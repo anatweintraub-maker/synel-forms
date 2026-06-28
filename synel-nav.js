@@ -187,6 +187,58 @@ var SynelNav = {
     ['snBackTxt','snLaterTxt','snBackListTxt'].forEach(function(id){var el=document.getElementById(id);if(el)el.oninput=bind;});
   },
 
+  _bsActions: function (name) {
+    name = name || '';
+    var MAP = [
+      ['101', ['פרטי השכר והניכויים נקלטו במערכת','נשלח לאישור מחלקת השכר','עודכן הסטטוס בתיק האונבורדינג']],
+      ['חוזה', ['החוזה החתום נשמר בתיק העובד','נשלח עותק למחלקת הכספים','עודכן הסטטוס בתיק האונבורדינג']],
+      ['סעיף 14', ['ההסדר הפנסיוני נרשם בתיק העובד','נשלח עדכון למחלקת השכר']],
+      ['נהלי', ['נרשם אישור קריאת הנהלים','עודכן הסטטוס בתיק האונבורדינג']],
+      ['קבלת ציוד', ['נרשמה קבלת הציוד במלאי','נשלחה הודעה לצוות ה-IT','עודכן הסטטוס בתיק האונבורדינג']],
+      ['החזרת ציוד', ['עודכן מלאי הציוד שהוחזר','נסגרו הרשאות הגישה למערכות','עודכן תיק העזיבה']],
+      ['פנסיה', ['נפתח תיק פנסיה','נשלח עדכון למחלקת הכספים','עודכן הסטטוס בתיק האונבורדינג']],
+      ['רשימת קליטה', ['עודכנה התקדמות הקליטה','נשלחו תזכורות לטפסים שטרם הושלמו']],
+      ['יום אחרון', ['עודכן לוח הזמנים ביומן העובד','נשלחו הזמנות לפגישות הסיום','עודכן תיק העזיבה']],
+      ['ראיון עזיבה', ['התשובות נשמרו לניתוח של HR','עודכן תיק העזיבה']],
+      ['161', ['נתוני גמר החשבון נשלחו למחלקת השכר','נוצר מסמך 161 רשמי','עודכן תיק העזיבה']],
+      ['חפיפה', ['ההערות הועברו למחליף/ה','נשלח עדכון למנהל הישיר','עודכן תיק העזיבה']],
+      ['המלצה', ['נשלחה בקשה למנהל הישיר','נפתחה משימה במערכת','יישלח עדכון כשהמכתב יהיה מוכן']]
+    ];
+    for (var i = 0; i < MAP.length; i++) { if (name.indexOf(MAP[i][0]) >= 0) return MAP[i][1]; }
+    return ['הנתונים נשמרו במערכת Harmony', 'עודכן תיק העובד'];
+  },
+
+  _injectBackstage: function () {
+    // אם התבנית כבר כוללת backstage משלה (פנסיה) — לא מזריקים כדי למנוע כפילות
+    if (document.querySelector('.backstage')) return;
+    var wrap = document.querySelector('.phone-wrap, .phone');
+    if (!wrap || document.getElementById('synel-backstage-box')) return;
+    var box = document.createElement('div');
+    box.id = 'synel-backstage-box';
+    box.style.cssText = 'width:375px;max-width:100%;background:#1e1b2e;border-radius:16px;padding:14px 16px;margin-top:14px;box-sizing:border-box;';
+    box.innerHTML =
+      '<div style="font-size:12px;font-weight:600;color:#C7C3E0;margin-bottom:10px;display:flex;align-items:center;gap:7px;">'
+      + '<span style="width:7px;height:7px;border-radius:50%;background:#A78BFA;display:inline-block;"></span>'
+      + 'מה קורה ברקע · לא מוצג לעובד</div>'
+      + '<div id="synel-backstage-list"></div>';
+    wrap.insertAdjacentElement('afterend', box);
+  },
+
+  _updateBackstage: function () {
+    var list = document.getElementById('synel-backstage-list');
+    if (!list) return;
+    var nameEl = document.getElementById('fName');
+    var name = nameEl ? nameEl.value : '';
+    var acts = this._bsActions(name);
+    var html = '';
+    for (var i = 0; i < acts.length; i++) {
+      html += '<div style="display:flex;align-items:center;gap:9px;font-size:12px;color:#E5E3F0;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:9px 12px;margin-bottom:6px;">'
+        + '<span style="width:18px;height:18px;border-radius:50%;background:#2D7A4F;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;">\u2713</span>'
+        + '<span>' + acts[i] + '</span></div>';
+    }
+    list.innerHTML = html;
+  },
+
   apply: function () {
     this._injectCss();
     if (typeof SynelBrand !== 'undefined' && SynelBrand.get) {
@@ -198,6 +250,13 @@ var SynelNav = {
     for (var i = 0; i < wraps.length; i++) this._build(wraps[i]);
     this._injected = true;
     try { this._injectPanel(); } catch (e) {}
+    try {
+      this._injectBackstage(); this._updateBackstage();
+      var self = this;
+      var fn = document.getElementById('fName');
+      if (fn) fn.addEventListener('input', function(){ self._updateBackstage(); });
+      setTimeout(function(){ self._injectBackstage(); self._updateBackstage(); }, 700);
+    } catch (e) {}
   },
 
   /* עדכון ערכים (שם עובד, התקדמות) — בונה מחדש את המעטפת */
