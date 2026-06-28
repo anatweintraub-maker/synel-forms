@@ -1,0 +1,184 @@
+/* ════════════════════════════════════════════════════════
+   synel-nav.js — מעטפת ניווט משותפת לכל התבניות
+   ────────────────────────────────────────────────────────
+   מזריק לתצוגת הטלפון של כל תבנית את אלמנטי המעטפת הקבועים:
+     • פס התקדמות כתום (לפי שלב נוכחי / סה"כ)
+     • שורת ניווט עליונה: חזרה ← | לוגו + שם עובד | המשך מאוחר יותר
+     • "חזרה לרשימה" בתחתית (מתחת לכפתור הפעולה)
+
+   אלה אלמנטים של *שלד* — בפרוטוטיפ הם ויזואליים בלבד;
+   בפרודקשן Harmony מחווט את ההתנהגות בפועל (ניווט, שמירת התקדמות).
+
+   שימוש: הוסף <script src="synel-nav.js"><\/script> לכל תבנית.
+   המודול מאתחל את עצמו. לעדכון ערכים: SynelNav.set({...}).
+   ════════════════════════════════════════════════════════ */
+var SynelNav = {
+  _injected: false,
+  cfg: {
+    employeeName: '',          // שם העובד שמוצג במרכז (ריק = מוסתר)
+    stepCurrent: 1,            // שלב נוכחי (לפס ההתקדמות)
+    stepTotal: 6,              // סה"כ שלבים
+    showBack: true,            // כפתור "חזרה ←"
+    showLater: true,           // "המשך מאוחר יותר"
+    showLogo: false,           // לוגו במרכז המעטפת (כבוי — הלוגו הגדול בגוף העמוד מספיק)
+    showBackList: true,        // "חזרה לרשימה"
+    showProgress: true,        // פס התקדמות כתום
+    logoText: 'SY',
+    logoImage: '',
+    backText: 'חזרה ←',
+    laterText: 'המשך מאוחר יותר',
+    backListText: 'חזרה לרשימה'
+  },
+
+  _injectCss: function () {
+    if (document.getElementById('synel-nav-css')) return;
+    var s = document.createElement('style');
+    s.id = 'synel-nav-css';
+    s.textContent =
+      '.synel-progress{height:3px;background:rgba(0,0,0,.06);overflow:hidden;flex-shrink:0;}' +
+      '.synel-progress > i{display:block;height:100%;background:var(--orange,#E8603C);transition:width .3s;}' +
+      '.synel-nav{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 16px;border-bottom:1px solid var(--border,#E5E7EB);flex-shrink:0;}' +
+      '.synel-nav .sn-side{display:flex;align-items:center;gap:6px;min-width:64px;}' +
+      '.synel-nav .sn-side.end{justify-content:flex-end;}' +
+      '.synel-nav .sn-link{font-size:12px;color:var(--orange,#E8603C);cursor:pointer;background:none;border:none;font-family:inherit;padding:0;white-space:nowrap;}' +
+      '.synel-nav .sn-link:hover{text-decoration:underline;}' +
+      '.synel-nav .sn-center{display:flex;align-items:center;gap:7px;}' +
+      '.synel-nav .sn-logo{width:24px;height:24px;border-radius:50%;background:var(--orange,#E8603C);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;letter-spacing:.3px;}' +
+      '.synel-nav .sn-name{font-size:13px;font-weight:600;color:var(--text,#1a1a1a);}' +
+      '.synel-backlist{padding:0 16px 16px;text-align:center;flex-shrink:0;}' +
+      '.synel-backlist button{font-size:13px;color:var(--text2,#6B7280);background:none;border:none;font-family:inherit;cursor:pointer;padding:6px;}' +
+      '.synel-backlist button:hover{color:var(--orange,#E8603C);}';
+    document.head.appendChild(s);
+  },
+
+  _build: function (wrap) {
+    if (wrap.getAttribute('data-synel-nav') === '1') return;
+    wrap.setAttribute('data-synel-nav', '1');
+    var c = this.cfg;
+
+    var bar = wrap.querySelector('.phone-bar, .top-bar');
+
+    // 1) פס התקדמות כתום — מיד אחרי שורת הסטטוס (או בראש המעטפת)
+    //    דילוג אם כבר קיים פס התקדמות בתבנית (למשל .progress ב-template-101) למניעת כפילות
+    if (c.showProgress && !wrap.querySelector('.progress, .progress-fill, .synel-progress')) {
+      var prog = document.createElement('div');
+      prog.className = 'synel-progress';
+      var fill = document.createElement('i');
+      var pct = c.stepTotal > 0 ? Math.round((c.stepCurrent / c.stepTotal) * 100) : 0;
+      fill.style.width = Math.max(0, Math.min(100, pct)) + '%';
+      prog.appendChild(fill);
+      if (bar && bar.parentNode === wrap) bar.insertAdjacentElement('afterend', prog);
+      else wrap.insertBefore(prog, wrap.firstChild);
+    }
+
+    // 2) שורת ניווט: חזרה ← (ימין) | לוגו + שם (מרכז) | המשך מאוחר יותר (שמאל)
+    var nav = document.createElement('div');
+    nav.className = 'synel-nav';
+
+    var right = document.createElement('div');
+    right.className = 'sn-side';
+    if (c.showBack) {
+      var back = document.createElement('button');
+      back.className = 'sn-link';
+      back.textContent = c.backText;
+      back.title = 'ניווט אחורה (מנוהל ע"י Harmony)';
+      right.appendChild(back);
+    }
+
+    var center = document.createElement('div');
+    center.className = 'sn-center';
+    if (c.showLogo) {
+      var logo = document.createElement('span');
+      logo.className = 'sn-logo';
+      if (c.logoImage) {
+        logo.style.background = 'transparent';
+        var im = document.createElement('img');
+        im.src = c.logoImage;
+        im.alt = 'logo';
+        im.style.cssText = 'width:100%;height:100%;object-fit:contain;border-radius:50%;';
+        logo.appendChild(im);
+      } else {
+        logo.textContent = c.logoText;
+      }
+      center.appendChild(logo);
+    }
+    if (c.employeeName) {
+      var nm = document.createElement('span');
+      nm.className = 'sn-name';
+      nm.textContent = c.employeeName;
+      center.appendChild(nm);
+    }
+
+    var left = document.createElement('div');
+    left.className = 'sn-side end';
+    if (c.showLater) {
+      var later = document.createElement('button');
+      later.className = 'sn-link';
+      later.textContent = c.laterText;
+      later.title = 'שמירת התקדמות והמשך מאוחר יותר (מנוהל ע"י Harmony)';
+      left.appendChild(later);
+    }
+
+    nav.appendChild(right);
+    nav.appendChild(center);
+    nav.appendChild(left);
+
+    var progEl = wrap.querySelector('.synel-progress');
+    if (progEl) progEl.insertAdjacentElement('afterend', nav);
+    else if (bar && bar.parentNode === wrap) bar.insertAdjacentElement('afterend', nav);
+    else wrap.insertBefore(nav, wrap.firstChild);
+
+    // 3) "חזרה לרשימה" אחיד בתחתית — מסתיר כל גרסת inline קיימת (pv-back / back-link / טקסט זהה) למניעת כפילות
+    if (c.showBackList) {
+      var olds = wrap.querySelectorAll('.pv-back, .back-link');
+      for (var k = 0; k < olds.length; k++) olds[k].style.display = 'none';
+      // גיבוי: כל אלמנט-עלה עם בדיוק הטקסט "חזרה לרשימה" (חוץ מזה של המודול)
+      var leaves = wrap.querySelectorAll('span, a, button, div');
+      for (var m2 = 0; m2 < leaves.length; m2++) {
+        var le = leaves[m2];
+        if (le.className && ('' + le.className).indexOf('synel-backlist') >= 0) continue;
+        if (le.children.length === 0 && le.textContent.trim() === (c.backListText || '').trim()) le.style.display = 'none';
+      }
+      var bl = document.createElement('div');
+      bl.className = 'synel-backlist';
+      var btn = document.createElement('button');
+      btn.textContent = c.backListText;
+      btn.title = 'חזרה לרשימת השלבים (מנוהל ע"י Harmony)';
+      bl.appendChild(btn);
+      wrap.appendChild(bl); // sibling אחרי הפוטר — שורד רינדור מחדש של תוכן/פוטר
+    }
+  },
+
+  apply: function () {
+    this._injectCss();
+    if (typeof SynelBrand !== 'undefined' && SynelBrand.get) {
+      var b = SynelBrand.get();
+      this.cfg.logoText = b.logoText || this.cfg.logoText;
+      this.cfg.logoImage = b.logoImage || '';
+    }
+    var wraps = document.querySelectorAll('.phone-wrap, .phone');
+    for (var i = 0; i < wraps.length; i++) this._build(wraps[i]);
+    this._injected = true;
+  },
+
+  /* עדכון ערכים (שם עובד, התקדמות) — בונה מחדש את המעטפת */
+  set: function (opts) {
+    opts = opts || {};
+    for (var k in opts) if (opts.hasOwnProperty(k)) this.cfg[k] = opts[k];
+    var wraps = document.querySelectorAll('.phone-wrap, .phone');
+    for (var i = 0; i < wraps.length; i++) {
+      var w = wraps[i];
+      var old;
+      while ((old = w.querySelector('.synel-progress, .synel-nav, .synel-backlist'))) old.remove();
+      w.removeAttribute('data-synel-nav');
+      this._build(w);
+    }
+  }
+};
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', function () { SynelNav.apply(); });
+} else {
+  SynelNav.apply();
+}
+console.log('[Synel Nav] Loaded');

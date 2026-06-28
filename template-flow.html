@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>עורך תבנית מעטפת תהליך — קליטה / סיום העסקה</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--bg:#F5F5F0;--surface:#fff;--border:#E5E7EB;--text:#1a1a1a;--text2:#6B7280;--text3:#9CA3AF;--accent:#4F46E5;--green:#2D7A4F;--orange:#E8603C;--red:#DC2626;--r:12px;}
+body{font-family:'Helvetica Neue',Arial,sans-serif;direction:rtl;background:var(--bg);min-height:100vh;display:flex;}
+
+/* EDITOR */
+.editor-panel{width:400px;flex-shrink:0;background:var(--surface);border-left:1px solid var(--border);height:100vh;overflow-y:auto;display:flex;flex-direction:column;}
+.ep-head{padding:14px 18px;border-bottom:1px solid var(--border);background:#FAFAFA;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.ep-head h2{font-size:14px;font-weight:600;color:var(--text);margin-bottom:2px;}
+.ep-head p{font-size:11px;color:var(--text3);}
+.ep-body{flex:1;padding:14px 18px;display:flex;flex-direction:column;gap:16px;}
+.ep-sec>label,.sec-lbl{font-size:11px;font-weight:600;color:var(--text2);letter-spacing:.04em;text-transform:uppercase;display:block;margin-bottom:7px;}
+.ep-inp{width:100%;padding:8px 12px;font-size:13px;border:1px solid var(--border);border-radius:var(--r);font-family:inherit;color:var(--text);outline:none;background:#FAFAFA;}
+.ep-inp:focus{border-color:var(--accent);background:var(--surface);}
+.ep-ta{width:100%;padding:8px 12px;font-size:13px;border:1px solid var(--border);border-radius:var(--r);font-family:inherit;color:var(--text);outline:none;background:#FAFAFA;resize:vertical;min-height:54px;line-height:1.5;}
+.ep-ta:focus{border-color:var(--accent);background:var(--surface);}
+.divider{height:1px;background:var(--border);}
+.sec-card{border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.sec-card-head{padding:11px 14px;background:#FAFAFA;display:flex;align-items:center;gap:8px;cursor:pointer;}
+.sec-card-head .t{font-size:13px;font-weight:600;color:var(--text);}
+.sec-card-head .chev{margin-right:auto;color:var(--text3);font-size:12px;transition:transform .15s;}
+.sec-card.open .chev{transform:rotate(90deg);}
+.sec-card-body{padding:14px;display:none;flex-direction:column;gap:11px;}
+.sec-card.open .sec-card-body{display:flex;}
+.fg{display:flex;flex-direction:column;gap:5px;}
+.fg label{font-size:11px;color:var(--text2);font-weight:500;}
+.fg input,.fg textarea,.fg select{width:100%;padding:7px 10px;font-size:12.5px;border:1px solid var(--border);border-radius:8px;font-family:inherit;outline:none;background:white;color:var(--text);}
+.fg input:focus,.fg textarea:focus,.fg select:focus{border-color:var(--accent);}
+.fg textarea{resize:vertical;min-height:46px;line-height:1.5;}
+.toggle-row{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text);}
+.switch{position:relative;width:38px;height:22px;flex-shrink:0;}
+.switch input{opacity:0;width:0;height:0;}
+.slider{position:absolute;inset:0;background:#D1D5DB;border-radius:22px;cursor:pointer;transition:.2s;}
+.slider:before{content:"";position:absolute;width:16px;height:16px;right:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;}
+.switch input:checked + .slider{background:var(--orange);}
+.switch input:checked + .slider:before{transform:translateX(-16px);}
+.proc-toggle{display:flex;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
+.proc-toggle button{flex:1;padding:10px;font-size:13px;font-weight:600;border:none;background:#FAFAFA;cursor:pointer;font-family:inherit;color:var(--text2);}
+.proc-toggle button.on{background:var(--orange);color:#fff;}
+.row-item{background:#FAFAFA;border:1px solid var(--border);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:7px;}
+.row-item .ri-top{display:flex;gap:6px;align-items:center;}
+.ri-rm{width:24px;height:24px;border-radius:50%;border:1px solid var(--border);background:#fff;cursor:pointer;color:var(--text3);font-size:13px;flex-shrink:0;line-height:1;}
+.ri-rm:hover{color:var(--red);border-color:var(--red);}
+.add-btn{padding:8px;font-size:12px;border:1px dashed var(--border);border-radius:8px;background:#fff;cursor:pointer;font-family:inherit;color:var(--accent);font-weight:500;}
+.add-btn:hover{border-color:var(--accent);background:#F8F8FF;}
+.assign-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.ep-footer{padding:14px 18px;border-top:1px solid var(--border);display:flex;gap:6px;flex-wrap:wrap;background:#FAFAFA;}
+.btn{flex:1;padding:9px;font-size:12px;border-radius:var(--r);border:1px solid var(--border);background:var(--surface);cursor:pointer;font-family:inherit;font-weight:500;color:var(--text);}
+.btn:hover{background:#F3F4F6;}
+.btn.primary{background:var(--orange);color:white;border-color:var(--orange);}
+.btn.primary:hover{background:#d4502f;}
+.hint{font-size:10.5px;color:var(--text3);line-height:1.5;}
+
+/* PREVIEW */
+.preview-panel{flex:1;background:var(--bg);padding:24px;overflow-y:auto;display:flex;flex-direction:column;align-items:center;gap:14px;}
+.pv-tabs{display:flex;gap:6px;background:#fff;border:1px solid var(--border);border-radius:999px;padding:4px;}
+.pv-tabs button{padding:7px 16px;font-size:12.5px;border:none;background:none;border-radius:999px;cursor:pointer;font-family:inherit;color:var(--text2);font-weight:500;}
+.pv-tabs button.on{background:var(--orange);color:#fff;}
+.pv-tabs button:disabled{opacity:.35;cursor:not-allowed;}
+.pv-mode{display:flex;gap:6px;align-items:center;font-size:11px;color:var(--text2);}
+.pv-mode button{padding:4px 10px;font-size:11px;border:1px solid var(--border);background:#fff;border-radius:999px;cursor:pointer;font-family:inherit;color:var(--text2);}
+.pv-mode button.on{border-color:var(--orange);color:var(--orange);font-weight:600;}
+.phone-wrap{width:375px;background:var(--surface);border-radius:28px;box-shadow:0 8px 40px rgba(0,0,0,.12);overflow:hidden;display:flex;flex-direction:column;min-height:640px;}
+.phone-bar{height:38px;background:var(--surface);display:flex;align-items:center;justify-content:space-between;padding:0 18px;font-size:12px;color:var(--text2);flex-shrink:0;}
+.phone-bar .topline{position:absolute;}
+.phone-scroll{flex:1;overflow-y:auto;padding:22px 20px 10px;display:flex;flex-direction:column;}
+.phone-footer{padding:12px 18px 22px;flex-shrink:0;}
+.pv-action-btn{width:100%;padding:16px;font-size:16px;font-weight:600;border-radius:50px;border:none;background:var(--orange);color:white;cursor:pointer;font-family:inherit;}
+.pv-action-btn.ghost{background:#F3F4F6;color:var(--text2);}
+
+/* preview content pieces */
+.pv-topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;border-bottom:1px solid #F0F0EC;font-size:12px;}
+.pv-topbar .brand{display:flex;align-items:center;gap:7px;font-weight:600;color:var(--orange);}
+.pv-topbar .later{color:var(--orange);font-size:12px;}
+.pv-logo{width:64px;height:64px;border-radius:50%;background:var(--orange);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:22px;margin:8px auto 14px;letter-spacing:.5px;}
+.pv-h{font-size:23px;font-weight:700;color:var(--text);text-align:center;line-height:1.3;margin-bottom:4px;}
+.pv-emoji{font-size:24px;text-align:center;margin:2px 0 10px;}
+.pv-sub{font-size:14px;color:var(--text2);text-align:center;line-height:1.6;margin-bottom:18px;padding:0 4px;}
+.pv-details{background:#FAFAFA;border-radius:14px;padding:6px 16px;margin-bottom:16px;}
+.pv-drow{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid #EFEFEC;}
+.pv-drow:last-child{border-bottom:none;}
+.pv-drow .lbl{font-size:13px;color:var(--text3);}
+.pv-drow .val{font-size:14px;color:var(--text);font-weight:600;}
+.pv-note{background:#FFF7ED;border:1px solid #FFE4C4;border-radius:12px;padding:13px 14px;font-size:13px;color:#9A6B2E;line-height:1.55;display:flex;gap:8px;align-items:flex-start;margin-bottom:8px;}
+.pv-check{width:80px;height:80px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:40px;margin:14px auto 18px;}
+.pv-next{background:#FAFAFA;border-radius:14px;padding:16px;margin-bottom:18px;}
+.pv-next .nt{font-size:12px;color:var(--text3);text-align:center;margin-bottom:12px;}
+.pv-nextrow{display:flex;gap:9px;align-items:flex-start;padding:8px 0;border-bottom:1px solid #EFEFEC;font-size:13px;color:var(--text);line-height:1.5;}
+.pv-nextrow:last-child{border-bottom:none;}
+.pv-dot{width:7px;height:7px;border-radius:50%;background:var(--green);margin-top:6px;flex-shrink:0;}
+.pv-summary{width:100%;padding:14px;font-size:15px;font-weight:600;border-radius:12px;border:none;background:var(--orange);color:#fff;font-family:inherit;margin-bottom:18px;cursor:pointer;}
+.pv-links-t{font-size:12px;color:var(--text3);margin-bottom:8px;}
+.pv-link{display:flex;align-items:center;gap:12px;background:#FAFAFA;border-radius:12px;padding:13px 14px;margin-bottom:8px;}
+.pv-link .li{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;background:#E8603C;}
+.pv-link .lt{flex:1;}
+.pv-link .lt .a{font-size:14px;font-weight:600;color:var(--text);}
+.pv-link .lt .b{font-size:11px;color:var(--text3);}
+.pv-link .arr{color:var(--text3);}
+.pv-gender{display:flex;gap:12px;margin:8px 0 18px;}
+.pv-gcard{flex:1;border:1.5px solid var(--border);border-radius:16px;padding:24px 10px;text-align:center;cursor:pointer;transition:border-color .15s;}
+.pv-gcard.sel{border-color:var(--orange);border-width:2px;}
+.pv-gcard.sel .gl{color:var(--orange);}
+.pv-gcard .ge{font-size:30px;}
+.pv-gcard .gl{font-size:14px;color:var(--text);margin-top:8px;font-weight:500;}
+.pv-spacer{flex:1;}
+
+/* modals + toast (כדפוס שאר התבניות) */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;z-index:200;}
+.modal-overlay.show,.modal-overlay[style*="flex"]{display:flex;}
+.modal-box{background:#fff;border-radius:16px;padding:22px;width:340px;max-width:90vw;}
+.modal-box h3{font-size:15px;margin-bottom:14px;color:var(--text);}
+.modal-inp{width:100%;padding:9px 12px;font-size:13px;border:1px solid var(--border);border-radius:10px;font-family:inherit;outline:none;margin-bottom:14px;}
+.modal-btns{display:flex;gap:8px;}
+.m-cancel,.m-ok{flex:1;padding:9px;font-size:13px;border-radius:10px;cursor:pointer;font-family:inherit;border:1px solid var(--border);background:#fff;}
+.m-ok{background:var(--orange);color:#fff;border-color:var(--orange);}
+.saved-list{display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto;margin-bottom:12px;}
+.saved-item{display:flex;align-items:center;gap:8px;padding:10px;border:1px solid var(--border);border-radius:10px;}
+.si-load,.si-del{padding:6px 12px;font-size:11px;border-radius:8px;cursor:pointer;font-family:inherit;border:1px solid var(--border);background:#fff;}
+.si-load{background:var(--orange);color:#fff;border-color:var(--orange);}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1a1a1a;color:#fff;padding:11px 20px;border-radius:50px;font-size:13px;opacity:0;transition:.3s;z-index:300;}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+</style>
+
+<script src="synel-db.js"></script>
+<script src="synel-org.js"></script>
+<script src="synel-assign.js"></script>
+<script src="synel-validation.js"></script>
+<script src="synel-autosave.js"></script>
+<script src="synel-accessibility.js"></script>
+<script src="synel-versions.js"></script>
+<script src="synel-mobile.js"></script>
+<script src="synel-publish.js"></script>
+<script src="synel-brand.js"></script>
+<script src="synel-nav.js"></script>
+</head>
+
+<body>
+
+<!-- ════════ EDITOR ════════ -->
+<div class="editor-panel">
+  <div class="ep-head">
+    <div>
+      <h2>🚪 מעטפת תהליך</h2>
+      <p>עמודי פתיחה · מקדים · סיום</p>
+      <a href="examples-flow.html" style="font-size:11px;color:var(--orange);text-decoration:none;">📱 מסכי מקור (דוגמה) ←</a>
+    </div>
+    <div id="assignMount" class="assign-bar"></div>
+  </div>
+
+  <div class="ep-body">
+
+    <div class="ep-sec" style="display:flex;align-items:center;gap:8px;">
+      <span class="sec-lbl" style="margin:0;">מיתוג גלובלי</span>
+      <span id="brandMount" style="margin-right:auto;"></span>
+    </div>
+    <!-- שם + סוג תהליך -->
+    <div class="ep-sec">
+      <label>שם התבנית</label>
+      <input class="ep-inp" id="fName" oninput="render()" placeholder="קליטת עובד חדש">
+    </div>
+
+    <div class="ep-sec">
+      <span class="sec-lbl">סוג תהליך</span>
+      <div class="proc-toggle">
+        <button id="procOn"  onclick="setProcess('onboarding')">קליטה (Onboarding)</button>
+        <button id="procOff" onclick="setProcess('offboarding')">סיום העסקה (Offboarding)</button>
+      </div>
+      <div class="hint" style="margin-top:6px;">החלפת סוג טוענת ברירות מחדל מתאימות (טקסטים, שדות, עמוד מקדים).</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- ① עמוד מקדים -->
+    <div class="sec-card" id="cardPrelim">
+      <div class="sec-card-head" onclick="toggleCard('cardPrelim')">
+        <span>①</span><span class="t">עמוד מקדים</span>
+        <label class="switch" onclick="event.stopPropagation()">
+          <input type="checkbox" id="prelimOn" onchange="state.preliminary.enabled=this.checked;render()">
+          <span class="slider"></span>
+        </label>
+        <span class="chev">›</span>
+      </div>
+      <div class="sec-card-body">
+        <div class="hint">נדרש בקליטה כדי לדעת איך לפנות לעובד/ת (זכר/נקבה). התשובה מחזיקה את אופן הפנייה בכל המסכים שאחריו.</div>
+        <div class="fg"><label>כותרת</label><input id="pTitle" oninput="state.preliminary.title=this.value;render()"></div>
+        <div class="fg"><label>שאלה</label><textarea id="pQuestion" oninput="state.preliminary.question=this.value;render()"></textarea></div>
+        <div class="fg"><span class="sec-lbl" style="margin:0;">אפשרויות</span><div id="pOptions" style="display:flex;flex-direction:column;gap:7px;"></div></div>
+        <button class="add-btn" onclick="addPrelimOption()">+ הוסף אפשרות</button>
+        <div class="fg"><label>טקסט כפתור</label><input id="pBtn" oninput="state.preliminary.buttonText=this.value;render()"></div>
+      </div>
+    </div>
+
+    <!-- ② עמוד פתיחה -->
+    <div class="sec-card open" id="cardIntro">
+      <div class="sec-card-head" onclick="toggleCard('cardIntro')">
+        <span>②</span><span class="t">עמוד פתיחה</span><span class="chev">›</span>
+      </div>
+      <div class="sec-card-body">
+        <div class="fg"><label>ברכה <span style="color:var(--text3)">(אפשר {{שדה DB}})</span></label><textarea id="iGreet" oninput="state.intro.greeting=this.value;render()"></textarea></div>
+        <div class="fg"><label>אימוג'י</label><input id="iEmoji" style="width:80px;" oninput="state.intro.emoji=this.value;render()"></div>
+        <div class="fg"><label>כותרת משנה</label><textarea id="iSub" oninput="state.intro.subtitle=this.value;render()"></textarea></div>
+        <div class="fg"><span class="sec-lbl" style="margin:0;">כרטיס פרטים</span><div id="iDetails" style="display:flex;flex-direction:column;gap:8px;"></div></div>
+        <button class="add-btn" onclick="addDetail()">+ הוסף שורת פרטים</button>
+        <div class="fg"><label>משך משוער (דקות)</label><input type="number" id="iDur" style="width:90px;" oninput="state.intro.durationMin=parseInt(this.value)||0;render()"></div>
+        <div class="fg"><label>טקסט כפתור</label><input id="iBtn" oninput="state.intro.buttonText=this.value;render()"></div>
+      </div>
+    </div>
+
+    <!-- ③ עמוד סיום -->
+    <div class="sec-card" id="cardOutro">
+      <div class="sec-card-head" onclick="toggleCard('cardOutro')">
+        <span>③</span><span class="t">עמוד סיום</span><span class="chev">›</span>
+      </div>
+      <div class="sec-card-body">
+        <div class="fg"><label>כותרת <span style="color:var(--text3)">(אפשר {{שדה DB}})</span></label><textarea id="oHead" oninput="state.outro.headline=this.value;render()"></textarea></div>
+        <div class="fg"><label>אימוג'י</label><input id="oEmoji" style="width:80px;" oninput="state.outro.emoji=this.value;render()"></div>
+        <div class="fg"><label>כותרת משנה</label><textarea id="oSub" oninput="state.outro.subtitle=this.value;render()"></textarea></div>
+        <div class="fg"><span class="sec-lbl" style="margin:0;">"מה הלאה?"</span><div id="oSteps" style="display:flex;flex-direction:column;gap:7px;"></div></div>
+        <button class="add-btn" onclick="addStep()">+ הוסף שלב</button>
+        <div class="fg"><label>כפתור סיכום <span style="color:var(--text3)">(ריק = מוסתר)</span></label><input id="oSummary" oninput="state.outro.summaryButton=this.value;render()"></div>
+        <div class="toggle-row" style="margin-top:4px;">
+          <label class="switch"><input type="checkbox" id="oLinksOn" onchange="state.outro.linksEnabled=this.checked;render()"><span class="slider"></span></label>
+          קישורים שימושיים
+        </div>
+        <div id="oLinks" style="display:flex;flex-direction:column;gap:8px;"></div>
+        <button class="add-btn" id="addLinkBtn" onclick="addLink()">+ הוסף קישור</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="ep-footer">
+    <button class="btn" onclick="saveForm()">💾 שמור</button>
+    <button class="btn" onclick="saveAs()">📋 שמור בשם</button>
+    <button class="btn primary" style="width:100%;" onclick="exportForm()">🚀 פרסם</button>
+    <button class="btn" style="width:100%;background:#1e1b4b;color:white;border-color:#1e1b4b;" onclick="exportJSON()">{ } ייצא JSON</button>
+    <button class="btn" style="width:100%;font-size:11px;" onclick="openLoad()">📂 תבניות שמורות</button>
+  </div>
+</div>
+
+<!-- ════════ PREVIEW ════════ -->
+<div class="preview-panel">
+  <div class="pv-tabs">
+    <button id="tabPrelim" onclick="setPage('prelim')">מקדים</button>
+    <button id="tabIntro"  onclick="setPage('intro')">פתיחה</button>
+    <button id="tabOutro"  onclick="setPage('outro')">סיום</button>
+  </div>
+  <div class="pv-mode">
+    תצוגה:
+    <button id="modeDemo" onclick="setMode('demo')">נתוני דמו</button>
+    <button id="modePh"   onclick="setMode('placeholder')">{{ placeholders }}</button>
+  </div>
+
+  <div class="phone-wrap">
+    <div class="phone-bar"><span>סינאל</span><span>9:41</span></div>
+    <div class="phone-scroll" id="phoneContent"></div>
+    <div class="phone-footer" id="phoneFooter"></div>
+  </div>
+</div>
+
+<!-- modals -->
+<div class="modal-overlay" id="saveAsModal" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal-box"><h3>📋 שמור בשם</h3>
+    <input class="modal-inp" id="saveAsName" onkeydown="if(event.key==='Enter')confirmSaveAs()">
+    <div class="modal-btns"><button class="m-cancel" onclick="document.getElementById('saveAsModal').style.display='none'">ביטול</button><button class="m-ok" onclick="confirmSaveAs()">שמור ✓</button></div>
+  </div>
+</div>
+<div class="modal-overlay" id="loadModal" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal-box" style="width:400px;"><h3>📂 תבניות שמורות</h3>
+    <div class="saved-list" id="savedList"></div>
+    <button class="m-cancel" style="width:100%;" onclick="document.getElementById('loadModal').style.display='none'">סגור</button>
+  </div>
+</div>
+<div class="toast" id="toastEl"></div>
+
+<script>
+/* ════════════════════════ STATE ════════════════════════ */
+var state = {
+  name: '', icon: '🚪',
+  processType: 'onboarding',
+  preliminary: { enabled:true, title:'', question:'', options:[], buttonText:'המשך ←' },
+  intro: { greeting:'', emoji:'', subtitle:'', details:[], durationMin:14, buttonText:'מתחילים ←' },
+  outro: { headline:'', emoji:'', subtitle:'', nextSteps:[], summaryButton:'', linksEnabled:true, links:[] },
+  previewPage: 'intro',
+  previewMode: 'demo'
+};
+var tt;
+
+/* ════════════════════════ PRESETS ════════════════════════ */
+var PRESETS = {
+  onboarding: {
+    name: 'קליטת עובד חדש',
+    preliminary: {
+      enabled:true,
+      title:'ברוכ/ה הבא/ה לסינאל',
+      question:'כדי שנוכל לפנות אליך בצורה הנכונה – כיצד תרצה/י שנפנה אליך?',
+      options:[ {value:'male',label:'זכר',emoji:'👨'}, {value:'female',label:'נקבה',emoji:'👩'} ],
+      buttonText:'המשך ←'
+    },
+    intro: {
+      greeting:'היי {{שם פרטי}}, ברוכ/ה הבא/ה לסינאל!',
+      emoji:'👋',
+      subtitle:'כדי שהיום הראשון יעבור חלק, נשלח אליך מצוות משאבי האנוש כמה שלבים קצרים למילוי מראש.',
+      details:[
+        {label:'שם', dbField:'EMP_NAME'},
+        {label:'תפקיד', dbField:'EMP_JOB_DESCR'},
+        {label:'תאריך התחלה', dbField:'EMP_DATE_START'},
+        {label:'מנהל/ת ישיר/ה', dbField:'MNG_NAME'}
+      ],
+      durationMin:14,
+      buttonText:'מתחילים ←'
+    },
+    outro: {
+      headline:'{{שם פרטי}}, סיימת! ברוכ/ה הבא/ה לסינאל',
+      emoji:'🎉',
+      subtitle:'כל הפרטים נקלטו. נתראה ביום הראשון!',
+      nextSteps:[
+        'תקבל/י מייל עם סיכום הקליטה והעותק החתום של החוזה',
+        'ביום הראשון תפגוש/י את המנהל/ת שלך לסיור היכרות',
+        'אם יש שאלות – צוות HR זמין בכל עת'
+      ],
+      summaryButton:'צפייה בסיכום הקליטה',
+      linksEnabled:true,
+      links:[
+        {label:'אתר החברה', sub:'www.synel.co.il', url:'https://www.synel.co.il', icon:'🌐'},
+        {label:'אפליקציית סינאל', sub:'הורד/י לנייד', url:'#', icon:'📱'},
+        {label:'פורטל עובדים', sub:'תלושים, חופשות, פניות HR', url:'#', icon:'👤'}
+      ]
+    }
+  },
+  offboarding: {
+    name: 'סיום העסקה',
+    preliminary: {
+      enabled:false,
+      title:'ברוכ/ה הבא/ה לסינאל',
+      question:'כדי שנוכל לפנות אליך בצורה הנכונה – כיצד תרצה/י שנפנה אליך?',
+      options:[ {value:'male',label:'זכר',emoji:'👨'}, {value:'female',label:'נקבה',emoji:'👩'} ],
+      buttonText:'המשך ←'
+    },
+    intro: {
+      greeting:'היי {{שם פרטי}}, נשלח אליך',
+      emoji:'👋',
+      subtitle:'כדי לסגור את תקופת העבודה שלך בסינאל בצורה חלקה, הכנו עבורך כמה שלבים קצרים.',
+      details:[
+        {label:'שם', dbField:'EMP_NAME'},
+        {label:'תפקיד', dbField:'EMP_JOB_DESCR'},
+        {label:'תאריך עזיבה', dbField:''},
+        {label:'יום אחרון', dbField:''}
+      ],
+      durationMin:14,
+      buttonText:'מתחילים ←'
+    },
+    outro: {
+      headline:'{{שם פרטי}}, תודה על הכל! בהצלחה בדרך הבאה',
+      emoji:'🙏',
+      subtitle:'כל הטפסים נקלטו. נשמח לשמוע עליך בעתיד.',
+      nextSteps:[
+        'תקבל/י מייל עם עותק טופס 161 החתום',
+        'הפנסיה והקופות ישוחררו בתאריך העזיבה',
+        'מכתב ההמלצה יישלח אליך לאחר אישור המנהל',
+        'HR זמין לכל שאלה עד 30 יום לאחר העזיבה'
+      ],
+      summaryButton:'',
+      linksEnabled:false,
+      links:[]
+    }
+  }
+};
+var DEMO = {
+  onboarding: { 'שם פרטי':'שחר', 'EMP_FIRST_NAME':'שחר', 'EMP_NAME':'שחר כהן', 'EMP_JOB_DESCR':'מנהל/ת תפעול', 'EMP_DATE_START':'10 ביוני 2026', 'MNG_NAME':'רונית כהן' },
+  offboarding:{ 'שם פרטי':'מיכל', 'EMP_FIRST_NAME':'מיכל', 'EMP_NAME':'מיכל לוי', 'EMP_JOB_DESCR':'מנהלת תפעול', 'תאריך עזיבה':'15 ביוני 2026', 'יום אחרון':'יום רביעי, 10 ביוני' }
+};
+
+/* ════════════════════════ HELPERS ════════════════════════ */
+function xe(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+/* גישה בטוחה למפת שדות ה-DB (גם אם synel-db.js עוד לא נטען) */
+function dbMeta(field){
+  if(!field || typeof SYNEL_DB_MAP==='undefined') return null;
+  return SYNEL_DB_MAP[field] || null;
+}
+
+function demoMap(){
+  var m = Object.assign({}, DEMO[state.processType]||{});
+  return m;
+}
+/* מחליף אסימוני {{...}} בטקסט: בדמו מציג ערך, ב-placeholder משאיר {{...}} */
+function resolveText(s){
+  s = String(s==null?'':s);
+  if(state.previewMode==='placeholder') return s;
+  var m = demoMap();
+  return s.replace(/\{\{\s*([^}]+?)\s*\}\}/g, function(_, key){
+    if(m[key] != null) return m[key];
+    var meta = dbMeta(key);
+    if(meta && m[meta.labelHe]!=null) return m[meta.labelHe];
+    return '{{'+key+'}}';
+  });
+}
+/* ערך לשורת פרטים: לפי dbField אם הוגדר, אחרת לפי label */
+function detailValue(d){
+  var m = demoMap();
+  if(state.previewMode==='placeholder'){
+    if(d.dbField){ var meta=dbMeta(d.dbField); return '{{'+(meta?meta.labelHe:d.dbField)+'}}'; }
+    return '{{'+(d.label||'')+'}}';
+  }
+  if(d.dbField && m[d.dbField]!=null) return m[d.dbField];
+  if(m[d.label]!=null) return m[d.label];
+  if(d.dbField){ var meta2=dbMeta(d.dbField); return '{{'+(meta2?meta2.labelHe:d.dbField)+'}}'; }
+  return '{{'+(d.label||'')+'}}';
+}
+
+/* ════════════════════════ EDITOR RENDER ════════════════════════ */
+function syncEditorFields(){
+  document.getElementById('fName').value = state.name;
+  document.getElementById('procOn').classList.toggle('on', state.processType==='onboarding');
+  document.getElementById('procOff').classList.toggle('on', state.processType==='offboarding');
+  // prelim
+  document.getElementById('prelimOn').checked = !!state.preliminary.enabled;
+  document.getElementById('pTitle').value = state.preliminary.title;
+  document.getElementById('pQuestion').value = state.preliminary.question;
+  document.getElementById('pBtn').value = state.preliminary.buttonText;
+  // intro
+  document.getElementById('iGreet').value = state.intro.greeting;
+  document.getElementById('iEmoji').value = state.intro.emoji;
+  document.getElementById('iSub').value = state.intro.subtitle;
+  document.getElementById('iDur').value = state.intro.durationMin;
+  document.getElementById('iBtn').value = state.intro.buttonText;
+  // outro
+  document.getElementById('oHead').value = state.outro.headline;
+  document.getElementById('oEmoji').value = state.outro.emoji;
+  document.getElementById('oSub').value = state.outro.subtitle;
+  document.getElementById('oSummary').value = state.outro.summaryButton;
+  document.getElementById('oLinksOn').checked = !!state.outro.linksEnabled;
+  renderEditorLists();
+}
+
+function renderEditorLists(){
+  // prelim options
+  var po = document.getElementById('pOptions'); po.innerHTML='';
+  state.preliminary.options.forEach(function(opt,i){
+    var row=document.createElement('div'); row.className='row-item';
+    var top=document.createElement('div'); top.className='ri-top';
+    var em=document.createElement('input'); em.value=opt.emoji; em.placeholder='😀'; em.style.width='52px';
+    em.oninput=function(){opt.emoji=this.value;render();};
+    var lb=document.createElement('input'); lb.value=opt.label; lb.placeholder='תווית';
+    lb.oninput=function(){opt.label=this.value;render();};
+    var rm=document.createElement('button'); rm.className='ri-rm'; rm.textContent='✕';
+    rm.onclick=function(){state.preliminary.options.splice(i,1);render();};
+    top.appendChild(em); top.appendChild(lb); top.appendChild(rm);
+    row.appendChild(top); po.appendChild(row);
+  });
+
+  // intro details
+  var dl=document.getElementById('iDetails'); dl.innerHTML='';
+  state.intro.details.forEach(function(d,i){
+    var row=document.createElement('div'); row.className='row-item';
+    var top=document.createElement('div'); top.className='ri-top';
+    var lb=document.createElement('input'); lb.value=d.label; lb.placeholder='תווית (שם / תפקיד...)';
+    lb.oninput=function(){d.label=this.value;render();};
+    var rm=document.createElement('button'); rm.className='ri-rm'; rm.textContent='✕';
+    rm.onclick=function(){state.intro.details.splice(i,1);render();};
+    top.appendChild(lb); top.appendChild(rm);
+    row.appendChild(top);
+    // DB dropdown (משויך ל-DB → ערך דינמי מ-Harmony)
+    var dbWrap=document.createElement('div'); dbWrap.className='fg';
+    var dbl=document.createElement('label'); dbl.textContent='שדה DB (ערך דינמי)';
+    var dd=buildDBDropdown(d.dbField, function(v){ d.dbField=v; render(); });
+    dbWrap.appendChild(dbl); dbWrap.appendChild(dd);
+    row.appendChild(dbWrap);
+    dl.appendChild(row);
+  });
+
+  // outro steps
+  var sl=document.getElementById('oSteps'); sl.innerHTML='';
+  state.outro.nextSteps.forEach(function(s,i){
+    var row=document.createElement('div'); row.className='row-item';
+    var top=document.createElement('div'); top.className='ri-top';
+    var ta=document.createElement('input'); ta.value=s; ta.placeholder='מה קורה אחר כך...';
+    ta.oninput=function(){state.outro.nextSteps[i]=this.value;render();};
+    var rm=document.createElement('button'); rm.className='ri-rm'; rm.textContent='✕';
+    rm.onclick=function(){state.outro.nextSteps.splice(i,1);render();};
+    top.appendChild(ta); top.appendChild(rm);
+    row.appendChild(top); sl.appendChild(row);
+  });
+
+  // outro links
+  var ll=document.getElementById('oLinks');
+  var addLinkBtn=document.getElementById('addLinkBtn');
+  ll.style.display = state.outro.linksEnabled ? 'flex' : 'none';
+  addLinkBtn.style.display = state.outro.linksEnabled ? 'block' : 'none';
+  ll.innerHTML='';
+  state.outro.links.forEach(function(l,i){
+    var row=document.createElement('div'); row.className='row-item';
+    var top=document.createElement('div'); top.className='ri-top';
+    var em=document.createElement('input'); em.value=l.icon; em.style.width='52px';
+    em.oninput=function(){l.icon=this.value;render();};
+    var lb=document.createElement('input'); lb.value=l.label; lb.placeholder='כותרת';
+    lb.oninput=function(){l.label=this.value;render();};
+    var rm=document.createElement('button'); rm.className='ri-rm'; rm.textContent='✕';
+    rm.onclick=function(){state.outro.links.splice(i,1);render();};
+    top.appendChild(em); top.appendChild(lb); top.appendChild(rm);
+    var sub=document.createElement('input'); sub.value=l.sub; sub.placeholder='טקסט משנה'; sub.style.fontSize='12px';
+    sub.oninput=function(){l.sub=this.value;render();};
+    var url=document.createElement('input'); url.value=l.url; url.placeholder='קישור (URL)'; url.style.fontSize='12px'; url.dir='ltr';
+    url.oninput=function(){l.url=this.value;render();};
+    row.appendChild(top); row.appendChild(sub); row.appendChild(url);
+    ll.appendChild(row);
+  });
+}
+
+/* ════════════════════════ PREVIEW RENDER ════════════════════════ */
+function render(){
+  // tab availability
+  var prelimAvail = !!state.preliminary.enabled;
+  document.getElementById('tabPrelim').disabled = !prelimAvail;
+  if(state.previewPage==='prelim' && !prelimAvail) state.previewPage='intro';
+  document.getElementById('tabPrelim').classList.toggle('on', state.previewPage==='prelim');
+  document.getElementById('tabIntro').classList.toggle('on', state.previewPage==='intro');
+  document.getElementById('tabOutro').classList.toggle('on', state.previewPage==='outro');
+  document.getElementById('modeDemo').classList.toggle('on', state.previewMode==='demo');
+  document.getElementById('modePh').classList.toggle('on', state.previewMode==='placeholder');
+
+  var c=document.getElementById('phoneContent');
+  var f=document.getElementById('phoneFooter');
+  c.innerHTML=''; f.innerHTML='';
+
+  if(state.previewPage==='prelim') renderPrelim(c,f);
+  else if(state.previewPage==='intro') renderIntro(c,f);
+  else renderOutro(c,f);
+
+  if(typeof SynelNav!=='undefined'){
+    SynelNav.set({ employeeName: '', stepTotal: 6, stepCurrent: state.previewPage==='outro'?6:0 });
+  }
+}
+
+function logoHTML(){
+  var b = (typeof SynelBrand!=='undefined' && SynelBrand.get) ? SynelBrand.get() : {logoText:'SY',logoImage:''};
+  if(b.logoImage) return '<div class="pv-logo" style="background:transparent;"><img src="'+b.logoImage+'" style="width:100%;height:100%;object-fit:contain;border-radius:50%;"></div>';
+  return '<div class="pv-logo">'+xe(b.logoText||'SY')+'</div>';
+}
+
+function renderPrelim(c,f){
+  var p=state.preliminary;
+  var opts = p.options.map(function(o){
+    return '<div class="pv-gcard" onclick="selectGender(this)"><div class="ge">'+xe(o.emoji)+'</div><div class="gl">'+xe(o.label)+'</div></div>';
+  }).join('');
+  c.innerHTML =
+    logoHTML() +
+    '<div class="pv-h">'+xe(p.title)+'</div>' +
+    '<div class="pv-sub">'+xe(p.question)+'</div>' +
+    '<div class="pv-gender">'+opts+'</div>' +
+    '<div class="pv-spacer"></div>';
+  f.innerHTML = '<button class="pv-action-btn ghost" id="prelimBtn">'+xe(p.buttonText)+'</button>';
+}
+function selectGender(el){
+  var cards=el.parentNode.querySelectorAll('.pv-gcard');
+  for(var i=0;i<cards.length;i++) cards[i].classList.remove('sel');
+  el.classList.add('sel');
+  var btn=document.getElementById('prelimBtn');
+  if(btn) btn.classList.remove('ghost'); // הכפתור מקבל את צבע המיתוג ברגע שנבחר מגדר
+}
+
+function renderIntro(c,f){
+  var it=state.intro;
+  var rows = it.details.map(function(d){
+    return '<div class="pv-drow"><span class="lbl">'+xe(d.label)+'</span><span class="val">'+xe(detailValue(d))+'</span></div>';
+  }).join('');
+  var note = it.durationMin ? '<div class="pv-note"><span>⏱</span><span>כל התהליך אורך כ-'+xe(it.durationMin)+' דקות. אפשר לעצור ולחזור בכל שלב.</span></div>' : '';
+  c.innerHTML =
+    logoHTML() +
+    '<div class="pv-h">'+xe(resolveText(it.greeting))+'</div>' +
+    (it.emoji ? '<div class="pv-emoji">'+xe(it.emoji)+'</div>' : '') +
+    '<div class="pv-sub">'+xe(resolveText(it.subtitle))+'</div>' +
+    (rows ? '<div class="pv-details">'+rows+'</div>' : '') +
+    note +
+    '<div class="pv-spacer"></div>';
+  f.innerHTML = '<button class="pv-action-btn">'+xe(it.buttonText)+'</button>';
+}
+
+function renderOutro(c,f){
+  var o=state.outro;
+  var check = o.icon!=='none' ? '<div class="pv-check">✓</div>' : '';
+  var steps = o.nextSteps.map(function(s){
+    return '<div class="pv-nextrow"><span class="pv-dot"></span><span>'+xe(resolveText(s))+'</span></div>';
+  }).join('');
+  var nextBlock = steps ? '<div class="pv-next"><div class="nt">'+xe(o.nextStepsTitle||'מה הלאה?')+'</div>'+steps+'</div>' : '';
+  var summary = o.summaryButton ? '<button class="pv-summary">'+xe(o.summaryButton)+'</button>' : '';
+  var links = '';
+  if(o.linksEnabled && o.links.length){
+    links = '<div class="pv-links-t">קישורים שימושיים</div>' + o.links.map(function(l){
+      return '<div class="pv-link"><div class="li">'+xe(l.icon)+'</div><div class="lt"><div class="a">'+xe(l.label)+'</div><div class="b" dir="ltr" style="text-align:right;">'+xe(l.sub)+'</div></div><div class="arr">←</div></div>';
+    }).join('');
+  }
+  c.innerHTML =
+    check +
+    '<div class="pv-h">'+xe(resolveText(o.headline))+(o.emoji?' '+xe(o.emoji):'')+'</div>' +
+    '<div class="pv-sub" style="margin-top:6px;">'+xe(resolveText(o.subtitle))+'</div>' +
+    nextBlock + summary + links +
+    '<div class="pv-spacer"></div>';
+  f.innerHTML='';
+}
+
+/* ════════════════════════ ACTIONS ════════════════════════ */
+function setProcess(type){
+  if(state.processType===type && state.name) { /* still re-apply on explicit click */ }
+  state.processType=type;
+  var p=PRESETS[type];
+  state.name=p.name;
+  state.preliminary=JSON.parse(JSON.stringify(p.preliminary));
+  state.intro=JSON.parse(JSON.stringify(p.intro));
+  state.outro=JSON.parse(JSON.stringify(p.outro));
+  if(!state.preliminary.enabled && state.previewPage==='prelim') state.previewPage='intro';
+  updateAssignProcess();
+  syncEditorFields(); render();
+}
+function setPage(p){ state.previewPage=p; render(); }
+function setMode(m){ state.previewMode=m; render(); }
+function toggleCard(id){ document.getElementById(id).classList.toggle('open'); }
+
+function addPrelimOption(){ state.preliminary.options.push({value:'',label:'',emoji:''}); renderEditorLists(); render(); }
+function addDetail(){ state.intro.details.push({label:'',dbField:''}); renderEditorLists(); render(); }
+function addStep(){ state.outro.nextSteps.push(''); renderEditorLists(); render(); }
+function addLink(){ state.outro.links.push({label:'',sub:'',url:'',icon:'🔗'}); renderEditorLists(); render(); }
+
+/* ════════════════════════ ASSIGN (synel-assign) ════════════════════════ */
+function updateAssignProcess(){
+  if(typeof SynelAssign==='undefined') return;
+  try{ var cur=SynelAssign.get(); SynelAssign.set({ process: state.processType, populations: cur.populations, owner: cur.owner }); }catch(e){}
+}
+
+/* ════════════════════════ EXPORT / SAVE ════════════════════════ */
+function buildFlowOpts(){
+  var assign = (typeof SynelAssign!=='undefined') ? SynelAssign.get() : {};
+  return {
+    formType: 'flow',
+    meta: {
+      name: state.name,
+      docTitle: state.name,
+      process: state.processType,
+      owner: assign.ownerLabel || assign.owner || '',
+      population: (assign.populationLabels && assign.populationLabels.join(', ')) || ''
+    },
+    source: { kind:'template' },
+    flow: {
+      processType: state.processType,
+      preliminary: state.preliminary.enabled ? {
+        enabled:true, kind:'gender',
+        title: state.preliminary.title,
+        question: state.preliminary.question,
+        options: state.preliminary.options,
+        buttonText: state.preliminary.buttonText
+      } : { enabled:false },
+      intro: {
+        greeting: state.intro.greeting,
+        emoji: state.intro.emoji,
+        subtitle: state.intro.subtitle,
+        details: state.intro.details,
+        durationNote: state.intro.durationMin ? ('כל התהליך אורך כ-'+state.intro.durationMin+' דקות. אפשר לעצור ולחזור בכל שלב.') : '',
+        buttonText: state.intro.buttonText
+      },
+      outro: {
+        icon: state.outro.icon || 'check',
+        headline: state.outro.headline,
+        emoji: state.outro.emoji,
+        subtitle: state.outro.subtitle,
+        nextSteps: state.outro.nextSteps,
+        summaryButton: state.outro.summaryButton,
+        links: state.outro.linksEnabled ? state.outro.links : []
+      }
+    },
+    fields: []
+  };
+}
+
+function exportJSON(){
+  if(typeof SynelExport==='undefined'){ toast('synel-export.js לא נטען'); return; }
+  SynelExport.download(buildFlowOpts());
+}
+
+function saveForm(){
+  try{ localStorage.setItem('flow_'+(state.name||'תהליך'), JSON.stringify(state)); }catch(e){}
+  toast('✓ נשמר: "'+(state.name||'תהליך')+'"');
+}
+function saveAs(){
+  document.getElementById('saveAsName').value=(state.name||'')+' — עותק';
+  document.getElementById('saveAsModal').style.display='flex';
+  setTimeout(function(){document.getElementById('saveAsName').select();},50);
+}
+function confirmSaveAs(){
+  var n=document.getElementById('saveAsName').value.trim(); if(!n)return;
+  state.name=n; syncEditorFields(); saveForm();
+  document.getElementById('saveAsModal').style.display='none';
+}
+function exportForm(){
+  if(typeof saveForm==='function') saveForm();
+  var _nm=(document.getElementById('fName')||{}).value||'טופס';
+  if(typeof SynelPublish!=='undefined') SynelPublish.publish(_nm);
+  else toast('🚀 פורסם!');
+}
+
+function openLoad(){
+  var sl=document.getElementById('savedList'); sl.innerHTML='';
+  var keys=[];
+  try{ for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i); if(k&&k.indexOf('flow_')===0)keys.push(k);} }catch(e){}
+  if(!keys.length){ sl.innerHTML='<div style="font-size:12px;color:#9CA3AF;text-align:center;padding:12px;">אין תבניות שמורות</div>'; }
+  else keys.forEach(function(k){
+    try{
+      var d=JSON.parse(localStorage.getItem(k));
+      var row=document.createElement('div'); row.className='saved-item';
+      var info=document.createElement('div'); info.style.flex='1';
+      var nm=document.createElement('div'); nm.style.cssText='font-size:13px;font-weight:500;'; nm.textContent=d.name||k;
+      var mt=document.createElement('div'); mt.style.cssText='font-size:10px;color:#9CA3AF;'; mt.textContent=(d.processType==='offboarding'?'סיום העסקה':'קליטה');
+      info.appendChild(nm); info.appendChild(mt);
+      var lb=document.createElement('button'); lb.className='si-load'; lb.textContent='טען';
+      (function(dat){ lb.onclick=function(){ loadForm(dat); document.getElementById('loadModal').style.display='none'; }; })(d);
+      var del=document.createElement('button'); del.className='si-del'; del.textContent='מחק';
+      (function(key){ del.onclick=function(){ if(confirm('למחוק?')){ localStorage.removeItem(key); openLoad(); } }; })(k);
+      row.appendChild(info); row.appendChild(lb); row.appendChild(del); sl.appendChild(row);
+    }catch(ex){}
+  });
+  document.getElementById('loadModal').style.display='flex';
+}
+function loadForm(d){
+  state = Object.assign(state, d);
+  // הגנה על מבנה
+  state.preliminary = Object.assign({enabled:true,options:[]}, d.preliminary||{});
+  state.intro = Object.assign({details:[]}, d.intro||{});
+  state.outro = Object.assign({nextSteps:[],links:[]}, d.outro||{});
+  if(!state.previewPage) state.previewPage='intro';
+  if(!state.previewMode) state.previewMode='demo';
+  updateAssignProcess();
+  syncEditorFields(); render();
+  toast('✓ נטען: "'+(state.name||'תהליך')+'"');
+}
+
+function toast(msg){
+  var t=document.getElementById('toastEl'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(tt); tt=setTimeout(function(){t.classList.remove('show');},2500);
+}
+
+/* ════════════════════════ INIT ════════════════════════ */
+(function init(){
+  // mount assign button
+  if(typeof SynelAssign!=='undefined' && SynelAssign.button){
+    try{ document.getElementById('assignMount').appendChild(SynelAssign.button()); }catch(e){}
+  }
+  if(typeof SynelBrand!=='undefined' && SynelBrand.button){
+    try{ document.getElementById('brandMount').appendChild(SynelBrand.button()); }catch(e){}
+    try{ SynelBrand.apply(); }catch(e){}
+  }
+  document.addEventListener('synel-brand-change', function(){ try{ render(); }catch(e){} });
+  // load via ?open=
+  var q=new URLSearchParams(location.search).get('open');
+  if(q){
+    try{ var d=JSON.parse(localStorage.getItem('flow_'+q)); if(d){ loadForm(d); return; } }catch(e){}
+  }
+  setProcess('onboarding'); // טוען ברירת מחדל מלאה
+})();
+</script>
+<script src="synel-export.js"></script>
+<script src="synel-help.js"></script>
+</body>
+</html>

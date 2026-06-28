@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מסכי מקור — מעטפת תהליך</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--bg:#F5F5F0;--surface:#fff;--border:#E5E7EB;--text:#1a1a1a;--text2:#6B7280;--text3:#9CA3AF;--orange:#E8603C;--green:#2D7A4F;--r:14px;}
+body{font-family:'Helvetica Neue',Arial,sans-serif;direction:rtl;background:var(--bg);color:var(--text);min-height:100vh;padding:28px 22px 60px;}
+.top{max-width:1100px;margin:0 auto 26px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+.top h1{font-size:22px;font-weight:700;margin-bottom:4px;}
+.top p{font-size:13px;color:var(--text2);line-height:1.6;max-width:620px;}
+.back{font-size:13px;color:var(--orange);text-decoration:none;border:1px solid var(--orange);border-radius:50px;padding:8px 16px;white-space:nowrap;font-weight:500;}
+.back:hover{background:#FFF1EC;}
+.wrap{max-width:1100px;margin:0 auto;}
+.sec{margin-bottom:34px;}
+.sec-h{display:flex;align-items:center;gap:9px;margin-bottom:6px;}
+.sec-h .ic{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;}
+.sec-h h2{font-size:16px;font-weight:700;}
+.sec-h .badge{font-size:11px;color:var(--text3);}
+.sec-note{font-size:12.5px;color:var(--text2);line-height:1.6;margin:0 39px 16px;}
+.grid{display:flex;gap:20px;flex-wrap:wrap;}
+.shot{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;width:248px;box-shadow:0 4px 18px rgba(0,0,0,.05);}
+.shot .frame{background:#FAFAFA;padding:12px 12px 0;display:flex;justify-content:center;}
+.shot img{width:100%;border-radius:10px 10px 0 0;display:block;}
+.shot .cap{padding:12px 14px 14px;}
+.shot .step{display:inline-block;font-size:10px;font-weight:600;letter-spacing:.04em;padding:2px 9px;border-radius:10px;margin-bottom:6px;}
+.shot .t{font-size:13.5px;font-weight:600;margin-bottom:3px;}
+.shot .d{font-size:11.5px;color:var(--text2);line-height:1.5;}
+.step.prelim{background:#EDE9FE;color:#6D28D9;}
+.step.intro{background:#FFF1EC;color:#C2410C;}
+.step.outro{background:#DCFCE7;color:#15803D;}
+.legend{max-width:1100px;margin:6px auto 0;font-size:12px;color:var(--text3);line-height:1.7;border-top:1px solid var(--border);padding-top:16px;}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div>
+    <h1>🚪 מסכי מקור — מעטפת תהליך</h1>
+    <p>המוקאפים המקוריים ששימשו בסיס לתבנית. כל מסך כאן מתאים לאחד משלושת שלבי המעטפת בעורך (מקדים · פתיחה · סיום). הערכים המופיעים (שמות, תאריכים) הם נתוני דמו — בפועל הם נמשכים דינמית משדות ה-DB דרך Harmony.</p>
+  </div>
+  <a class="back" href="template-flow.html">← חזרה לעורך</a>
+</div>
+
+<div class="wrap">
+
+  <!-- ONBOARDING -->
+  <div class="sec">
+    <div class="sec-h">
+      <span class="ic" style="background:#FFF1EC;">🚀</span>
+      <h2>קליטה — Onboarding</h2>
+      <span class="badge">3 מסכים</span>
+    </div>
+    <div class="sec-note">בקליטה מופעל גם העמוד המקדים (בחירת מגדר) שבא ראשון — כדי לדעת איך לפנות לעובד/ת בכל המסכים שאחריו.</div>
+    <div class="grid">
+      <div class="shot">
+        <div class="frame"><img src="onboarding-1-gender.png" alt="בחירת מגדר"></div>
+        <div class="cap">
+          <span class="step prelim">① עמוד מקדים</span>
+          <div class="t">בחירת אופן פנייה</div>
+          <div class="d">"ברוכ/ה הבא/ה לסינאל" + זכר/נקבה. התשובה מחזיקה את הפנייה בכל המסכים.</div>
+        </div>
+      </div>
+      <div class="shot">
+        <div class="frame"><img src="onboarding-2-welcome.png" alt="עמוד פתיחה קליטה"></div>
+        <div class="cap">
+          <span class="step intro">② עמוד פתיחה</span>
+          <div class="t">היי שחר, ברוכה הבאה!</div>
+          <div class="d">כרטיס פרטים (שם · תפקיד · תאריך התחלה · מנהל/ת) + הערת משך 14 דקות.</div>
+        </div>
+      </div>
+      <div class="shot">
+        <div class="frame"><img src="onboarding-3-complete.png" alt="עמוד סיום קליטה"></div>
+        <div class="cap">
+          <span class="step outro">③ עמוד סיום</span>
+          <div class="t">סיימת! 🎉</div>
+          <div class="d">"מה הלאה?" + כפתור "צפייה בסיכום הקליטה" + קישורים שימושיים.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OFFBOARDING -->
+  <div class="sec">
+    <div class="sec-h">
+      <span class="ic" style="background:#FEF2F2;">🚪</span>
+      <h2>סיום העסקה — Offboarding</h2>
+      <span class="badge">2 מסכים</span>
+    </div>
+    <div class="sec-note">בסיום העסקה אין עמוד מקדים — המסע מתחיל ישר מעמוד הפתיחה. הטקסטים, שדות הפרטים וצעדי הסיום שונים מקליטה.</div>
+    <div class="grid">
+      <div class="shot">
+        <div class="frame"><img src="offboarding-1-welcome.png" alt="עמוד פתיחה סיום"></div>
+        <div class="cap">
+          <span class="step intro">② עמוד פתיחה</span>
+          <div class="t">היי מיכל, נשלח אליך 👋</div>
+          <div class="d">כרטיס פרטים עם תאריך עזיבה ויום אחרון במקום מנהל/תאריך התחלה.</div>
+        </div>
+      </div>
+      <div class="shot">
+        <div class="frame"><img src="offboarding-2-complete.png" alt="עמוד סיום סיום"></div>
+        <div class="cap">
+          <span class="step outro">③ עמוד סיום</span>
+          <div class="t">תודה על הכל! 🙏</div>
+          <div class="d">"מה הלאה?" עם טופס 161, פנסיה, מכתב המלצה — בלי כפתור סיכום ובלי קישורים.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="legend">
+  התאמה לעורך: כל מסך כאן ניתן לשחזור מלא בתבנית "מעטפת תהליך" — החלפת המתג בין קליטה לסיום טוענת את ברירות המחדל המתאימות, וכל טקסט/שדה/קישור ניתן לעריכה. בתצוגה המקדימה אפשר לעבור בין "נתוני דמו" ל-<code>{{placeholders}}</code> כדי לראות את המיפוי הדינמי.
+</div>
+
+</body>
+</html>

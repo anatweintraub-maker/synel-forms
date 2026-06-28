@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>עורך תבנית Highlights + מסמך</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--bg:#F5F5F0;--surface:#fff;--border:#E5E7EB;--text:#1a1a1a;--text2:#6B7280;--text3:#9CA3AF;--accent:#4F46E5;--green:#2D7A4F;--orange:#E8603C;--red:#DC2626;--amber:#D97706;--r:12px;}
+body{font-family:'Helvetica Neue',Arial,sans-serif;direction:rtl;background:var(--bg);min-height:100vh;display:flex;}
+
+/* EDITOR */
+.ep{width:380px;flex-shrink:0;background:var(--surface);border-left:1px solid var(--border);height:100vh;overflow-y:auto;display:flex;flex-direction:column;}
+.ep-head{padding:14px 18px;border-bottom:1px solid var(--border);background:#FAFAFA;}
+.ep-head h2{font-size:14px;font-weight:600;color:var(--text);margin-bottom:2px;}
+.ep-head p{font-size:11px;color:var(--text3);}
+.ep-body{flex:1;padding:14px 18px;display:flex;flex-direction:column;gap:12px;}
+.ep-sec>label{font-size:11px;font-weight:600;color:var(--text2);letter-spacing:.04em;text-transform:uppercase;display:block;margin-bottom:5px;}
+.ep-inp{width:100%;padding:8px 12px;font-size:13px;border:1px solid var(--border);border-radius:var(--r);font-family:inherit;color:var(--text);outline:none;background:#FAFAFA;}
+.ep-inp:focus{border-color:var(--accent);background:var(--surface);}
+.ep-ta{width:100%;padding:8px 12px;font-size:12px;border:1px solid var(--border);border-radius:var(--r);font-family:inherit;color:var(--text);outline:none;background:#FAFAFA;resize:none;}
+.ep-ta:focus{border-color:var(--accent);}
+.divider{height:1px;background:var(--border);}
+.tog-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.tog-row span{font-size:11px;color:var(--text2);}
+.tog{position:relative;display:inline-block;width:30px;height:17px;cursor:pointer;}
+.tog input{opacity:0;width:0;height:0;position:absolute;}
+.togs{position:absolute;inset:0;border-radius:17px;background:#D1D5DB;transition:.15s;}
+.togs:before{content:'';position:absolute;height:11px;width:11px;right:3px;top:3px;background:white;border-radius:50%;transition:.15s;}
+.tog input:checked+.togs{background:var(--accent);}
+.tog input:checked+.togs:before{transform:translateX(-13px);}
+
+/* HL ITEMS */
+.hl-list{display:flex;flex-direction:column;gap:8px;}
+.hl-card{background:#FAFAFA;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
+.hl-card.type-points{border-color:#C7D2FE;}
+.hl-card.type-db{border-color:#A7F3D0;}
+.hc-head{padding:8px 12px;display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--border);background:white;}
+.hc-type-badge{font-size:10px;padding:2px 8px;border-radius:20px;}
+.badge-points{background:#EEF2FF;color:var(--accent);}
+.badge-db{background:#ECFDF5;color:var(--green);}
+.hc-rm{width:22px;height:22px;border-radius:50%;border:1px solid var(--border);background:none;cursor:pointer;color:var(--text3);font-size:11px;margin-right:auto;}
+.hc-rm:hover{background:#FEE2E2;color:var(--red);}
+.hc-body{padding:10px 12px;display:flex;flex-direction:column;gap:6px;}
+.hc-body input,.hc-body select,.hc-body textarea{width:100%;padding:6px 10px;font-size:12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;outline:none;background:white;color:var(--text);}
+.hc-row{display:flex;gap:5px;}
+.hc-row input,.hc-row select{flex:1;}
+.point-list{display:flex;flex-direction:column;gap:4px;}
+.point-row{display:flex;gap:4px;}
+.point-row input{flex:1;padding:5px 9px;font-size:12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;outline:none;background:white;}
+.point-rm{width:24px;height:24px;border-radius:6px;border:1px solid var(--border);background:none;cursor:pointer;color:var(--text3);font-size:11px;}
+.point-rm:hover{background:#FEE2E2;color:var(--red);}
+.add-point{padding:4px 10px;font-size:11px;border:1px dashed #C7D2FE;border-radius:8px;background:none;color:var(--accent);cursor:pointer;font-family:inherit;}
+
+.add-type-wrap{display:flex;flex-direction:column;gap:5px;}
+.add-type-grid{display:none;flex-wrap:wrap;gap:5px;}
+.add-type-grid.open{display:flex;}
+.at-btn{padding:5px 11px;font-size:11px;border:1px solid var(--border);border-radius:20px;background:white;cursor:pointer;font-family:inherit;color:var(--text2);}
+.at-btn:hover{border-color:var(--accent);color:var(--accent);}
+.add-btn{width:100%;padding:8px;font-size:12px;border:1.5px dashed #C7D2FE;border-radius:var(--r);background:none;color:var(--accent);cursor:pointer;font-family:inherit;}
+.add-btn:hover{background:var(--accent);color:white;border-color:var(--accent);}
+
+.ep-footer{padding:14px 18px;border-top:1px solid var(--border);display:flex;gap:6px;flex-wrap:wrap;}
+.btn{flex:1;padding:9px;font-size:12px;border-radius:var(--r);border:1px solid var(--border);background:var(--surface);cursor:pointer;font-family:inherit;font-weight:500;}
+.btn.primary{background:var(--accent);color:white;border-color:var(--accent);}
+
+/* PREVIEW */
+.preview-panel{flex:1;background:var(--bg);padding:24px;overflow-y:auto;display:flex;justify-content:center;align-items:flex-start;}
+.phone-wrap{width:375px;background:var(--surface);border-radius:24px;box-shadow:0 8px 40px rgba(0,0,0,.1);overflow:hidden;display:flex;flex-direction:column;}
+.phone-bar{height:40px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;}
+.pbar-step{font-size:11px;color:var(--text3);}
+.pbar-dots{display:flex;gap:4px;margin-right:auto;}
+.pdot{width:6px;height:6px;border-radius:50%;background:var(--border);}
+.pdot.active{background:var(--accent);}
+.phone-scroll{flex:1;overflow-y:auto;}
+
+/* Highlights */
+.pv-hl-section{padding:16px;background:var(--bg);}
+
+/* Points highlights */
+.pv-hl-points{background:#FFFBEB;border:1px solid #FCD34D;border-radius:14px;padding:14px 16px;margin-bottom:10px;}
+.pv-hl-points-title{font-size:13px;font-weight:700;color:#92400E;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.pv-point-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(0,0,0,.06);font-size:13px;color:var(--text);}
+.pv-point-row:last-child{border-bottom:none;}
+.pv-point-check{width:24px;height:24px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;color:white;font-size:12px;flex-shrink:0;}
+
+/* DB highlights */
+.pv-hl-db{background:#F8F8F6;border-radius:14px;padding:4px 0;margin-bottom:10px;border:1px solid var(--border);}
+.pv-db-row{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:1px solid rgba(0,0,0,.05);font-size:13px;}
+.pv-db-row:last-child{border-bottom:none;}
+.pv-db-label{color:var(--text2);}
+.pv-db-value{font-weight:600;color:var(--text);}
+
+/* Content */
+.pv-content{padding:16px;}
+.pv-title{font-size:20px;font-weight:700;color:var(--text);margin-bottom:3px;}
+.pv-sub{font-size:13px;color:var(--text2);margin-bottom:8px;line-height:1.5;}
+.pv-time{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;background:#F5F5F0;border-radius:20px;font-size:12px;color:var(--text2);margin-bottom:14px;border:1px solid var(--border);}
+
+/* Doc */
+.pv-scroll-hint{background:#FFFBEB;border:1px solid #FCD34D;border-radius:10px;padding:8px 14px;font-size:12px;color:#92400E;margin-bottom:8px;display:flex;gap:6px;align-items:center;}
+.pv-doc-btn{width:100%;padding:13px;font-size:14px;border:1.5px solid var(--red);border-radius:12px;background:#FEF2F2;color:var(--red);cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:10px;transition:all .2s;}
+.pv-doc-btn.opened{border-color:var(--green);background:#F0FDF4;color:var(--green);}
+.pv-doc-content{background:#F8F8F6;border-radius:12px;padding:14px 16px;margin-bottom:10px;font-size:12px;color:var(--text);line-height:1.9;display:none;max-height:200px;overflow-y:auto;}
+.pv-doc-content.show{display:block;}
+.pv-scroll-done{font-size:11px;color:var(--green);text-align:left;margin-bottom:6px;display:none;}
+.pv-scroll-done.show{display:block;}
+
+/* Confirm */
+.pv-confirm{border:1.5px solid var(--green);border-radius:14px;padding:12px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:10px;opacity:.4;pointer-events:none;transition:all .15s;}
+.pv-confirm.enabled{opacity:1;pointer-events:auto;}
+.pv-confirm:hover.enabled{background:#F0FDF4;}
+.pv-confirm-check{width:28px;height:28px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;color:white;font-size:14px;flex-shrink:0;}
+.pv-confirm-text{font-size:14px;font-weight:500;color:var(--green);}
+
+/* Sig */
+.pv-sig{background:#F8F8F6;border-radius:14px;padding:14px;margin-bottom:10px;opacity:.4;pointer-events:none;transition:all .15s;}
+.pv-sig.enabled{opacity:1;pointer-events:auto;}
+.pv-sig-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px;}
+.pv-sig-sub{font-size:12px;color:var(--text3);margin-bottom:8px;}
+.sig-canvas{width:100%;height:90px;cursor:crosshair;display:block;border:1px solid var(--border);border-radius:8px;background:white;}
+
+.phone-footer{padding:12px 16px 20px;border-top:1px solid var(--border);}
+.pv-action-btn{width:100%;padding:15px;font-size:15px;font-weight:600;border-radius:50px;border:none;background:var(--orange);color:white;cursor:pointer;font-family:inherit;margin-bottom:10px;}
+.pv-back{display:block;text-align:center;font-size:13px;color:var(--text3);cursor:pointer;}
+
+/* Modals */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:none;align-items:center;justify-content:center;}
+.modal-overlay.show{display:flex;}
+.modal-box{background:white;border-radius:14px;padding:22px 24px;width:340px;box-shadow:0 20px 50px rgba(0,0,0,.15);}
+.modal-box h3{font-size:14px;font-weight:600;margin-bottom:12px;}
+.modal-inp{width:100%;padding:8px 12px;font-size:13px;border:1px solid var(--border);border-radius:10px;font-family:inherit;outline:none;margin-bottom:12px;}
+.modal-btns{display:flex;gap:8px;}
+.m-cancel{flex:1;padding:8px;font-size:13px;border-radius:10px;border:1px solid var(--border);background:none;cursor:pointer;font-family:inherit;}
+.m-ok{flex:1;padding:8px;font-size:13px;border-radius:10px;border:none;background:var(--accent);color:white;cursor:pointer;font-family:inherit;font-weight:500;}
+.saved-list{max-height:200px;overflow-y:auto;margin-bottom:12px;display:flex;flex-direction:column;gap:5px;}
+.saved-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--border);border-radius:10px;}
+.si-load{padding:3px 10px;font-size:11px;border-radius:20px;border:none;background:var(--accent);color:white;cursor:pointer;}
+.si-del{padding:3px 8px;font-size:11px;border-radius:20px;border:1px solid #FECACA;background:#FEF2F2;color:var(--red);cursor:pointer;}
+
+.toast{position:fixed;bottom:20px;right:50%;transform:translateX(50%);background:#111;color:white;font-size:12px;padding:7px 18px;border-radius:20px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999;}
+.toast.show{opacity:1;}
+</style>
+<script src="synel-db.js"></script>
+<script src="synel-validation.js"></script>
+<script src="synel-autosave.js"></script>
+<script src="synel-accessibility.js"></script>
+<script src="synel-versions.js"></script>
+<script src="synel-mobile.js"></script>
+<script src="synel-brand.js"></script>
+<script src="synel-nav.js"></script>
+<script src="synel-publish.js"></script>
+</head>
+<body>
+
+<div class="ep">
+  <div class="ep-head">
+    <h2>⭐ עורך תבנית Highlights + מסמך</h2>
+    <p>נקודות טקסט · שורות DB · מסמך לחתימה</p>
+  </div>
+  <div class="ep-body">
+
+    <div class="ep-sec">
+      <label>שם הטופס</label>
+      <input class="ep-inp" id="fName" value="חוזה ההעסקה שלך" oninput="render()">
+    </div>
+    <div class="ep-sec">
+      <label>תת-כותרת</label>
+      <input class="ep-inp" id="fSub" value="קרא/י את עיקרי התנאים, פתח/י את המסמך וחתמ/י." oninput="render()">
+    </div>
+    <div class="ep-sec">
+      <label>זמן משוער (דקות)</label>
+      <input class="ep-inp" id="fTime" value="3" style="width:80px;" oninput="render()">
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- HIGHLIGHTS -->
+    <div class="ep-sec">
+      <label>סעיפי Highlights</label>
+      <div class="hl-list" id="hlList"></div>
+      <div class="add-type-wrap">
+        <div class="add-type-grid" id="addGrid">
+          <button class="at-btn" onclick="addHL('points')">✓ נקודות טקסט</button>
+          <button class="at-btn" onclick="addHL('db')">🗄 שורות DB</button>
+        </div>
+        <button class="add-btn" onclick="document.getElementById('addGrid').classList.toggle('open')">+ הוסף סעיף Highlights</button>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- DOC -->
+    <div class="ep-sec">
+      <label>מסמך לקריאה</label>
+      <div class="tog-row">
+        <span>הצג מסמך</span>
+        <label class="tog"><input type="checkbox" id="hasDoc" checked onchange="render()"><span class="togs"></span></label>
+      </div>
+      <input class="ep-inp" id="docBtnText" value="צפייה במסמך המלא 📄" oninput="render()" style="margin-bottom:6px;">
+      <div class="tog-row">
+        <span>חובה לפתוח לפני חתימה</span>
+        <label class="tog"><input type="checkbox" id="docRequired" checked onchange="render()"><span class="togs"></span></label>
+      </div>
+      <div class="tog-row" style="margin-top:4px;">
+        <span>הצג תוכן המסמך בתוך הטופס</span>
+        <label class="tog"><input type="checkbox" id="hasDocContent" onchange="render()"><span class="togs"></span></label>
+      </div>
+      <textarea class="ep-ta" id="docContent" rows="5" placeholder="תוכן המסמך (יוצג בתוך הטופס לאחר לחיצה על הכפתור)..." oninput="render()"></textarea>
+      <div style="font-size:11px;color:var(--text3);margin-top:4px;">💡 אם תוכן המסמך ריק — הכפתור יפתח קישור חיצוני</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- CONFIRM -->
+    <div class="ep-sec">
+      <label>אישור וחתימה</label>
+      <div class="tog-row">
+        <span>אישור קריאה</span>
+        <label class="tog"><input type="checkbox" id="hasRC" checked onchange="render()"><span class="togs"></span></label>
+      </div>
+      <input class="ep-inp" id="rcText" value="קראתי והבנתי את המסמך המלא" oninput="render()" style="margin-bottom:6px;">
+      <div class="tog-row">
+        <span>חתימה דיגיטלית</span>
+        <label class="tog"><input type="checkbox" id="hasSig" checked onchange="render()"><span class="togs"></span></label>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="ep-sec">
+      <label>כפתור פעולה</label>
+      <input class="ep-inp" id="fBtn" value="אישור והמשך ←" oninput="render()">
+    </div>
+    <div class="ep-sec">
+      <label>שיוך</label>
+      <select class="ep-inp" id="fProcess" onchange="updateAssign()">
+        <option value="">— תהליך —</option>
+        <option value="onboarding" selected>🚀 Onboarding</option>
+        <option value="offboarding">🚪 Offboarding</option>
+        <option value="lifecycle">🔄 Life Cycle</option>
+      </select>
+      <div style="display:flex;gap:6px;align-items:center;margin-top:6px;">
+        <label style="font-size:11px;color:var(--text2);">שלב</label>
+        <input class="ep-inp" id="fStepCur" type="number" value="2" style="width:55px;" oninput="updateAssign()">
+        <span style="font-size:12px;color:var(--text3);">מתוך</span>
+        <input class="ep-inp" id="fStepTotal" type="number" value="6" style="width:55px;" oninput="updateAssign()">
+      </div>
+      <select class="ep-inp" id="fOwner" style="margin-top:6px;">
+        <option value="">— עובד אחראי —</option>
+        <option>HR</option><option>מנהל ישיר</option><option>IT</option><option>חשב שכר</option>
+      </select>
+    </div>
+
+  </div>
+  <div class="ep-footer">
+    <button class="btn" onclick="saveForm()">💾 שמור</button>
+    <button class="btn" onclick="saveAs()">📋 שמור בשם</button>
+    <button class="btn primary" style="width:100%;" onclick="exportForm()">🚀 פרסם</button>
+    <button class="btn" style="width:100%;background:#1e1b4b;color:white;border-color:#1e1b4b;" onclick="exportJSON()">{ } ייצא JSON</button>
+    <button class="btn" style="width:100%;font-size:11px;" onclick="openLoad()">📂 טפסים שמורים</button>
+  </div>
+</div>
+
+<div class="preview-panel">
+  <div class="phone-wrap">
+    <div class="phone-bar">
+      <span class="pbar-step" id="stepLbl">שלב 2 מתוך 6</span>
+      <div class="pbar-dots" id="pbarDots"></div>
+    </div>
+    <div class="phone-scroll" id="phoneScroll">
+      <div class="pv-hl-section" id="hlSection"></div>
+      <div class="pv-content" id="pvContent"></div>
+    </div>
+    <div class="phone-footer">
+      <button class="pv-action-btn" id="actionBtn">אישור והמשך ←</button>
+      <span class="pv-back">חזרה לרשימה</span>
+    </div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="saveAsModal" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal-box"><h3>📋 שמור בשם</h3>
+    <input class="modal-inp" id="saveAsName" onkeydown="if(event.key==='Enter')confirmSaveAs()">
+    <div class="modal-btns"><button class="m-cancel" onclick="document.getElementById('saveAsModal').style.display='none'">ביטול</button><button class="m-ok" onclick="confirmSaveAs()">שמור ✓</button></div>
+  </div>
+</div>
+<div class="modal-overlay" id="loadModal" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal-box" style="width:400px;"><h3>📂 טפסים שמורים</h3>
+    <div class="saved-list" id="savedList"></div>
+    <button class="m-cancel" style="width:100%;" onclick="document.getElementById('loadModal').style.display='none'">סגור</button>
+  </div>
+</div>
+<div class="toast" id="toastEl"></div>
+
+<script>
+var hlSections = [
+  {
+    type: 'db',
+    title: '',
+    rows: [
+      {label:'תפקיד',           value:'מנהל/ת תפעול',        dbField:'job_title',      type:'text'},
+      {label:'שכר חודשי',       value:'14,500',               dbField:'monthly_salary', type:'currency'},
+      {label:'שעות עבודה',      value:'186 שעות/חודש, גמיש', dbField:'work_hours',     type:'text'},
+      {label:'ימי חופשה',       value:'14 ימים בשנה',        dbField:'vacation_days',  type:'text'},
+      {label:'תנאים סוציאליים', value:'פנסיה, קרן השתלמות',  dbField:'benefits',       type:'text'},
+    ]
+  }
+];
+
+var docOpened = false;
+
+/* ── EDITOR: HIGHLIGHTS ── */
+function renderHLEditor(){
+  var list = document.getElementById('hlList'); list.innerHTML='';
+  hlSections.forEach(function(sec, i){
+    var card = document.createElement('div');
+    card.className = 'hl-card type-'+sec.type;
+    var head = document.createElement('div'); head.className='hc-head';
+    var badge = document.createElement('span');
+    badge.className='hc-type-badge '+(sec.type==='points'?'badge-points':'badge-db');
+    badge.textContent = sec.type==='points'?'✓ נקודות טקסט':'🗄 שורות DB';
+    var rm = document.createElement('button'); rm.className='hc-rm'; rm.textContent='✕';
+    (function(idx){rm.onclick=function(){hlSections.splice(idx,1);renderHLEditor();render();};})(i);
+    head.appendChild(badge); head.appendChild(rm); card.appendChild(head);
+
+    var body = document.createElement('div'); body.className='hc-body';
+
+    if(sec.type==='points'){
+      // Title
+      var ti = document.createElement('input'); ti.placeholder='כותרת (לדוגמה: מה זה סעיף 14?)'; ti.value=sec.title||'';
+      (function(idx){ti.oninput=function(){hlSections[idx].title=this.value;render();};})(i);
+      body.appendChild(ti);
+      // Subtitle
+      var sub = document.createElement('input'); sub.placeholder='תת-כותרת (אופציונלי)'; sub.value=sec.subtitle||'';
+      (function(idx){sub.oninput=function(){hlSections[idx].subtitle=this.value;render();};})(i);
+      body.appendChild(sub);
+      // Points
+      var pts = document.createElement('div'); pts.className='point-list';
+      (sec.points||[]).forEach(function(pt, pi){
+        var pr = document.createElement('div'); pr.className='point-row';
+        var inp = document.createElement('input'); inp.value=pt||''; inp.placeholder='נקודה '+( pi+1)+'...';
+        (function(si,pi2){inp.oninput=function(){hlSections[si].points[pi2]=this.value;render();};})(i,pi);
+        var prm = document.createElement('button'); prm.className='point-rm'; prm.textContent='✕';
+        (function(si,pi2){prm.onclick=function(){hlSections[si].points.splice(pi2,1);renderHLEditor();render();};})(i,pi);
+        pr.appendChild(inp); pr.appendChild(prm); pts.appendChild(pr);
+      });
+      var addPt = document.createElement('button'); addPt.className='add-point'; addPt.textContent='+ הוסף נקודה';
+      (function(idx){addPt.onclick=function(){hlSections[idx].points.push('');renderHLEditor();render();};})(i);
+      pts.appendChild(addPt);
+      body.appendChild(pts);
+    }
+    else if(sec.type==='db'){
+      // DB rows
+      var lbl = document.createElement('label'); lbl.textContent='שורות — תווית | ערך דמו | שדה DB'; lbl.style.fontSize='11px'; lbl.style.color='var(--text2)'; body.appendChild(lbl);
+      (sec.rows||[]).forEach(function(row, ri){
+        var card = document.createElement('div'); card.style.cssText='background:#F8F8F6;border:1px solid #E5E7EB;border-radius:8px;padding:7px 8px;margin-bottom:5px;';
+        // Line 1: label + value
+        var rr = document.createElement('div'); rr.className='hc-row'; rr.style.marginBottom='4px';
+        var li = document.createElement('input'); li.placeholder='תווית'; li.value=row.label||'';
+        (function(si,ri2){li.oninput=function(){hlSections[si].rows[ri2].label=this.value;render();};})(i,ri);
+        var vi = document.createElement('input'); vi.placeholder='ערך דמו'; vi.value=row.value||''; vi.style.cssText='width:90px;flex:none;';
+        (function(si,ri2){vi.oninput=function(){hlSections[si].rows[ri2].value=this.value;render();};})(i,ri);
+        var dbrm = document.createElement('button'); dbrm.className='point-rm'; dbrm.textContent='✕';
+        (function(si,ri2){dbrm.onclick=function(){hlSections[si].rows.splice(ri2,1);renderHLEditor();render();};})(i,ri);
+        rr.appendChild(li); rr.appendChild(vi); rr.appendChild(dbrm);
+        // Line 2: DB field dropdown (if synel-db.js loaded)
+        var line2 = document.createElement('div');
+        if(typeof buildDBDropdown === 'function'){
+          var dbSel = buildDBDropdown(row.dbField||'', function(chosen, meta){
+            hlSections[i].rows[ri].dbField = chosen;
+            if(meta && !hlSections[i].rows[ri].label) hlSections[i].rows[ri].label = meta.labelHe;
+            if(meta) hlSections[i].rows[ri].type = meta.type;
+            renderHLEditor(); render();
+          });
+          line2.appendChild(dbSel);
+        } else {
+          var dbFree = document.createElement('input'); dbFree.placeholder='db.field'; dbFree.value=row.dbField||''; dbFree.style.cssText='width:100%;padding:4px 6px;font-size:11px;border:1px solid #E5E7EB;border-radius:6px;font-family:inherit;outline:none;background:#EEF2FF;color:#4338CA;';
+          (function(si,ri2){dbFree.oninput=function(){hlSections[si].rows[ri2].dbField=this.value;};})(i,ri);
+          line2.appendChild(dbFree);
+        }
+        card.appendChild(rr); card.appendChild(line2); body.appendChild(card);
+      });
+      var addRow = document.createElement('button'); addRow.className='add-point'; addRow.textContent='+ הוסף שורה';
+      (function(idx){addRow.onclick=function(){hlSections[idx].rows.push({label:'',value:'',dbField:'',type:'text'});renderHLEditor();render();};})(i);
+      body.appendChild(addRow);
+    }
+
+    card.appendChild(body); list.appendChild(card);
+  });
+}
+
+function addHL(type){
+  if(type==='points') hlSections.push({type:'points',title:'',subtitle:'',points:['','','']});
+  else hlSections.push({type:'db',rows:[{label:'',value:'',dbField:'',type:'text'}]});
+  document.getElementById('addGrid').classList.remove('open');
+  renderHLEditor(); render();
+}
+
+/* ── PREVIEW ── */
+function render(){
+  var name    = document.getElementById('fName').value||'טופס';
+  var sub     = document.getElementById('fSub').value;
+  var time    = document.getElementById('fTime').value;
+  var hasDoc  = document.getElementById('hasDoc').checked;
+  var docBtn  = document.getElementById('docBtnText').value;
+  var docReq  = document.getElementById('docRequired').checked;
+  var hasDC   = document.getElementById('hasDocContent').checked;
+  var docCont = document.getElementById('docContent').value;
+  var hasRC   = document.getElementById('hasRC').checked;
+  var rcText  = document.getElementById('rcText').value;
+  var hasSig  = document.getElementById('hasSig').checked;
+  var btn     = document.getElementById('fBtn').value;
+  document.getElementById('actionBtn').textContent = btn;
+
+  // HL SECTION
+  var hlEl = document.getElementById('hlSection'); hlEl.innerHTML='';
+  hlSections.forEach(function(sec){
+    if(sec.type==='points'){
+      var box = document.createElement('div'); box.className='pv-hl-points';
+      if(sec.title){
+        var tt = document.createElement('div'); tt.className='pv-hl-points-title';
+        tt.innerHTML='<span style="font-size:18px;">🧳</span>'+xe(sec.title);
+        box.appendChild(tt);
+      }
+      if(sec.subtitle){
+        var st = document.createElement('div'); st.style.cssText='font-size:12px;color:#92400E;margin-bottom:8px;line-height:1.6;'; st.textContent=sec.subtitle; box.appendChild(st);
+      }
+      var ptBox = document.createElement('div'); ptBox.style.cssText='background:white;border-radius:10px;padding:4px 0;';
+      (sec.points||[]).filter(function(p){return p.trim();}).forEach(function(pt){
+        var pr = document.createElement('div'); pr.className='pv-point-row';
+        var ch = document.createElement('div'); ch.className='pv-point-check'; ch.textContent='✓';
+        var tx = document.createElement('span'); tx.textContent=pt;
+        pr.appendChild(ch); pr.appendChild(tx); ptBox.appendChild(pr);
+      });
+      box.appendChild(ptBox); hlEl.appendChild(box);
+    }
+    else if(sec.type==='db'){
+      var dbBox = document.createElement('div'); dbBox.className='pv-hl-db';
+      (sec.rows||[]).forEach(function(row){
+        var rr = document.createElement('div'); rr.className='pv-db-row';
+        var dbMeta = (typeof SYNEL_DB_MAP!=='undefined'&&row.dbField)?SYNEL_DB_MAP[row.dbField]:null;
+        var displayLabel = row.label || (dbMeta&&dbMeta.labelHe) || row.dbField || '';
+        var lb = document.createElement('span'); lb.className='pv-db-label'; lb.textContent=displayLabel;
+        var vl = document.createElement('span'); vl.className='pv-db-value'; vl.textContent=row.value||(row.dbField?'{{'+row.dbField+'}}':'');
+        rr.appendChild(lb); rr.appendChild(vl); dbBox.appendChild(rr);
+      });
+      hlEl.appendChild(dbBox);
+    }
+  });
+
+  // CONTENT
+  var c = document.getElementById('pvContent'); c.innerHTML='';
+  var h = document.createElement('div'); h.className='pv-title'; h.textContent=name; c.appendChild(h);
+  if(sub){var s=document.createElement('div');s.className='pv-sub';s.textContent=sub;c.appendChild(s);}
+  if(time){var t=document.createElement('div');t.className='pv-time';t.innerHTML='⏱ זמן משוער: ~'+time+' דק\'';c.appendChild(t);}
+
+  if(hasDoc){
+    if(docReq){
+      var hint=document.createElement('div');hint.className='pv-scroll-hint';
+      hint.innerHTML='⚠️ יש לפתוח ולגלול את המסמך המלא לפני החתימה';
+      c.appendChild(hint);
+    }
+    var db=document.createElement('button');db.className='pv-doc-btn';
+    db.textContent=docBtn||'צפייה במסמך המלא 📄';
+    var docContentEl=null,scrollDoneEl=null;
+    if(hasDC && docCont){
+      docContentEl=document.createElement('div');docContentEl.className='pv-doc-content';
+      docContentEl.innerHTML=docCont.replace(/\n/g,'<br>');
+      var sdEl=document.createElement('div');sdEl.className='pv-scroll-done';sdEl.innerHTML='✓ הגעת לסוף המסמך – ניתן עכשיו לחתום';
+      scrollDoneEl=sdEl;
+    }
+    db.onclick=function(){
+      docOpened=true;
+      db.classList.add('opened');db.textContent='✓ המסמך נפתח';
+      if(docContentEl){docContentEl.classList.add('show');}
+      if(scrollDoneEl){scrollDoneEl.classList.add('show');}
+      var rc=document.querySelector('.pv-confirm');if(rc)rc.classList.add('enabled');
+      var sg=document.querySelector('.pv-sig');if(sg)sg.classList.add('enabled');
+      toast('המסמך נפתח ✓');
+    };
+    c.appendChild(db);
+    if(docContentEl){c.appendChild(docContentEl);}
+    if(scrollDoneEl){c.appendChild(scrollDoneEl);}
+  }
+
+  if(hasRC){
+    var rc=document.createElement('div');rc.className='pv-confirm'+((!docReq||docOpened)?' enabled':'');
+    rc.innerHTML='<div class="pv-confirm-check">✓</div><div class="pv-confirm-text">'+xe(rcText)+'</div>';
+    rc.onclick=function(){if(this.classList.contains('enabled')){this.style.background='#F0FDF4';toast('✓ אישור קריאה נרשם');}};
+    c.appendChild(rc);
+  }
+
+  if(hasSig){
+    var sb=document.createElement('div');sb.className='pv-sig'+((!docReq||docOpened)?' enabled':'');
+    sb.innerHTML='<div class="pv-sig-title">חתימה דיגיטלית</div><div class="pv-sig-sub">חתמ/י באצבע או עכבר</div>';
+    var cWrap=document.createElement('div');
+    var canvas=document.createElement('canvas');canvas.className='sig-canvas';canvas.width=340;canvas.height=90;
+    cWrap.appendChild(canvas);sb.appendChild(cWrap);
+    var sbtns=document.createElement('div');sbtns.style.cssText='display:flex;gap:8px;margin-top:8px;';
+    var done=document.createElement('button');done.style.cssText='flex:1;padding:7px;font-size:12px;border:none;border-radius:10px;background:#ECFDF5;color:var(--green);cursor:pointer;font-family:inherit;display:none;';done.textContent='✓ חתימה נקלטה';
+    var clr=document.createElement('button');clr.style.cssText='flex:1;padding:7px;font-size:12px;border:1px solid var(--border);border-radius:10px;background:white;cursor:pointer;font-family:inherit;';clr.textContent='ניקוי';
+    sbtns.appendChild(done);sbtns.appendChild(clr);sb.appendChild(sbtns);
+    var note=document.createElement('div');note.style.cssText='font-size:11px;color:var(--text3);text-align:center;margin-top:6px;';note.textContent='עותק חתום נשלח למייל אליך';
+    sb.appendChild(note);c.appendChild(sb);
+    setTimeout(function(){
+      var ctx=canvas.getContext('2d');ctx.strokeStyle='#1a1a1a';ctx.lineWidth=2;ctx.lineCap='round';
+      var drawing=false;
+      function pos(e){var r=canvas.getBoundingClientRect();var src=e.touches?e.touches[0]:e;return{x:(src.clientX-r.left)*(canvas.width/r.width),y:(src.clientY-r.top)*(canvas.height/r.height)};}
+      canvas.onmousedown=canvas.ontouchstart=function(e){e.preventDefault();if(!sb.classList.contains('enabled'))return;drawing=true;var p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);};
+      canvas.onmousemove=canvas.ontouchmove=function(e){e.preventDefault();if(!drawing)return;var p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();};
+      canvas.onmouseup=canvas.ontouchend=function(){drawing=false;done.style.display='block';};
+      clr.onclick=function(){ctx.clearRect(0,0,canvas.width,canvas.height);done.style.display='none';};
+    },60);
+  }
+}
+
+function xe(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function updateAssign(){
+  var c=document.getElementById('fStepCur').value;
+  var t=document.getElementById('fStepTotal').value;
+  document.getElementById('stepLbl').textContent='שלב '+c+' מתוך '+t;
+  var dots=document.getElementById('pbarDots');dots.innerHTML='';
+  var tot=parseInt(t)||1,cur=parseInt(c)||1;
+  for(var i=1;i<=Math.min(tot,6);i++){var dot=document.createElement('div');dot.className='pdot'+(i===cur?' active':'');dots.appendChild(dot);}
+}
+
+function getData(){
+  return{name:document.getElementById('fName').value,sub:document.getElementById('fSub').value,time:document.getElementById('fTime').value,hasDoc:document.getElementById('hasDoc').checked,docBtnText:document.getElementById('docBtnText').value,docRequired:document.getElementById('docRequired').checked,hasDocContent:document.getElementById('hasDocContent').checked,docContent:document.getElementById('docContent').value,hasRC:document.getElementById('hasRC').checked,rcText:document.getElementById('rcText').value,hasSig:document.getElementById('hasSig').checked,btn:document.getElementById('fBtn').value,process:document.getElementById('fProcess').value,stepCur:document.getElementById('fStepCur').value,stepTotal:document.getElementById('fStepTotal').value,owner:document.getElementById('fOwner').value,hlSections:hlSections.map(function(s){return JSON.parse(JSON.stringify(s));}),savedAt:new Date().toISOString()};
+}
+function saveForm(){var d=getData();try{localStorage.setItem('hl_'+d.name,JSON.stringify(d));}catch(e){}toast('✓ נשמר: "'+d.name+'"');}
+function saveAs(){document.getElementById('saveAsName').value=document.getElementById('fName').value+' — עותק';document.getElementById('saveAsModal').style.display='flex';setTimeout(function(){document.getElementById('saveAsName').select();},50);}
+function confirmSaveAs(){var n=document.getElementById('saveAsName').value.trim();if(!n)return;document.getElementById('fName').value=n;render();saveForm();document.getElementById('saveAsModal').style.display='none';toast('✓ נשמר בשם: "'+n+'"');}
+function exportJSON(){
+  var d = getData();
+  var json = {
+    formType: 'highlights',
+    meta: {
+      name: d.name, subtitle: d.sub||'',
+      estimatedTime: parseInt(d.time)||3,
+      process: d.process||'', stepCurrent: parseInt(d.stepCur)||1,
+      stepTotal: parseInt(d.stepTotal)||6, owner: d.owner||'',
+      exportedAt: new Date().toISOString(),
+    },
+    document: {
+      hasDoc: d.hasDoc||false,
+      docButtonText: d.docBtnText||'',
+      docRequired: d.docRequired||false,
+      hasDocContent: d.hasDocContent||false,
+      docContent: d.docContent||'',
+    },
+    completion: {
+      hasReadConfirm: d.hasRC||false,
+      readConfirmText: d.rcText||'',
+      hasSignature: d.hasSig||false,
+      actionButton: d.btn||'',
+    },
+    highlights: (d.hlSections||[]).map(function(sec){
+      if(sec.type==='points'){
+        return { type:'points', title:sec.title||'', subtitle:sec.subtitle||'', points:sec.points||[] };
+      } else {
+        return { type:'db', rows:(sec.rows||[]).map(function(r){
+          return { label:r.label, value:r.value||'', dbField:r.dbField||'', filler:r.filler||'', type:r.type||'text' };
+        })};
+      }
+    }),
+  };
+  var blob=new Blob([JSON.stringify(json,null,2)],{type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download=(d.name||'highlights').replace(/\s+/g,'_')+'.json';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+  toast('JSON יוצא: '+(d.name||'highlights')+'.json');
+}
+
+function exportForm(){
+  if(typeof saveForm==='function') saveForm();
+  var _nm=(document.getElementById('fName')||{}).value||'טופס';
+  if(typeof SynelPublish!=='undefined') SynelPublish.publish(_nm);
+  else toast('🚀 פורסם!');
+}
+function openLoad(){
+  var sl=document.getElementById('savedList');sl.innerHTML='';
+  var keys=[];try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.startsWith('hl_'))keys.push(k);}}catch(e){}
+  if(!keys.length){sl.innerHTML='<div style="font-size:12px;color:#9CA3AF;text-align:center;padding:12px;">אין טפסים שמורים</div>';}
+  else keys.forEach(function(k){
+    try{var d=JSON.parse(localStorage.getItem(k));var row=document.createElement('div');row.className='saved-item';
+      var info=document.createElement('div');info.style.flex='1';
+      var nm=document.createElement('div');nm.style.cssText='font-size:13px;font-weight:500;';nm.textContent=d.name||k;
+      var mt=document.createElement('div');mt.style.cssText='font-size:10px;color:#9CA3AF;';mt.textContent=(d.hlSections||[]).length+' סעיפים';
+      info.appendChild(nm);info.appendChild(mt);
+      var lb=document.createElement('button');lb.className='si-load';lb.textContent='טען';
+      (function(dat){lb.onclick=function(){loadForm(dat);document.getElementById('loadModal').style.display='none';};})(d);
+      var db2=document.createElement('button');db2.className='si-del';db2.textContent='מחק';
+      (function(key){db2.onclick=function(){if(confirm('למחוק?')){localStorage.removeItem(key);openLoad();}};})(k);
+      row.appendChild(info);row.appendChild(lb);row.appendChild(db2);sl.appendChild(row);
+    }catch(ex){}
+  });
+  document.getElementById('loadModal').style.display='flex';
+}
+function loadForm(data){
+  var fields=['fName','fSub','fTime','docBtnText','rcText','fBtn','fProcess','fStepCur','fStepTotal'];
+  fields.forEach(function(id){if(data[id]!==undefined)document.getElementById(id).value=data[id];});
+  var checks=['hasDoc','docRequired','hasDocContent','hasRC','hasSig'];
+  checks.forEach(function(id){if(data[id]!==undefined)document.getElementById(id).checked=data[id];});
+  document.getElementById('docContent').value=data.docContent||'';
+  document.getElementById('fOwner').value=data.owner||'';
+  hlSections=data.hlSections||[];docOpened=false;
+  updateAssign();renderHLEditor();render();toast('✓ נטען: "'+data.name+'"');
+}
+
+var tt=null;
+function toast(msg){var t=document.getElementById('toastEl');t.textContent=msg;t.classList.add('show');clearTimeout(tt);tt=setTimeout(function(){t.classList.remove('show');},2500);}
+
+updateAssign(); renderHLEditor(); render();
+</script>
+<script src="synel-help.js"></script>
+</body>
+</html>

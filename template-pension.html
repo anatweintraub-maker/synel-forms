@@ -1,0 +1,1491 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>עורך תבנית שאלון פנסיה</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--bg:#F5F5F0;--surface:#fff;--border:#E5E7EB;--text:#1a1a1a;--text2:#6B7280;--text3:#9CA3AF;--accent:#4F46E5;--green:#2D7A4F;--orange:#E8603C;--red:#DC2626;--r:12px;}
+body{font-family:'Helvetica Neue',Arial,sans-serif;direction:rtl;background:var(--bg);min-height:100vh;display:flex;}
+
+/* EDITOR */
+.editor-panel{width:380px;flex-shrink:0;background:var(--surface);border-left:1px solid var(--border);height:100vh;overflow-y:auto;display:flex;flex-direction:column;}
+.ep-head{padding:14px 18px;border-bottom:1px solid var(--border);background:#FAFAFA;}
+.ep-head h2{font-size:14px;font-weight:600;color:var(--text);margin-bottom:2px;}
+.ep-head p{font-size:11px;color:var(--text3);}
+.ep-body{flex:1;padding:14px 18px;display:flex;flex-direction:column;gap:14px;}
+.ep-sec>label{font-size:11px;font-weight:600;color:var(--text2);letter-spacing:.04em;text-transform:uppercase;display:block;margin-bottom:6px;}
+.ep-inp{width:100%;padding:8px 12px;font-size:13px;border:1px solid var(--border);border-radius:var(--r);font-family:inherit;color:var(--text);outline:none;background:#FAFAFA;}
+.ep-inp:focus{border-color:var(--accent);background:var(--surface);}
+.ep-ta{width:100%;padding:8px 12px;font-size:13px;border:1px solid var(--border);border-radius:var(--r);font-family:inherit;color:var(--text);outline:none;background:#FAFAFA;resize:none;}
+.ep-ta:focus{border-color:var(--accent);}
+.divider{height:1px;background:var(--border);}
+.step-card{background:#FAFAFA;border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;display:flex;flex-direction:column;gap:8px;}
+.step-card-title{font-size:12px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:6px;}
+.step-badge{font-size:10px;padding:2px 8px;border-radius:10px;}
+.badge-blue{background:#EEF2FF;color:var(--accent);}
+.badge-green{background:#ECFDF5;color:var(--green);}
+.badge-orange{background:#FFF7ED;color:#C2410C;}
+.field-group{display:flex;flex-direction:column;gap:5px;}
+.field-group label{font-size:11px;color:var(--text2);}
+.field-group input,.field-group textarea{width:100%;padding:6px 10px;font-size:12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;outline:none;background:white;color:var(--text);}
+.field-group input:focus,.field-group textarea:focus{border-color:var(--accent);}
+.ep-footer{padding:14px 18px;border-top:1px solid var(--border);display:flex;gap:6px;flex-wrap:wrap;}
+.btn{flex:1;padding:9px;font-size:12px;border-radius:var(--r);border:1px solid var(--border);background:var(--surface);cursor:pointer;font-family:inherit;font-weight:500;}
+.btn.primary{background:var(--accent);color:white;border-color:var(--accent);}
+
+/* PREVIEW */
+.preview-panel{flex:1;background:var(--bg);padding:24px;overflow-y:auto;display:flex;flex-direction:column;justify-content:flex-start;align-items:center;gap:14px;}
+.phone-wrap{width:375px;background:var(--surface);border-radius:24px;box-shadow:0 8px 40px rgba(0,0,0,.1);overflow:hidden;display:flex;flex-direction:column;min-height:500px;}
+.phone-bar{height:40px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;}
+.pbar-step{font-size:11px;color:var(--text3);}
+.pbar-dots{display:flex;gap:4px;margin-right:auto;}
+.pdot{width:6px;height:6px;border-radius:50%;background:var(--border);}
+.pdot.active{background:var(--accent);}
+
+/* Flow screens */
+.flow-screen{display:none;padding:20px 16px;flex:1;}
+.flow-screen.active{display:block;}
+.fs-title{font-size:20px;font-weight:700;color:var(--text);margin-bottom:4px;}
+.fs-sub{font-size:13px;color:var(--text2);margin-bottom:8px;line-height:1.5;}
+.fs-time{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;background:#F5F5F0;border-radius:20px;font-size:12px;color:var(--text2);margin-bottom:16px;border:1px solid var(--border);}
+.fs-question{font-size:15px;font-weight:600;color:var(--text);margin-bottom:12px;}
+.yn-btns{display:flex;flex-direction:column;gap:8px;margin-bottom:12px;}
+.yn-btn{width:100%;padding:14px 16px;font-size:14px;font-weight:500;border:1.5px solid var(--border);border-radius:12px;background:white;cursor:pointer;font-family:inherit;color:var(--text);text-align:right;transition:all .15s;}
+.yn-btn:hover{border-color:var(--accent);}
+.yn-btn.sel-yes{border-color:var(--green);background:#ECFDF5;color:var(--green);}
+.yn-btn.sel-no{border-color:#9CA3AF;background:#F8F8F6;color:#6B7280;}
+
+/* Info card */
+.info-card{background:#EEF2FF;border:1px solid #C7D2FE;border-radius:12px;padding:12px 16px;margin-bottom:12px;font-size:13px;color:#3730A3;line-height:1.7;}
+
+/* Form fields */
+.form-fields{display:flex;flex-direction:column;gap:10px;margin-bottom:12px;}
+.form-field label{font-size:12px;font-weight:500;color:var(--text2);display:block;margin-bottom:4px;}
+.form-field input{width:100%;padding:10px 12px;font-size:13px;border:1px solid var(--border);border-radius:10px;font-family:inherit;outline:none;background:white;direction:rtl;}
+.form-field input:focus{border-color:var(--accent);}
+.form-field .optional{font-size:10px;color:var(--text3);margin-right:4px;}
+
+/* Default pension card */
+.default-pension{background:#F0FDF4;border:1px solid #A7F3D0;border-radius:12px;padding:14px 16px;margin-bottom:12px;}
+.dp-title{font-size:14px;font-weight:600;color:var(--green);margin-bottom:6px;}
+.dp-row{display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;}
+.dp-label{color:var(--text2);}
+.dp-value{font-weight:500;color:var(--text);}
+
+/* Confirm */
+.confirm-row{border:1.5px solid var(--green);border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:10px;}
+.confirm-row:hover{background:#F0FDF4;}
+.confirm-check{width:26px;height:26px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;color:white;font-size:13px;flex-shrink:0;}
+.confirm-text{font-size:13px;font-weight:500;color:var(--green);}
+
+/* Progress */
+.progress-bar{height:3px;background:#F3F4F6;margin-bottom:16px;border-radius:2px;overflow:hidden;}
+.progress-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .3s;}
+
+.phone-footer{padding:12px 16px 20px;border-top:1px solid var(--border);}
+.action-btn{width:100%;padding:15px;font-size:15px;font-weight:600;border-radius:50px;border:none;background:var(--orange);color:white;cursor:pointer;font-family:inherit;margin-bottom:10px;}
+.action-btn:disabled{opacity:.4;cursor:not-allowed;}
+.back-link{display:block;text-align:center;font-size:13px;color:var(--text3);cursor:pointer;}
+.back-to-prev{display:block;text-align:center;font-size:12px;color:var(--accent);cursor:pointer;margin-bottom:8px;}
+.advice-link{display:block;text-align:center;font-size:12px;color:var(--text2);cursor:pointer;margin:10px 0 6px;text-decoration:underline;}
+.advice-link:hover{color:var(--accent);}
+.advice-icon{width:52px;height:52px;border-radius:50%;background:#FFF7ED;border:2px solid #F59E0B;color:#C2410C;display:flex;align-items:center;justify-content:center;font-size:24px;margin:6px auto 12px;}
+
+/* Modals */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:none;align-items:center;justify-content:center;}
+.modal-box{background:white;border-radius:14px;padding:22px 24px;width:340px;box-shadow:0 20px 50px rgba(0,0,0,.15);}
+.modal-box h3{font-size:14px;font-weight:600;margin-bottom:12px;}
+.modal-inp{width:100%;padding:8px 12px;font-size:13px;border:1px solid var(--border);border-radius:10px;font-family:inherit;outline:none;margin-bottom:12px;}
+.modal-btns{display:flex;gap:8px;}
+.m-cancel{flex:1;padding:8px;font-size:13px;border-radius:10px;border:1px solid var(--border);background:none;cursor:pointer;font-family:inherit;}
+.m-ok{flex:1;padding:8px;font-size:13px;border-radius:10px;border:none;background:var(--accent);color:white;cursor:pointer;font-family:inherit;font-weight:500;}
+.saved-list{max-height:200px;overflow-y:auto;margin-bottom:12px;display:flex;flex-direction:column;gap:5px;}
+.saved-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--border);border-radius:10px;}
+.si-load{padding:3px 10px;font-size:11px;border-radius:20px;border:none;background:var(--accent);color:white;cursor:pointer;}
+.si-del{padding:3px 8px;font-size:11px;border-radius:20px;border:1px solid #FECACA;background:#FEF2F2;color:var(--red);cursor:pointer;}
+
+.toast{position:fixed;bottom:20px;right:50%;transform:translateX(50%);background:#111;color:white;font-size:12px;padding:7px 18px;border-radius:20px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999;}
+.toast.show{opacity:1;}
+
+/* ── חברות פנסיה ── */
+.funds-list{display:flex;flex-direction:column;gap:8px;margin-bottom:12px;}
+.fund-card{display:flex;align-items:center;gap:11px;padding:11px 12px;border:1.5px solid var(--border);border-radius:12px;background:white;cursor:pointer;transition:border-color .15s,background .15s;}
+.fund-card:hover{border-color:var(--accent);}
+.fund-card.selected{border-color:var(--accent);background:#EEF2FF;}
+.fund-mono{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:white;flex-shrink:0;}
+.fund-info{flex:1;min-width:0;}
+.fund-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px;}
+.fund-fees{font-size:11px;color:var(--text2);}
+.fund-pick{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;color:white;}
+.fund-card.selected .fund-pick{background:var(--accent);border-color:var(--accent);}
+.fund-existing{border-color:var(--green);background:#F0FDF4;}
+.fund-existing .fund-mono{background:var(--green);}
+.fund-tag{font-size:10px;font-weight:600;color:var(--green);background:#DCFCE7;padding:1px 7px;border-radius:8px;margin-right:5px;}
+
+/* ── מסלקה ── */
+.mislaka-box{background:#FAFAFA;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;text-align:center;}
+.mislaka-spin{width:34px;height:34px;border:3px solid #E5E7EB;border-top-color:var(--accent);border-radius:50%;margin:4px auto 10px;animation:msp .8s linear infinite;}
+@keyframes msp{to{transform:rotate(360deg);}}
+.mislaka-status{font-size:13px;color:var(--text2);line-height:1.6;}
+.mislaka-found{background:#F0FDF4;border-color:#A7F3D0;text-align:right;}
+.mislaka-found .mf-head{font-size:13px;font-weight:600;color:var(--green);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.mislaka-none{background:#FFF7ED;border-color:#FED7AA;text-align:right;}
+.mislaka-none .mf-head{font-size:13px;font-weight:600;color:#C2410C;margin-bottom:4px;}
+.mf-row{display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;color:var(--text);}
+.mf-row .l{color:var(--text2);}
+.mf-src{font-size:10px;color:var(--text3);margin-top:8px;padding-top:7px;border-top:1px dashed var(--border);}
+
+/* ── הפרשה ── */
+.contrib-card{border-radius:12px;padding:14px 16px;margin-bottom:12px;border:1px solid;}
+.contrib-retro{background:#F0FDF4;border-color:#A7F3D0;}
+.contrib-wait{background:#FFF7ED;border-color:#FED7AA;}
+.contrib-title{font-size:14px;font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:6px;}
+.contrib-retro .contrib-title{color:var(--green);}
+.contrib-wait .contrib-title{color:#C2410C;}
+.contrib-body{font-size:12px;color:var(--text);line-height:1.6;}
+.contrib-notify{font-size:11px;color:var(--text2);background:white;border-radius:8px;padding:7px 10px;margin-top:9px;display:flex;align-items:center;gap:6px;}
+
+/* ── חתימה ── */
+.sig-pad{border:1.5px dashed var(--border);border-radius:12px;height:96px;display:flex;align-items:center;justify-content:center;cursor:pointer;margin-bottom:10px;background:#FAFAFA;color:var(--text3);font-size:12px;transition:all .15s;}
+.sig-pad.signed{border-style:solid;border-color:var(--green);background:#F0FDF4;color:var(--green);font-size:22px;font-family:'Segoe Script','Brush Script MT',cursive;}
+.sig-canvas-wrap{position:relative;margin-bottom:8px;}
+.sig-canvas{width:100%;height:120px;border:1.5px solid var(--border);border-radius:12px;background:white;touch-action:none;cursor:crosshair;display:block;}
+.sig-canvas.signed{border-color:var(--green);}
+.sig-hint{position:absolute;top:50%;left:0;right:0;transform:translateY(-50%);text-align:center;font-size:12px;color:var(--text3);pointer-events:none;}
+.sig-actions{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:11px;}
+.sig-clear{border:none;background:none;color:var(--accent);cursor:pointer;font-family:inherit;font-size:12px;}
+.sig-preview{border:1.5px dashed var(--border);border-radius:12px;min-height:96px;display:flex;align-items:center;justify-content:center;cursor:pointer;margin-bottom:8px;background:#FAFAFA;color:var(--text3);font-size:12px;padding:8px;transition:all .15s;}
+.sig-preview:hover{border-color:var(--accent);}
+.sig-preview.has-sig{border-style:solid;border-color:var(--green);background:#F0FDF4;}
+.sig-preview-img{max-height:90px;max-width:100%;}
+
+/* ── סיום / פתיחת תיק ── */
+.done-icon{width:52px;height:52px;border-radius:50%;background:#F0FDF4;border:2px solid var(--green);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:24px;margin:6px auto 12px;}
+.notify-list{display:flex;flex-direction:column;gap:7px;margin-bottom:12px;}
+.notify-item{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--text);background:#FAFAFA;border:1px solid var(--border);border-radius:10px;padding:9px 12px;}
+.notify-dot{width:18px;height:18px;border-radius:50%;background:var(--green);color:white;font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+
+/* ── אזור רקע (לא מוצג לעובד) ── */
+.backstage{display:none;width:375px;max-width:100%;background:#1e1b2e;border-radius:16px;padding:14px 16px;}
+.backstage.show{display:block;}
+.backstage-head{font-size:12px;font-weight:600;color:#C7C3E0;margin-bottom:10px;display:flex;align-items:center;gap:7px;}
+.bs-dot{width:7px;height:7px;border-radius:50%;background:#A78BFA;}
+.backstage .notify-item{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12);color:#E5E3F0;}
+
+/* ── מסמך טופס פנסיה ── */
+.done-banner{display:flex;align-items:center;gap:8px;background:#F0FDF4;border:1px solid #A7F3D0;border-radius:10px;padding:9px 12px;margin-bottom:14px;font-size:12px;color:var(--green);font-weight:500;}
+.pdoc{border:1px solid var(--border);border-radius:12px;background:white;overflow:hidden;margin-bottom:8px;}
+.pdoc-head{background:#FAFAFA;border-bottom:1px solid var(--border);padding:12px 14px;}
+.pdoc-logo{width:40px;height:40px;border-radius:9px;background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;color:white;flex-shrink:0;}
+.pdoc-title{font-size:14px;font-weight:700;color:var(--text);}
+.pdoc-meta{font-size:10px;color:var(--text3);margin-top:3px;}
+.pdoc-body{padding:12px 14px;display:flex;flex-direction:column;gap:12px;}
+.pdoc-sec-label{font-size:10px;font-weight:600;color:var(--text3);letter-spacing:.04em;text-transform:uppercase;margin-bottom:5px;}
+.pdoc-source{font-size:10px;color:var(--accent);background:#EEF2FF;border-radius:6px;padding:6px 9px;margin-top:7px;line-height:1.4;}
+.pdoc-row{display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:1px dotted var(--border);}
+.pdoc-row:last-child{border-bottom:none;}
+.pdoc-row .k{color:var(--text2);}
+.pdoc-row .v{color:var(--text);font-weight:500;text-align:left;}
+.pdoc-ph{color:var(--accent);background:#EEF2FF;border-radius:4px;padding:0 5px;font-size:11px;}
+.pdoc-fund{display:flex;align-items:center;gap:9px;}
+.pdoc-fund .fm{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:white;flex-shrink:0;}
+.pdoc-sign{border-top:1px solid var(--border);padding:12px 14px;display:flex;justify-content:space-between;align-items:flex-end;}
+.pdoc-sign-img{height:46px;}
+.pdoc-sign-box{text-align:center;}
+.pdoc-sign-label{font-size:10px;color:var(--text3);margin-top:4px;border-top:1px solid var(--text3);padding-top:3px;}
+
+/* ── הסכמה ואימות ── */
+.consent-row{display:flex;gap:10px;align-items:flex-start;border:1.5px solid var(--border);border-radius:12px;padding:12px;margin-bottom:12px;cursor:pointer;}
+.consent-row.checked{border-color:var(--green);background:#F0FDF4;}
+.consent-box{width:22px;height:22px;border-radius:6px;border:1.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;margin-top:1px;}
+.consent-row.checked .consent-box{background:var(--green);border-color:var(--green);}
+.consent-txt{font-size:12px;color:var(--text);line-height:1.5;}
+.otp-block{border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:12px;background:#FAFAFA;}
+.otp-sent{font-size:12px;color:var(--text2);margin-bottom:8px;line-height:1.5;}
+.otp-inputs{display:flex;gap:6px;direction:ltr;justify-content:center;margin-bottom:8px;}
+.otp-digit{width:38px;height:44px;text-align:center;font-size:18px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;outline:none;background:white;}
+.otp-digit:focus{border-color:var(--accent);}
+.otp-send{font-size:12px;color:var(--accent);background:none;border:none;cursor:pointer;font-family:inherit;padding:0;}
+.otp-ok{font-size:12px;color:var(--green);font-weight:500;}
+
+/* ── עריכת חברות בפאנל ── */
+.ed-fund{display:flex;gap:5px;align-items:center;background:#FAFAFA;border:1px solid var(--border);border-radius:8px;padding:6px 8px;margin-bottom:5px;}
+.ed-fund input{font-size:11px;border:1px solid var(--border);border-radius:5px;padding:4px 6px;font-family:inherit;outline:none;}
+</style>
+<script src="synel-db.js"></script>
+<script src="synel-validation.js"></script>
+<script src="synel-autosave.js"></script>
+<script src="synel-accessibility.js"></script>
+<script src="synel-versions.js"></script>
+<script src="synel-backstage.js"></script>
+<script src="synel-brand.js"></script>
+<script src="synel-nav.js"></script>
+<script src="synel-publish.js"></script>
+<script src="synel-help.js"></script>
+<script src="synel-mobile.js"></script>
+<script src="synel-signature.js"></script>
+</head>
+<body>
+
+<!-- EDITOR -->
+<div class="editor-panel">
+  <div class="ep-head">
+    <h2>💰 עורך תבנית שאלון פנסיה</h2>
+    <p>זרימה קבועה — ערוך רק את הטקסטים</p>
+  </div>
+  <div class="ep-body">
+
+    <div class="ep-sec">
+      <label>כותרת ופתיח</label>
+      <div class="field-group">
+        <label>שם הטופס</label>
+        <input id="fName" value="שאלון פנסיה" oninput="render()">
+      </div>
+      <div class="field-group" style="margin-top:6px;">
+        <label>תת-כותרת</label>
+        <textarea id="fSub" rows="2" oninput="render()">כדי לוודא שתנאי הפנסיה שלך מוגדרים נכון מהיום הראשון.</textarea>
+      </div>
+      <div class="field-group" style="margin-top:6px;">
+        <label>זמן משוער (דקות)</label>
+        <input id="fTime" value="2" style="width:80px;" oninput="render()">
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="ep-sec">
+      <label>פרטי העובד — מקור ומילוי</label>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:8px;line-height:1.5;">לכל שדה: מאיזה שדה ב-DB הוא נשלף, ומי שולט במילוי. מופיע במסמך הסופי עם הערכים בפועל.</div>
+      <div id="empFieldsCfg"></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- STEP 1 -->
+    <div class="ep-sec">
+      <label>שלב 1 — האם יש ביטוח פנסיוני?</label>
+      <div class="step-card">
+        <div class="step-card-title">❓ שאלה ראשונה <span class="step-badge badge-blue">שלב 1</span></div>
+        <div class="field-group">
+          <label>טקסט השאלה</label>
+          <input id="q1text" value="האם יש לך ביטוח פנסיוני פעיל?" oninput="render()">
+        </div>
+        <div class="field-group">
+          <label>כפתור כן</label>
+          <input id="q1yes" value="כן, יש לי ביטוח פנסיוני פעיל" oninput="render()">
+        </div>
+        <div class="field-group">
+          <label>כפתור לא</label>
+          <input id="q1no" value="לא, אין לי ביטוח פנסיוני" oninput="render()">
+        </div>
+        <div style="font-size:11px;color:var(--text3);background:#F8F8F6;border-radius:8px;padding:7px 10px;">
+          ✓ כן → שאלה 2<br>
+          ✗ לא → פתיחת פנסיה ברירת מחדל
+        </div>
+      </div>
+    </div>
+
+    <div style="display:none">
+    <!-- STEP 2 -->
+    <div class="ep-sec">
+      <label>שלב 2 — המשך עם אותו ביטוח?</label>
+      <div class="step-card">
+        <div class="step-card-title">❓ שאלה שנייה <span class="step-badge badge-blue">שלב 2</span></div>
+        <div class="field-group">
+          <label>טקסט השאלה</label>
+          <input id="q2text" value="האם תרצה/י להמשיך עם אותו ביטוח?" oninput="render()">
+        </div>
+        <div class="field-group">
+          <label>כפתור כן</label>
+          <input id="q2yes" value="כן, רוצה להמשיך עם הביטוח הקיים" oninput="render()">
+        </div>
+        <div class="field-group">
+          <label>כפתור לא</label>
+          <input id="q2no" value="לא, אעבור לפנסיה הארגונית" oninput="render()">
+        </div>
+        <div style="font-size:11px;color:var(--text3);background:#F8F8F6;border-radius:8px;padding:7px 10px;">
+          ✓ כן → מילוי פרטי הביטוח<br>
+          ✗ לא → פתיחת פנסיה ברירת מחדל
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="ep-sec">
+      <label>שלב 3 — פרטי הביטוח הקיים</label>
+      <div class="step-card">
+        <div class="step-card-title">📋 טופס פרטים <span class="step-badge badge-orange">שלב 3א</span></div>
+        <div class="field-group">
+          <label>הסבר מעל הטופס</label>
+          <textarea id="q3info" rows="2" oninput="render()">מלא/י את פרטי הביטוח הפנסיוני הקיים. נציג HR יצור קשר לאימות.</textarea>
+        </div>
+        <div class="field-group">
+          <label>שדה 1 — תווית</label>
+          <input id="f1label" value="שם חברת הביטוח / קרן הפנסיה" oninput="render()">
+        </div>
+        <div class="field-group">
+          <label>שדה 2 — תווית</label>
+          <input id="f2label" value="מספר פוליסה / חשבון" oninput="render()">
+        </div>
+        <div class="field-group">
+          <label>שדה 3 — תווית (אופציונלי)</label>
+          <input id="f3label" value="שם סוכן הביטוח" oninput="render()">
+        </div>
+      </div>
+    </div>
+
+    <!-- DEFAULT PENSION -->
+    <div class="ep-sec">
+      <label>פנסיה ברירת מחדל ארגונית</label>
+      <div class="step-card">
+        <div class="step-card-title">✅ אישור פתיחה <span class="step-badge badge-green">שלב 3ב</span></div>
+        <div class="field-group">
+          <label>שם קרן הפנסיה הארגונית</label>
+          <input id="dpName" value="מנורה מבטחים פנסיה" oninput="render()">
+        </div>
+        <div class="field-group">
+          <label>אחוז הפקדה — עובד</label>
+          <input id="dpEmployee" value="6%" oninput="render()">
+        </div>
+        <div class="field-group">
+          <label>אחוז הפקדה — מעסיק</label>
+          <input id="dpEmployer" value="6.5%" oninput="render()">
+        </div>
+        <div class="field-group">
+          <label>פיצויים</label>
+          <input id="dpSeverance" value="8.33%" oninput="render()">
+        </div>
+        <div class="field-group">
+          <label>הודעת אישור לעובד</label>
+          <textarea id="dpConfirmText" rows="2" oninput="render()">אני מאשר/ת פתיחת חשבון פנסיה בקרן הנ"ל בתנאים המפורטים.</textarea>
+        </div>
+      </div>
+    </div>
+
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="ep-sec">
+      <label>חברות הפנסיה</label>
+      <div style="font-size:11px;color:var(--text3);background:#F8F8F6;border-radius:8px;padding:8px 10px;line-height:1.6;">7 החברות ודמי הניהול מנוהלים כרגע במערך <b>PENSION_FUNDS</b> בקוד. הלוגו מוצג כמונוגרמה צבעונית זמנית — ניתן להחליף בלוגו אמיתי.</div>
+    </div>
+
+    <div class="ep-sec">
+      <label>תרחיש מסלקה — לבדיקה</label>
+      <select class="ep-inp" id="mislakaScenario">
+        <option value="auto" selected>לפי ההצהרה (אוטומטי)</option>
+        <option value="found">תמיד נמצאה פנסיה</option>
+        <option value="notfound">תמיד לא נמצאה → ברירת מחדל</option>
+      </select>
+      <div style="font-size:11px;color:var(--text3);margin-top:5px;line-height:1.5;">בדיקה בלבד. בפועל המסלקה מכריעה, לא ההצהרה.</div>
+    </div>
+
+    <div class="ep-sec">
+      <label>שיוך</label>
+      <select class="ep-inp" id="fProcess" onchange="updateAssign()">
+        <option value="onboarding" selected>🚀 Onboarding</option>
+        <option value="lifecycle">🔄 Life Cycle</option>
+      </select>
+      <div style="display:flex;gap:6px;align-items:center;margin-top:6px;">
+        <label style="font-size:11px;color:var(--text2);">שלב</label>
+        <input class="ep-inp" id="fStepCur" type="number" value="4" style="width:55px;" oninput="updateAssign()">
+        <span style="font-size:12px;color:var(--text3);">מתוך</span>
+        <input class="ep-inp" id="fStepTotal" type="number" value="6" style="width:55px;" oninput="updateAssign()">
+      </div>
+    </div>
+
+  </div>
+  
+    <div class="divider"></div>
+
+    <div class="ep-sec">
+      <label>עובד אחראי</label>
+      <select class="ep-inp" id="fOwner" onchange="updateAssign && updateAssign()">
+        <option value="">-- לא הוגדר --</option>
+        <option value="hr">HR</option>
+        <option value="manager">מנהל ישיר</option>
+        <option value="it">IT</option>
+        <option value="payroll">חשב שכר</option>
+      </select>
+    </div>
+  
+    <div class="divider"></div>
+
+    <div class="ep-sec">
+      <label>אישור סיום</label>
+      <div class="tog-row" style="margin-bottom:6px;">
+        <span>חתימה דיגיטלית</span>
+        <label class="tog"><input type="checkbox" id="hasSigOpt" checked onchange="updateConfirmType()"><span class="togs"></span></label>
+      </div>
+      <div class="tog-row">
+        <span>צ'קבוקס "קראתי והבנתי"</span>
+        <label class="tog"><input type="checkbox" id="hasCheckOpt" onchange="updateConfirmType()"><span class="togs"></span></label>
+      </div>
+      <input class="ep-inp" id="confirmOptText" value="קראתי והבנתי" oninput="updateConfirmType()" style="margin-top:6px;">
+    </div>
+  
+    <!-- DB FIELD MAPPING SECTION -->
+    <div class="ep-sec" id="dbMappingSection" style="margin-top:8px;">
+      <label style="font-size:11px;font-weight:600;color:#6B7280;letter-spacing:.04em;text-transform:uppercase;display:block;margin-bottom:5px;">מיפוי שדות DB</label>
+      <div id="dbMappingList" style="display:flex;flex-direction:column;gap:5px;"></div>
+      <button onclick="addDBMapping()" style="width:100%;padding:6px;font-size:11px;border:1.5px dashed #C7D2FE;border-radius:8px;background:none;color:#4F46E5;cursor:pointer;font-family:inherit;margin-top:4px;">+ הוסף שיוך שדה DB</button>
+    </div>
+
+<div class="ep-footer">
+    <button class="btn" onclick="saveForm()">💾 שמור</button>
+    <button class="btn" onclick="saveAs()">📋 שמור בשם</button>
+    <button class="btn primary" style="width:100%;" onclick="exportForm()">🚀 פרסם</button>
+    <button class="btn" style="width:100%;background:#1e1b4b;color:white;border-color:#1e1b4b;" onclick="exportJSON()">{ } ייצא JSON</button>
+    <button class="btn" style="width:100%;font-size:11px;" onclick="openLoad()">📂 טפסים שמורים</button>
+  </div>
+</div>
+
+<!-- PREVIEW -->
+<div class="preview-panel">
+  <div class="phone-wrap">
+    <div class="phone-bar">
+      <span class="pbar-step" id="stepLbl">שלב 4 מתוך 6</span>
+      <div class="pbar-dots" id="pbarDots"></div>
+    </div>
+
+    <!-- SCREEN 1: הצהרה -->
+    <div class="flow-screen active" id="screen1">
+      <div class="progress-bar"><div class="progress-fill" style="width:16%"></div></div>
+      <div class="fs-title">💰 <span id="pv-name"></span></div>
+      <div class="fs-sub" id="pv-sub"></div>
+      <div class="fs-time" id="pv-time"></div>
+      <div class="fs-question" id="pv-q1text"></div>
+      <div class="yn-btns">
+        <button class="yn-btn" id="q1yes-btn" onclick="declare('yes')"></button>
+        <button class="yn-btn" id="q1no-btn" onclick="declare('no')"></button>
+        <button class="yn-btn" id="q1maybe-btn" onclick="declare('maybe')"></button>
+      </div>
+    </div>
+
+    <!-- SCREEN 1B: הסכמה ואימות -->
+    <div class="flow-screen" id="screenConsent">
+      <div class="progress-bar"><div class="progress-fill" style="width:25%"></div></div>
+      <div class="fs-title">🔐 אימות והסכמה</div>
+      <div class="fs-sub">כדי לבדוק עבורך במסלקה הפנסיונית, נדרשת הסכמתך ואימות זהות.</div>
+
+      <div class="consent-row" id="consentRow" onclick="toggleConsent()">
+        <div class="consent-box" id="consentBox">✓</div>
+        <div class="consent-txt">אני מאשר/ת פנייה למסלקה הפנסיונית בשמי, לקבלת מידע על המוצרים הפנסיוניים שלי.</div>
+      </div>
+
+      <div class="otp-block">
+        <div class="otp-sent" id="otpSent">נשלח קוד אימות לטלפון <b id="otpPhone">{{טלפון מהמערכת}}</b></div>
+        <div class="otp-inputs" id="otpInputs">
+          <input class="otp-digit" maxlength="1" inputmode="numeric">
+          <input class="otp-digit" maxlength="1" inputmode="numeric">
+          <input class="otp-digit" maxlength="1" inputmode="numeric">
+          <input class="otp-digit" maxlength="1" inputmode="numeric">
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <button class="otp-send" onclick="sendOtp()">שליחת קוד מחדש</button>
+          <span class="otp-ok" id="otpOk" style="display:none;">✓ אומת</span>
+        </div>
+      </div>
+
+      <div class="phone-footer" style="border:none;padding:0;">
+        <button class="action-btn" id="consentBtn" disabled onclick="goMislaka()">אימות ובדיקה במסלקה ←</button>
+      </div>
+      <span class="back-to-prev" onclick="goScreen('screen1')">← חזרה</span>
+    </div>
+
+    <!-- SCREEN 2: מסלקה -->
+    <div class="flow-screen" id="screenMislaka">
+      <div class="progress-bar"><div class="progress-fill" style="width:33%"></div></div>
+      <div class="fs-title">🔎 בדיקה מול המסלקה</div>
+      <div id="mislakaArea"></div>
+      <div class="phone-footer" style="border:none;padding:14px 0 0;">
+        <button class="action-btn" id="mislakaBtn" style="display:none;" onclick="goAfterMislaka()">המשך ←</button>
+      </div>
+    </div>
+
+    <!-- SCREEN 3: בחירת קרן -->
+    <div class="flow-screen" id="screenFunds">
+      <div class="progress-bar"><div class="progress-fill" style="width:50%"></div></div>
+      <div class="fs-title">🏦 בחירת קרן פנסיה</div>
+      <div class="fs-sub">בחר/י קרן להצטרפות. דמי הניהול מוצגים לכל קרן.</div>
+      <div class="funds-list" id="fundsList"></div>
+      <div class="phone-footer" style="border:none;padding:6px 0 0;">
+        <button class="action-btn" id="fundsBtn" disabled onclick="goContrib()">המשך ←</button>
+      </div>
+      <span class="advice-link" onclick="goAdvice()">לא בטוח/ה? מבקש/ת ייעוץ מגורם מקצועי</span>
+      <span class="back-to-prev" onclick="goScreen('screen1')">← חזרה להתחלה</span>
+    </div>
+
+    <!-- SCREEN 3C: ייעוץ / סימון לבדיקה -->
+    <div class="flow-screen" id="screenAdvice">
+      <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+      <div class="advice-icon">⏳</div>
+      <div class="fs-title" style="text-align:center;">הבקשה סומנה לבדיקה</div>
+      <div class="fs-sub" style="text-align:center;">סימנו את הבקשה שלך לייעוץ. יועץ/ת פנסיוני/ת מטעם הארגון ייצור/תיצור איתך קשר להשלמת התהליך, ללא צורך בהחלטה עכשיו.</div>
+      <div id="adviceBackstageHost"></div>
+      <span class="back-to-prev" onclick="goScreen('screenFunds')">← חזרה לבחירה</span>
+    </div>
+
+    <!-- SCREEN 3B: ברירת מחדל ארגונית -->
+    <div class="flow-screen" id="screenDefault">
+      <div class="progress-bar"><div class="progress-fill" style="width:50%"></div></div>
+      <div class="fs-title">🏢 פנסיית ברירת המחדל הארגונית</div>
+      <div class="fs-sub">לא נמצאה פנסיה פעילה, ולכן נפתחת לך פנסיה בקרן ברירת המחדל של הארגון.</div>
+      <div class="default-pension">
+        <div class="dp-title" id="def-name"></div>
+        <div class="dp-row"><span class="dp-label">הפקדת עובד</span><span class="dp-value" id="def-emp"></span></div>
+        <div class="dp-row"><span class="dp-label">הפקדת מעסיק</span><span class="dp-value" id="def-empr"></span></div>
+        <div class="dp-row"><span class="dp-label">פיצויים</span><span class="dp-value" id="def-sev"></span></div>
+      </div>
+      <div class="phone-footer" style="border:none;padding:6px 0 0;">
+        <button class="action-btn" onclick="goContrib()">המשך ←</button>
+      </div>
+      <span class="back-to-prev" onclick="goScreen('screen1')">← חזרה להתחלה</span>
+    </div>
+
+    <!-- SCREEN 4: הפרשה -->
+    <div class="flow-screen" id="screenContrib">
+      <div class="progress-bar"><div class="progress-fill" style="width:66%"></div></div>
+      <div class="fs-title">📅 מועד תחילת ההפרשות</div>
+      <div id="contribArea"></div>
+      <div class="phone-footer" style="border:none;padding:6px 0 0;">
+        <button class="action-btn" onclick="goSign()">המשך לחתימה ←</button>
+      </div>
+    </div>
+
+    <!-- SCREEN 5: חתימה -->
+    <div class="flow-screen" id="screenSign">
+      <div class="progress-bar"><div class="progress-fill" style="width:83%"></div></div>
+      <div class="fs-title">✍️ חתימה ואישור</div>
+      <div class="info-card" id="signSummary"></div>
+      <div id="signArea"></div>
+      <div class="phone-footer" style="border:none;padding:0;">
+        <button class="action-btn" id="signBtn" disabled onclick="finishCase()">פתיחת תיק וסיום ←</button>
+      </div>
+    </div>
+
+    <!-- SCREEN 6: טופס הפנסיה הממולא -->
+    <div class="flow-screen" id="screenDone">
+      <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+      <div class="done-banner"><span>✓</span> התיק נפתח — זהו טופס ההצטרפות שלך</div>
+      <div id="pdocArea"></div>
+      <span class="back-to-prev" onclick="resetFlow()">↺ הרצה מחדש של הזרימה</span>
+    </div>
+  </div>
+
+  <!-- פעולות רקע — מחוץ למסך העובד -->
+  <div class="backstage" id="backstage">
+    <div class="backstage-head"><span class="bs-dot"></span> מה קורה ברקע · לא מוצג לעובד</div>
+    <div class="notify-list" id="notifyList"></div>
+  </div>
+</div>
+
+<!-- Modals -->
+<div class="modal-overlay" id="saveAsModal" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal-box"><h3>📋 שמור בשם</h3>
+    <input class="modal-inp" id="saveAsName" onkeydown="if(event.key==='Enter')confirmSaveAs()">
+    <div class="modal-btns"><button class="m-cancel" onclick="document.getElementById('saveAsModal').style.display='none'">ביטול</button><button class="m-ok" onclick="confirmSaveAs()">שמור ✓</button></div>
+  </div>
+</div>
+<div class="modal-overlay" id="loadModal" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal-box" style="width:400px;"><h3>📂 טפסים שמורים</h3>
+    <div class="saved-list" id="savedList"></div>
+    <button class="m-cancel" style="width:100%;" onclick="document.getElementById('loadModal').style.display='none'">סגור</button>
+  </div>
+</div>
+<div class="toast" id="toastEl"></div>
+
+<script>
+/* ── גיבוי מוטמע backstage ── */
+if (typeof window.SynelBackstage === 'undefined') {
+(function(){
+/* SYNEL BACKSTAGE — "מה קורה ברקע"
+   אזור משותף שמציג את פעולות המערכת שרצות מאחורי הקלעים (לא מוצג לעובד).
+   Add to template: <script src="synel-backstage.js"><\/script>
+
+   שימוש:
+     // בסיום הטופס, אחרי שהעובד אישר:
+     SynelBackstage.play('backstageHost', [
+       'בוצעה פנייה למסלקה הפנסיונית',
+       'נפתח תיק פנסיה',
+       'נשלח עדכון למחלקת הכספים',
+     ]);
+
+   target = id של אלמנט מארח (או האלמנט עצמו). אם לא קיים — מוזרק לסוף ה-body.
+   הפעולות מופיעות אחת-אחת עם אינדיקציה, ומסומנות בבירור כ"לא מוצג לעובד".
+*/
+
+var SynelBackstage = {
+
+  _styled: false,
+
+  _injectStyle: function(){
+    if(this._styled || document.getElementById('sbsStyle')) { this._styled=true; return; }
+    var s = document.createElement('style');
+    s.id = 'sbsStyle';
+    s.textContent =
+      '.sbs{width:375px;max-width:100%;margin:0 auto;background:#1e1b2e;border-radius:16px;padding:14px 16px;direction:rtl;font-family:inherit;}'+
+      '.sbs-head{font-size:12px;font-weight:600;color:#C7C3E0;margin-bottom:10px;display:flex;align-items:center;gap:7px;}'+
+      '.sbs-dot{width:7px;height:7px;border-radius:50%;background:#A78BFA;}'+
+      '.sbs-loading{font-size:11px;color:#9C98B8;text-align:center;margin-bottom:4px;}'+
+      '.sbs-list{display:flex;flex-direction:column;gap:7px;}'+
+      '.sbs-item{display:flex;align-items:center;gap:9px;font-size:12px;color:#E5E3F0;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:9px 12px;}'+
+      '.sbs-check{width:18px;height:18px;border-radius:50%;background:#1D9E75;color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}';
+    document.head.appendChild(s);
+    this._styled = true;
+  },
+
+  _resolve: function(target){
+    if(!target) return null;
+    if(typeof target === 'string'){
+      var el = document.getElementById(target);
+      if(!el){ el = document.createElement('div'); el.id = target; document.body.appendChild(el); }
+      return el;
+    }
+    return target;
+  },
+
+  /* מציג את אזור הרקע עם רשימת הפעולות, אחת-אחת */
+  play: function(target, items, opts){
+    this._injectStyle();
+    opts = opts || {};
+    var host = this._resolve(target);
+    if(!host) return;
+    var headText = opts.head || 'מה קורה ברקע · לא מוצג לעובד';
+    host.innerHTML =
+      '<div class="sbs">'+
+        '<div class="sbs-head"><span class="sbs-dot"></span> '+headText+'</div>'+
+        '<div class="sbs-loading" id="sbsLoading">'+(opts.loading||'יציאה לממשק…')+'</div>'+
+        '<div class="sbs-list" id="sbsList"></div>'+
+      '</div>';
+    host.style.display = '';
+    var list = host.querySelector('#sbsList');
+    var loading = host.querySelector('#sbsLoading');
+    var step = opts.stepMs || 350;
+    (items||[]).forEach(function(text, i){
+      setTimeout(function(){
+        if(loading) loading.style.display = 'none';
+        var row = document.createElement('div');
+        row.className = 'sbs-item';
+        row.innerHTML = '<div class="sbs-check">✓</div><div>'+text+'</div>';
+        list.appendChild(row);
+      }, step*(i+1));
+    });
+  },
+
+  /* הסתרת האזור */
+  hide: function(target){
+    var host = this._resolve(target);
+    if(host){ host.innerHTML=''; host.style.display='none'; }
+  },
+};
+
+if (typeof window !== 'undefined') { window.SynelBackstage = SynelBackstage; }
+
+})();
+}
+
+/* ── גיבוי מוטמע: אם synel-signature.js החיצוני לא נטען, מגדירים אותו כאן.
+   בפרודקשן עם הקובץ — ה-guard מדלג ומשתמשים במודול המשותף. ── */
+if (typeof window.SynelSignature === 'undefined') {
+(function(){
+/* SYNEL DIGITAL SIGNATURE
+   משטח חתימה דיגיטלית כבילה — משותף לכל הטפסים שדורשים חתימה.
+   Add to template: <script src="synel-signature.js"><\/script>
+
+   שימוש:
+     SynelSignature.open({ signer: 'שם החתום', title: 'חתימה על טופס פנסיה' }, function(result){
+       if(!result) return;            // המשתמש ביטל
+       result.image     // dataURL (PNG) של החתימה
+       result.points    // רצף נקודות דינמי [{x,y,t,p}] — בסיס לחתימה כבילה
+       result.strokes   // מספר משיכות
+       result.durationMs// משך החתימה
+       result.coverage  // אחוז ניצול שטח המשטח
+     });
+
+   הלכידה הדינמית (נקודות, זמנים, לחץ) היא מה שמבסס חתימה "כבילה".
+   התוקף המשפטי המלא תלוי גם ברמת החתימה (רגילה / מאובטחת / מאושרת עם תעודה)
+   ובספק החתימה — ראו נקודת האינטגרציה ב-onComplete.
+*/
+
+var SynelSignature = {
+
+  _built: false,
+  _cb: null,
+  _ctx: null,
+  _drawing: false,
+  _points: [],
+  _strokes: 0,
+  _t0: 0,
+  _minPoints: 25,   /* סף מינימלי ללכידה משמעותית */
+
+  /* בניית ה-DOM של המודאל פעם אחת והזרקה ל-body */
+  _build: function(){
+    if(this._built) return;
+    var self = this;
+    var wrap = document.createElement('div');
+    wrap.id = 'synelSigModal';
+    wrap.setAttribute('dir','rtl');
+    wrap.innerHTML =
+      '<div class="ssig-overlay" id="ssigOverlay">'+
+        '<div class="ssig-panel">'+
+          '<div class="ssig-head">'+
+            '<div><div class="ssig-title" id="ssigTitle">חתימה דיגיטלית</div>'+
+              '<div class="ssig-sub" id="ssigSub"></div></div>'+
+            '<button class="ssig-x" id="ssigClose" aria-label="סגירה">✕</button>'+
+          '</div>'+
+          '<div class="ssig-rotate" id="ssigRotate">לחוויה טובה יותר, סובב/י את המכשיר לרוחב</div>'+
+          '<div class="ssig-canvas-wrap">'+
+            '<canvas class="ssig-canvas" id="ssigCanvas"></canvas>'+
+            '<div class="ssig-baseline"></div>'+
+            '<div class="ssig-hint" id="ssigHint">חתמ/י כאן — מלא/י את רוחב המשטח</div>'+
+          '</div>'+
+          '<div class="ssig-meter"><div class="ssig-meter-fill" id="ssigMeter"></div></div>'+
+          '<div class="ssig-foot">'+
+            '<button class="ssig-clear" id="ssigClear">נקה</button>'+
+            '<button class="ssig-ok" id="ssigOk" disabled>אישור החתימה</button>'+
+          '</div>'+
+        '</div>'+
+      '</div>';
+    document.body.appendChild(wrap);
+    this._injectStyle();
+
+    this._canvas = document.getElementById('ssigCanvas');
+    this._ctx = this._canvas.getContext('2d');
+
+    document.getElementById('ssigClose').onclick = function(){ self._finish(null); };
+    document.getElementById('ssigClear').onclick = function(){ self.clear(); };
+    document.getElementById('ssigOk').onclick    = function(){ self._confirm(); };
+
+    var c = this._canvas;
+    c.addEventListener('pointerdown', function(e){ self._down(e); });
+    c.addEventListener('pointermove', function(e){ self._move(e); });
+    window.addEventListener('pointerup', function(e){ self._up(e); });
+    c.style.touchAction = 'none';
+
+    window.addEventListener('resize', function(){ if(self._open) self._resize(); });
+    this._built = true;
+  },
+
+  _injectStyle: function(){
+    if(document.getElementById('ssigStyle')) return;
+    var s = document.createElement('style');
+    s.id = 'ssigStyle';
+    s.textContent =
+      '.ssig-overlay{position:fixed;inset:0;background:rgba(17,17,17,.55);z-index:9000;display:none;align-items:center;justify-content:center;padding:16px;}'+
+      '.ssig-overlay.show{display:flex;}'+
+      '.ssig-panel{background:#fff;border-radius:16px;width:100%;max-width:720px;box-shadow:0 24px 60px rgba(0,0,0,.25);display:flex;flex-direction:column;overflow:hidden;}'+
+      '.ssig-head{display:flex;justify-content:space-between;align-items:flex-start;padding:16px 18px;border-bottom:1px solid #E5E7EB;}'+
+      '.ssig-title{font-size:16px;font-weight:700;color:#1a1a1a;}'+
+      '.ssig-sub{font-size:12px;color:#6B7280;margin-top:2px;}'+
+      '.ssig-x{border:none;background:none;font-size:18px;color:#9CA3AF;cursor:pointer;line-height:1;}'+
+      '.ssig-rotate{display:none;font-size:12px;color:#C2410C;background:#FFF7ED;padding:7px 14px;}'+
+      '.ssig-canvas-wrap{position:relative;padding:14px 18px;}'+
+      '.ssig-canvas{width:100%;height:260px;border:1.5px solid #E5E7EB;border-radius:12px;background:#FAFAFA;display:block;cursor:crosshair;touch-action:none;}'+
+      '.ssig-baseline{position:absolute;left:42px;right:42px;bottom:58px;border-bottom:1.5px dashed #D1D5DB;pointer-events:none;}'+
+      '.ssig-hint{position:absolute;inset:14px 18px;display:flex;align-items:center;justify-content:center;color:#9CA3AF;font-size:13px;pointer-events:none;}'+
+      '.ssig-meter{height:4px;background:#F3F4F6;margin:0 18px;border-radius:2px;overflow:hidden;}'+
+      '.ssig-meter-fill{height:100%;width:0;background:#2D7A4F;border-radius:2px;transition:width .15s;}'+
+      '.ssig-foot{display:flex;gap:10px;padding:14px 18px 18px;}'+
+      '.ssig-clear{flex:0 0 auto;padding:11px 18px;border:1px solid #E5E7EB;border-radius:50px;background:#fff;color:#6B7280;cursor:pointer;font-family:inherit;font-size:14px;}'+
+      '.ssig-ok{flex:1;padding:13px;border:none;border-radius:50px;background:#4F46E5;color:#fff;cursor:pointer;font-family:inherit;font-size:15px;font-weight:600;}'+
+      '.ssig-ok:disabled{opacity:.4;cursor:not-allowed;}'+
+      '@media (max-width:600px){'+
+        '.ssig-canvas{height:200px;}'+
+        '.ssig-rotate{display:block;}'+
+        '.ssig-panel{max-width:100%;height:100%;border-radius:0;justify-content:center;}'+
+        '.ssig-overlay{padding:0;}'+
+      '}';
+    document.head.appendChild(s);
+  },
+
+  /* פתיחת המודאל. onComplete(result|null) */
+  open: function(opts, onComplete){
+    this._build();
+    opts = opts || {};
+    this._cb = onComplete || function(){};
+    document.getElementById('ssigTitle').textContent = opts.title || 'חתימה דיגיטלית';
+    document.getElementById('ssigSub').textContent   = opts.signer ? ('החתום: '+opts.signer) : '';
+    document.getElementById('ssigOverlay').classList.add('show');
+    this._open = true;
+    this.clear();
+    var self = this;
+    setTimeout(function(){ self._resize(); }, 30);
+  },
+
+  /* התאמת רזולוציית הקנבס לגודל בפועל (חדות) */
+  _resize: function(){
+    var c = this._canvas;
+    var rect = c.getBoundingClientRect();
+    var dpr = window.devicePixelRatio || 1;
+    /* שמירת ציור קיים */
+    var prev = this._points.length ? c.toDataURL() : null;
+    c.width  = Math.max(1, Math.round(rect.width  * dpr));
+    c.height = Math.max(1, Math.round(rect.height * dpr));
+    this._ctx.setTransform(dpr,0,0,dpr,0,0);
+    this._ctx.lineWidth = 2.4;
+    this._ctx.lineCap = 'round';
+    this._ctx.lineJoin = 'round';
+    this._ctx.strokeStyle = '#1a1a1a';
+    if(prev){ var img=new Image(); var ctx=this._ctx, w=rect.width, h=rect.height;
+      img.onload=function(){ ctx.drawImage(img,0,0,w,h); }; img.src=prev; }
+  },
+
+  _pos: function(e){
+    var r = this._canvas.getBoundingClientRect();
+    return { x: e.clientX - r.left, y: e.clientY - r.top, p: (e.pressure!=null? e.pressure : 0.5) };
+  },
+
+  _down: function(e){
+    e.preventDefault();
+    this._drawing = true;
+    this._strokes++;
+    if(this._t0===0) this._t0 = Date.now();
+    var p = this._pos(e);
+    this._ctx.beginPath();
+    this._ctx.moveTo(p.x, p.y);
+    this._points.push({x:p.x, y:p.y, t:Date.now()-this._t0, p:p.p, s:this._strokes});
+    this._hideHint();
+  },
+  _move: function(e){
+    if(!this._drawing) return;
+    e.preventDefault();
+    var p = this._pos(e);
+    /* עובי קו מושפע מלחץ (אם נתמך) — חיזוק לדינמיקה */
+    this._ctx.lineWidth = 1.6 + (p.p||0.5)*2.2;
+    this._ctx.lineTo(p.x, p.y);
+    this._ctx.stroke();
+    this._points.push({x:p.x, y:p.y, t:Date.now()-this._t0, p:p.p, s:this._strokes});
+    this._updateMeter();
+  },
+  _up: function(){ this._drawing = false; },
+
+  _hideHint: function(){ var h=document.getElementById('ssigHint'); if(h)h.style.display='none'; },
+
+  /* מד "מילוי" — כמה החתימה מנצלת את המשטח. סף ל-OK. */
+  _coverage: function(){
+    if(this._points.length<2) return 0;
+    var minX=1e9,maxX=-1e9,minY=1e9,maxY=-1e9;
+    this._points.forEach(function(p){
+      if(p.x<minX)minX=p.x; if(p.x>maxX)maxX=p.x;
+      if(p.y<minY)minY=p.y; if(p.y>maxY)maxY=p.y;
+    });
+    var r = this._canvas.getBoundingClientRect();
+    var cov = ((maxX-minX)/Math.max(1,r.width)) * ((maxY-minY)/Math.max(1,r.height));
+    return Math.min(1, cov*2.2);
+  },
+  _ready: function(){
+    return this._points.length >= this._minPoints && this._coverage() >= 0.18;
+  },
+  _updateMeter: function(){
+    var pct = Math.min(1, this._points.length/this._minPoints);
+    var cov = this._coverage();
+    var score = Math.min(1, (pct*0.5 + cov*0.5));
+    document.getElementById('ssigMeter').style.width = Math.round(score*100)+'%';
+    document.getElementById('ssigOk').disabled = !this._ready();
+  },
+
+  clear: function(){
+    if(!this._ctx) return;
+    var r = this._canvas.getBoundingClientRect();
+    this._ctx.clearRect(0,0,this._canvas.width,this._canvas.height);
+    this._points = []; this._strokes = 0; this._t0 = 0; this._drawing = false;
+    var h=document.getElementById('ssigHint'); if(h)h.style.display='';
+    document.getElementById('ssigMeter').style.width='0';
+    document.getElementById('ssigOk').disabled = true;
+  },
+
+  _confirm: function(){
+    if(!this._ready()) return;
+    var result = {
+      image: this._canvas.toDataURL('image/png'),
+      points: this._points.slice(),
+      strokes: this._strokes,
+      durationMs: this._points.length ? this._points[this._points.length-1].t : 0,
+      coverage: Math.round(this._coverage()*100)/100,
+      capturedAt: new Date().toISOString(),
+    };
+    this._finish(result);
+  },
+
+  _finish: function(result){
+    document.getElementById('ssigOverlay').classList.remove('show');
+    this._open = false;
+    var cb = this._cb; this._cb = null;
+    if(cb) cb(result);
+  },
+};
+
+if (typeof window !== 'undefined') { window.SynelSignature = SynelSignature; }
+
+})();
+}
+
+function $(id){return document.getElementById(id);}
+function setTxt(id,v){var e=$(id);if(e)e.textContent=v;}
+
+/* ── נתוני 7 חברות הפנסיה ──
+   הלוגו הוא מונוגרמה צבעונית כ-placeholder. להחלפה בלוגו אמיתי: שדה logoUrl.
+   דמי הניהול הם ערכי הדגמה וניתנים לעריכה בפאנל — לעדכן מול הנתונים בפועל. */
+var PENSION_FUNDS = [
+  {name:'מנורה מבטחים', mono:'מ', color:'#00853E', feeDeposit:'1.49%', feeSavings:'0.16%'},
+  {name:'מגדל מקפת',    mono:'מג',color:'#003B7A', feeDeposit:'1.31%', feeSavings:'0.18%'},
+  {name:'הראל',         mono:'ה', color:'#E2001A', feeDeposit:'1.45%', feeSavings:'0.17%'},
+  {name:'כלל',          mono:'כ', color:'#7A2E8E', feeDeposit:'1.40%', feeSavings:'0.15%'},
+  {name:'הפניקס',       mono:'הפ',color:'#F39200', feeDeposit:'1.28%', feeSavings:'0.14%'},
+  {name:'אלטשולר שחם',  mono:'א', color:'#1A4F8B', feeDeposit:'1.35%', feeSavings:'0.13%'},
+  {name:'מיטב',         mono:'מי',color:'#009FA8', feeDeposit:'1.42%', feeSavings:'0.16%'},
+];
+
+/* ── מצב הזרימה ── */
+var flowState = {
+  declared:null,        /* yes / no / maybe — מה שהעובד הצהיר */
+  mislaka:null,         /* {found:bool, fundName, policyNo} — תוצאת המסלקה */
+  selectedFund:null,    /* אינדקס הקרן שנבחרה, או 'existing' */
+  signed:false,
+};
+
+/* ── FLOW ── */
+function goScreen(id){
+  document.querySelectorAll('.flow-screen').forEach(function(s){s.classList.remove('active');});
+  var el=$(id);if(el)el.classList.add('active');
+  var bs=$('backstage');if(bs)bs.classList.remove('show');
+}
+
+/* שלב 1 — הצהרה. ממשיכים להסכמה ואימות לפני המסלקה. */
+function declare(ans){
+  flowState.declared=ans;
+  flowState.consent=false;
+  flowState.otpVerified=false;
+  initConsentScreen();
+  goScreen('screenConsent');
+}
+
+/* ── הסכמה ואימות (שלב נדרש לפני המסלקה) ── */
+function initConsentScreen(){
+  var row=$('consentRow'); if(row)row.classList.remove('checked');
+  var ok=$('otpOk'); if(ok)ok.style.display='none';
+  var ph=$('otpPhone'); if(ph)ph.textContent='{{טלפון מהמערכת}}';
+  document.querySelectorAll('#otpInputs .otp-digit').forEach(function(inp){
+    inp.value='';
+    inp.oninput=function(){
+      if(this.value && this.nextElementSibling) this.nextElementSibling.focus();
+      checkConsentReady();
+    };
+    inp.onkeydown=function(e){
+      if(e.key==='Backspace' && !this.value && this.previousElementSibling) this.previousElementSibling.focus();
+    };
+  });
+  checkConsentReady();
+}
+function toggleConsent(){
+  flowState.consent=!flowState.consent;
+  $('consentRow').classList.toggle('checked', flowState.consent);
+  checkConsentReady();
+}
+function sendOtp(){
+  /* נקודת אינטגרציה: שליחת קוד אמיתי ל-SMS. כרגע סימולציה. */
+  toast('📱 קוד אימות נשלח לטלפון העובד');
+}
+function otpFilled(){
+  var digits=document.querySelectorAll('#otpInputs .otp-digit');
+  var all=true; digits.forEach(function(d){if(!/^\d$/.test(d.value))all=false;});
+  return all;
+}
+function checkConsentReady(){
+  /* אימות מתבצע כשכל 4 הספרות הוזנו (סימולציה — בפועל מול שרת ה-OTP). */
+  flowState.otpVerified = otpFilled();
+  $('otpOk').style.display = flowState.otpVerified ? 'inline' : 'none';
+  $('consentBtn').disabled = !(flowState.consent && flowState.otpVerified);
+}
+function goMislaka(){
+  goScreen('screenMislaka');
+  runMislaka();
+}
+
+/* שלב 2 — פנייה למסלקה (לאחר הסכמה ואימות).
+   נקודת אינטגרציה: כאן המפתח יחבר קריאת API אמיתית למסלקה הפנסיונית,
+   עם ת״ז מטופס 101 וטלפון מבסיס הנתונים. כרגע סימולציה ויזואלית. */
+function runMislaka(){
+  var area=$('mislakaArea');var btn=$('mislakaBtn');
+  if(btn)btn.style.display='none';
+  area.innerHTML =
+    '<div class="mislaka-box">'+
+      '<div class="mislaka-spin"></div>'+
+      '<div class="mislaka-status">פונים למסלקה הפנסיונית בשם העובד…<br>'+
+      '<span style="font-size:11px;color:var(--text3);">ת״ז מטופס 101 · טלפון מבסיס הנתונים</span></div>'+
+    '</div>';
+  setTimeout(function(){
+    /* תוצאת הסימולציה. תרחיש 'auto' = לפי ההצהרה; אחרת לפי הבורר בפאנל.
+       בפועל המסלקה מכריעה ללא תלות בהצהרה. */
+    var scenario = ($('mislakaScenario') && $('mislakaScenario').value) || 'auto';
+    var found;
+    if(scenario==='found') found=true;
+    else if(scenario==='notfound') found=false;
+    else found = (flowState.declared!=='no');
+    flowState.mislaka = found
+      ? {found:true, fundName:'הראל פנסיה', policyNo:'•••• 4821'}
+      : {found:false};
+    renderMislakaResult();
+  }, 1600);
+}
+function renderMislakaResult(){
+  var area=$('mislakaArea');var btn=$('mislakaBtn');var m=flowState.mislaka;
+  if(m.found){
+    area.innerHTML =
+      '<div class="mislaka-box mislaka-found">'+
+        '<div class="mf-head">✓ נמצאה פנסיה פעילה</div>'+
+        '<div class="mf-row"><span class="l">קרן</span><span>'+m.fundName+'</span></div>'+
+        '<div class="mf-row"><span class="l">מספר פוליסה</span><span>'+m.policyNo+'</span></div>'+
+        '<div class="mf-src">המידע התקבל מהמסלקה הפנסיונית. אפשר להמשיך עם הקרן הקיימת או לעבור לאחרת.</div>'+
+      '</div>';
+  } else {
+    area.innerHTML =
+      '<div class="mislaka-box mislaka-none">'+
+        '<div class="mf-head">לא נמצאה פנסיה פעילה</div>'+
+        '<div class="mf-row"><span>תשויך/י לקרן ברירת המחדל של הארגון.</span></div>'+
+        '<div class="mf-src">המידע התקבל מהמסלקה הפנסיונית.</div>'+
+      '</div>';
+  }
+  if(btn)btn.style.display='block';
+}
+
+/* ניתוב אחרי המסלקה: יש פנסיה → בחירת קרן; אין → ברירת מחדל ארגונית */
+function goAfterMislaka(){
+  if(flowState.mislaka && flowState.mislaka.found){ goFunds(); }
+  else { goDefault(); }
+}
+
+/* מסלול ייעוץ — העובד אינו בטוח ומבקש ייעוץ מגורם מקצועי */
+function goAdvice(){
+  flowState.selectedFund='advice';
+  goScreen('screenAdvice');
+  if(typeof SynelBackstage!=='undefined'){
+    SynelBackstage.play('adviceBackstageHost', [
+      'הבקשה סומנה לבדיקה / ייעוץ',
+      'נשלחה פנייה ליועץ/ת הפנסיוני/ת של הארגון',
+      'עודכן סטטוס "ממתין לייעוץ" בתיק העובד',
+    ]);
+  }
+}
+
+/* שלב 3 (מסלול "אין פנסיה") — ברירת מחדל ארגונית */
+function goDefault(){
+  flowState.selectedFund='default';
+  setTxt('def-name', $('dpName').value);
+  setTxt('def-emp',  $('dpEmployee').value);
+  setTxt('def-empr', $('dpEmployer').value);
+  setTxt('def-sev',  $('dpSeverance').value);
+  goScreen('screenDefault');
+}
+
+/* שלב 3 (מסלול "יש פנסיה") — בחירת קרן */
+function goFunds(){ renderFunds(); goScreen('screenFunds'); }
+function renderFunds(){
+  var list=$('fundsList');list.innerHTML='';flowState.selectedFund=null;
+  $('fundsBtn').disabled=true;
+  var m=flowState.mislaka;
+  if(m&&m.found){
+    var ex=document.createElement('div');
+    ex.className='fund-card fund-existing';
+    ex.innerHTML=
+      '<div class="fund-mono">✓</div>'+
+      '<div class="fund-info"><div class="fund-name">'+m.fundName+
+        '<span class="fund-tag">קיימת</span></div>'+
+        '<div class="fund-fees">המשך עם הקרן הקיימת שלך</div></div>'+
+      '<div class="fund-pick">✓</div>';
+    ex.onclick=function(){selectFund('existing',ex);};
+    list.appendChild(ex);
+  }
+  PENSION_FUNDS.forEach(function(f,i){
+    var c=document.createElement('div');
+    c.className='fund-card';
+    c.innerHTML=
+      '<div class="fund-mono" style="background:'+f.color+'">'+f.mono+'</div>'+
+      '<div class="fund-info"><div class="fund-name">'+f.name+'</div>'+
+        '<div class="fund-fees">דמי ניהול: '+f.feeDeposit+' מהפקדה · '+f.feeSavings+' מצבירה</div></div>'+
+      '<div class="fund-pick">✓</div>';
+    c.onclick=function(){selectFund(i,c);};
+    list.appendChild(c);
+  });
+}
+function selectFund(idx,el){
+  flowState.selectedFund=idx;
+  document.querySelectorAll('#fundsList .fund-card').forEach(function(c){c.classList.remove('selected');});
+  el.classList.add('selected');
+  $('fundsBtn').disabled=false;
+}
+
+/* שלב 4 — מועד ההפרשות. נקבע ממה שהמסלקה מצאה, לא מההצהרה. */
+function goContrib(){ renderContrib(); goScreen('screenContrib'); }
+function renderContrib(){
+  var area=$('contribArea');var hasActive=flowState.mislaka&&flowState.mislaka.found;
+  if(hasActive){
+    area.innerHTML=
+      '<div class="contrib-card contrib-retro">'+
+        '<div class="contrib-title">✓ הפרשה רטרואקטיבית</div>'+
+        '<div class="contrib-body">לעובד קיימת פנסיה פעילה, ולכן ההפרשות מתחילות '+
+        '<b>מהיום הראשון לעבודה</b> (ללא תקופת המתנה), בהתאם לצו ההרחבה לפנסיה חובה.</div>'+
+        '<div class="contrib-notify">💼 מחלקת הכספים מתעדכנת לביצוע הפרשה רטרו מתחילת העבודה</div>'+
+      '</div>';
+  } else {
+    area.innerHTML=
+      '<div class="contrib-card contrib-wait">'+
+        '<div class="contrib-title">⏳ תקופת המתנה</div>'+
+        '<div class="contrib-body">לא נמצאה פנסיה פעילה, ולכן ההפרשות מתחילות '+
+        '<b>בתום 6 חודשי עבודה</b> (תקופת המתנה לפי צו ההרחבה).</div>'+
+        '<div class="contrib-notify">💼 מחלקת הכספים מתעדכנת להתחלת הפרשות בעוד 6 חודשים</div>'+
+      '</div>';
+  }
+}
+
+/* שם הקרן הנבחרת בהתאם למסלול */
+function getFundName(){
+  var f=flowState.selectedFund;
+  if(f==='existing') return flowState.mislaka.fundName;
+  if(f==='default')  return ($('dpName')&&$('dpName').value) || 'קרן ברירת המחדל';
+  if(typeof f==='number') return PENSION_FUNDS[f].name;
+  return 'הקרן הנבחרת';
+}
+
+/* שלב 5 — חתימה / אישור */
+function goSign(){
+  updateConfirmType();
+  var fundName = getFundName();
+  if(flowState.selectedFund==='existing') fundName+=' (קיימת)';
+  if(flowState.selectedFund==='default')  fundName+=' (ברירת מחדל ארגונית)';
+  var when = (flowState.mislaka&&flowState.mislaka.found) ? 'מהיום הראשון (רטרו)' : 'בעוד 6 חודשים';
+  $('signSummary').innerHTML='קרן נבחרת: <b>'+fundName+'</b><br>תחילת הפרשות: <b>'+when+'</b>';
+  flowState.signed=false;
+  buildSignArea();
+  $('signBtn').disabled=true;
+  goScreen('screenSign');
+}
+
+/* בונה את אזור החתימה בהתאם לסוג האישור */
+function buildSignArea(){
+  var area=$('signArea');
+  flowState.signatureImg=null; flowState.signatureData=null;
+  if(flowState.confirmType==='checkbox'){
+    area.innerHTML='<div class="sig-pad" id="sigPad">'+
+      (flowState.confirmText||'קראתי והבנתי')+' — לחצ/י לאישור</div>';
+    $('sigPad').onclick=function(){
+      flowState.signed=true;
+      this.className='sig-pad signed';this.textContent='✓ אושר';
+      $('signBtn').disabled=false;
+    };
+  } else {
+    area.innerHTML=
+      '<div class="sig-preview" id="sigPreview" onclick="openSignature()">'+
+        '<span id="sigPreviewHint">לחצ/י לפתיחת משטח החתימה הדיגיטלית</span>'+
+      '</div>'+
+      '<div class="sig-actions"><span style="color:var(--text3);">חתימה דיגיטלית כבילה</span>'+
+        '<button class="sig-clear" id="sigReSign" style="display:none;" onclick="openSignature()">חתימה מחדש</button></div>';
+  }
+}
+
+/* פתיחת משטח החתימה המשותף (מודאל גדול, לכידה דינמית) */
+function openSignature(){
+  if(typeof SynelSignature==='undefined'){
+    toast('⚠ מודול החתימה (synel-signature.js) לא נטען');
+    return;
+  }
+  var fundName=getFundName();
+  SynelSignature.open({title:'חתימה על טופס הפנסיה', signer:fundName!=='הקרן הנבחרת'?('הצטרפות ל'+fundName):''}, function(result){
+    if(!result) return; /* בוטל */
+    flowState.signed=true;
+    flowState.signatureImg=result.image;
+    flowState.signatureData={points:result.points.length,strokes:result.strokes,durationMs:result.durationMs,coverage:result.coverage,capturedAt:result.capturedAt};
+    var prev=$('sigPreview');
+    if(prev){prev.classList.add('has-sig');prev.innerHTML='<img src="'+result.image+'" alt="חתימה" class="sig-preview-img">';}
+    var re=$('sigReSign');if(re)re.style.display='inline';
+    $('signBtn').disabled=false;
+  });
+}
+
+/* פרטי הקרן הנבחרת (שם, מונוגרמה, צבע, מספר פוליסה) */
+function getFundMeta(){
+  var f=flowState.selectedFund;
+  if(f==='existing') return {name:flowState.mislaka.fundName, mono:'✓', color:'#0F6E56', policy:flowState.mislaka.policyNo, tag:'קרן קיימת'};
+  if(f==='default')  return {name:($('dpName')&&$('dpName').value)||'קרן ברירת מחדל', mono:'🏢', color:'#534AB7', policy:'', tag:'ברירת מחדל ארגונית'};
+  if(typeof f==='number'){var x=PENSION_FUNDS[f];return {name:x.name, mono:x.mono, color:x.color, policy:'', tag:'קרן חדשה'};}
+  return {name:'—', mono:'?', color:'#888', policy:'', tag:''};
+}
+
+/* שלב 6 — פתיחת תיק, הצגת טופס ההצטרפות ויציאה לממשק */
+function finishCase(){
+  /* תמונת החתימה והנתונים הדינמיים כבר נשמרו ב-flowState ממודול החתימה */
+  buildPensionForm();
+
+  var fundName=getFundMeta().name;
+  var mislakaItem = (flowState.mislaka && flowState.mislaka.found)
+    ? 'בוצעה פנייה למסלקה הפנסיונית — נמצאה פנסיה פעילה'
+    : 'בוצעה פנייה למסלקה הפנסיונית — לא נמצאה פנסיה פעילה';
+  var items=[
+    mislakaItem,
+    'נפתח תיק פנסיה ל'+fundName,
+    'נשלח עדכון למחלקת הכספים',
+    'נשלחה הודעת אישור לעובד',
+    'עודכן הסטטוס בתיק האונבורדינג',
+  ];
+  var list=$('notifyList');
+  list.innerHTML='<div style="font-size:11px;color:#9C98B8;text-align:center;margin-bottom:4px;">יציאה לממשק…</div>';
+  items.forEach(function(t,i){
+    setTimeout(function(){
+      if(i===0)list.innerHTML='';
+      var row=document.createElement('div');row.className='notify-item';
+      row.innerHTML='<div class="notify-dot">✓</div><div>'+t+'</div>';
+      list.appendChild(row);
+    }, 350*(i+1));
+  });
+  goScreen('screenDone');
+  var bs=$('backstage');if(bs)bs.classList.add('show');
+}
+
+/* בניית מסמך טופס ההצטרפות הממולא */
+function buildPensionForm(){
+  var fm=getFundMeta();
+  var hasActive=flowState.mislaka&&flowState.mislaka.found;
+  var when = hasActive ? 'מהיום הראשון לעבודה (רטרואקטיבית)' : 'בתום 6 חודשי עבודה';
+  var ref = 'PEN-'+new Date().getFullYear()+'-'+Math.floor(100000+Math.random()*900000);
+  var today = new Date().toLocaleDateString('he-IL');
+  /* ערכי העובד — נשלפים מה-DB / מטופס 101 (ההגדרה נעשית בעורך התבנית).
+     כאן ערכי דמו עקביים עם 101. בפרודקשן getSynelDisplayValue מחזיר את הערך האמיתי. */
+  var empDemo={EMP_NAME:'שחר כהן', TZ:'037451829', EMP_DATE_START:'01/06/2026'};
+  function ph(t){
+    return (typeof getSynelDisplayValue==='function') ? getSynelDisplayValue(t,empDemo) : (empDemo[t]||'');
+  }
+
+  /* בלוק חתימה */
+  var signHtml;
+  if(flowState.confirmType==='checkbox'){
+    signHtml='<div class="pdoc-sign-box"><div style="font-size:12px;color:var(--green);">✓ '+
+      (flowState.confirmText||'קראתי והבנתי')+'</div><div class="pdoc-sign-label">אישור העובד · '+today+'</div></div>';
+  } else if(flowState.signatureImg){
+    signHtml='<div class="pdoc-sign-box"><img class="pdoc-sign-img" src="'+flowState.signatureImg+'" alt="חתימה"><div class="pdoc-sign-label">חתימת העובד · '+today+'</div></div>';
+  } else {
+    signHtml='<div class="pdoc-sign-box"><div style="font-size:12px;color:var(--green);">✓ נחתם דיגיטלית</div><div class="pdoc-sign-label">חתימת העובד · '+today+'</div></div>';
+  }
+
+  var policyRow = fm.policy ? '<div class="pdoc-row"><span class="k">מספר פוליסה</span><span class="v">'+fm.policy+'</span></div>' : '';
+
+  $('pdocArea').innerHTML =
+    '<div class="pdoc">'+
+      '<div class="pdoc-head" style="background:'+fm.color+';border-bottom:none;">'+
+        '<div style="display:flex;align-items:center;gap:10px;">'+
+          '<div class="pdoc-logo">'+fm.mono+'</div>'+
+          '<div>'+
+            '<div class="pdoc-title" style="color:white;">'+fm.name+'</div>'+
+            '<div class="pdoc-meta" style="color:rgba(255,255,255,.8);">טופס הצטרפות והרשאה · אסמכתא '+ref+'</div>'+
+          '</div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="pdoc-body">'+
+        '<div>'+
+          '<div class="pdoc-sec-label">פרטי העובד</div>'+
+          (typeof empFieldsCfg!=='undefined'
+            ? empFieldsCfg.map(function(f){return '<div class="pdoc-row"><span class="k">'+f.label+'</span><span class="v">'+ph(f.dbField)+'</span></div>';}).join('')
+            : '<div class="pdoc-row"><span class="k">שם מלא</span><span class="v">'+ph('EMP_NAME')+'</span></div>'+
+              '<div class="pdoc-row"><span class="k">תעודת זהות</span><span class="v">'+ph('TZ')+'</span></div>'+
+              '<div class="pdoc-row"><span class="k">תאריך תחילת עבודה</span><span class="v">'+ph('EMP_DATE_START')+'</span></div>')+
+        '</div>'+
+        '<div>'+
+          '<div class="pdoc-sec-label">הקרן הנבחרת</div>'+
+          '<div class="pdoc-fund">'+
+            '<div class="fm" style="background:'+fm.color+'">'+fm.mono+'</div>'+
+            '<div><div style="font-size:13px;font-weight:600;">'+fm.name+'</div>'+
+            '<div style="font-size:11px;color:var(--text2);">'+fm.tag+'</div></div>'+
+          '</div>'+
+          policyRow+
+        '</div>'+
+        '<div>'+
+          '<div class="pdoc-sec-label">שיעורי הפקדה</div>'+
+          '<div class="pdoc-row"><span class="k">הפקדת עובד</span><span class="v">'+($('dpEmployee').value)+'</span></div>'+
+          '<div class="pdoc-row"><span class="k">הפקדת מעסיק</span><span class="v">'+($('dpEmployer').value)+'</span></div>'+
+          '<div class="pdoc-row"><span class="k">פיצויים</span><span class="v">'+($('dpSeverance').value)+'</span></div>'+
+          '<div class="pdoc-row"><span class="k">תחילת הפרשות</span><span class="v">'+when+'</span></div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="pdoc-sign">'+
+        '<div style="font-size:10px;color:var(--text3);max-width:150px;line-height:1.4;">הטופס נשלח לקרן ולמחלקת הכספים.</div>'+
+        signHtml+
+      '</div>'+
+    '</div>';
+}
+
+function resetFlow(){
+  flowState={declared:null,mislaka:null,selectedFund:null,signed:false};
+  goScreen('screen1');
+}
+
+/* סוג אישור הסיום — חתימה דיגיטלית או צ'קבוקס "קראתי והבנתי" */
+function updateConfirmType(){
+  var sig=$('hasSigOpt'), chk=$('hasCheckOpt');
+  flowState.confirmType = (sig&&sig.checked) ? 'signature' : 'checkbox';
+  flowState.confirmText = ($('confirmOptText')&&$('confirmOptText').value) || 'קראתי והבנתי';
+}
+
+/* ── RENDER (מסך הצהרה) ── */
+function render(){
+  setTxt('pv-name', $('fName').value);
+  setTxt('pv-sub',  $('fSub').value);
+  var t=$('pv-time'); if(t) t.innerHTML='⏱ זמן משוער: ~'+$('fTime').value+' דק\'';
+  setTxt('pv-q1text', $('q1text').value);
+  setTxt('q1yes-btn', $('q1yes').value);
+  setTxt('q1no-btn',  $('q1no').value);
+  setTxt('q1maybe-btn', 'לא בטוח/ה — בדקו בשבילי');
+}
+
+function updateAssign(){
+  var c=document.getElementById('fStepCur').value;
+  var t=document.getElementById('fStepTotal').value;
+  document.getElementById('stepLbl').textContent='שלב '+c+' מתוך '+t;
+  var dots=document.getElementById('pbarDots');dots.innerHTML='';
+  var tot=parseInt(t)||1,cur=parseInt(c)||1;
+  for(var i=1;i<=Math.min(tot,6);i++){var dot=document.createElement('div');dot.className='pdot'+(i===cur?' active':'');dots.appendChild(dot);}
+}
+
+/* ── SAVE/LOAD ── */
+function getData(){
+  var fields=['fName','fSub','fTime','q1text','q1yes','q1no','q2text','q2yes','q2no','q3info','f1label','f2label','f3label','dpName','dpEmployee','dpEmployer','dpSeverance','dpConfirmText','fProcess','fStepCur','fStepTotal'];
+  var d={savedAt:new Date().toISOString()};
+  fields.forEach(function(id){d[id]=document.getElementById(id).value;});
+  return d;
+}
+function saveForm(){var d=getData();try{localStorage.setItem('pension_'+d.fName,JSON.stringify(d));}catch(e){}toast('✓ נשמר: "'+d.fName+'"');}
+function saveAs(){document.getElementById('saveAsName').value=document.getElementById('fName').value+' — עותק';document.getElementById('saveAsModal').style.display='flex';setTimeout(function(){document.getElementById('saveAsName').select();},50);}
+function confirmSaveAs(){var n=document.getElementById('saveAsName').value.trim();if(!n)return;document.getElementById('fName').value=n;render();saveForm();document.getElementById('saveAsModal').style.display='none';toast('✓ נשמר בשם: "'+n+'"');}
+function exportJSON(){
+  var d = getData();
+  var json = {
+    formType: 'pension',
+    meta: {
+      name: d.name||'שאלון פנסיה', subtitle: d.sub||'',
+      estimatedTime: parseInt(d.time)||2,
+      process: d.process||'', stepCurrent: parseInt(d.stepCur)||1,
+      stepTotal: parseInt(d.stepTotal)||6, owner: d.owner||'',
+      exportedAt: new Date().toISOString(),
+    },
+    completion: { actionButton: d.btn||'', hasSignature: d.hasSig||false },
+    flow: {
+      question1: { text:d.q1text||'', yesLabel:d.q1yes||'כן', noLabel:d.q1no||'לא' },
+      question2: { text:d.q2text||'', yesLabel:d.q2yes||'כן', noLabel:d.q2no||'לא' },
+      question3: { icon:d.q3icon||'', text:d.q3text||'' },
+      defaultBranch: { icon:d.defIcon||'', title:d.defTitle||'', text:d.defText||'' },
+      fields: (d.fields||[]).map(function(f){
+        return { label:f.label||'', type:f.type||'text', dbField:f.dbField||'', filler:f.filler||'E_', required:f.required!==false };
+      }),
+    },
+  };
+  var blob=new Blob([JSON.stringify(json,null,2)],{type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download=(json.meta.name||'pension').replace(/\s+/g,'_')+'.json';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+  toast('JSON יוצא: '+json.meta.name+'.json');
+}
+
+function exportForm(){saveForm();toast('🚀 פורסם!');}
+function openLoad(){
+  var sl=document.getElementById('savedList');sl.innerHTML='';
+  var keys=[];try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.startsWith('pension_'))keys.push(k);}}catch(e){}
+  if(!keys.length){sl.innerHTML='<div style="font-size:12px;color:#9CA3AF;text-align:center;padding:12px;">אין טפסים שמורים</div>';}
+  else keys.forEach(function(k){
+    try{var d=JSON.parse(localStorage.getItem(k));var row=document.createElement('div');row.className='saved-item';
+      var info=document.createElement('div');info.style.flex='1';
+      var nm=document.createElement('div');nm.style.cssText='font-size:13px;font-weight:500;';nm.textContent=d.fName||k;
+      info.appendChild(nm);
+      var lb=document.createElement('button');lb.className='si-load';lb.textContent='טען';
+      (function(dat){lb.onclick=function(){loadForm(dat);document.getElementById('loadModal').style.display='none';};})(d);
+      var db2=document.createElement('button');db2.className='si-del';db2.textContent='מחק';
+      (function(key){db2.onclick=function(){if(confirm('למחוק?')){localStorage.removeItem(key);openLoad();}};})(k);
+      row.appendChild(info);row.appendChild(lb);row.appendChild(db2);sl.appendChild(row);
+    }catch(ex){}
+  });
+  document.getElementById('loadModal').style.display='flex';
+}
+function loadForm(data){
+  Object.keys(data).forEach(function(id){var el=document.getElementById(id);if(el)el.value=data[id];});
+  updateAssign();render();goScreen('screen1');toast('✓ נטען');
+}
+
+var tt=null;
+function toast(msg){var t=document.getElementById('toastEl');t.textContent=msg;t.classList.add('show');clearTimeout(tt);tt=setTimeout(function(){t.classList.remove('show');},2500);}
+
+updateAssign();render();updateConfirmType();
+
+/* ── פרטי העובד: מקור (DB) + מי שולט במילוי — מוגדר בעורך, אחיד לכל התבניות ── */
+var empFieldsCfg = [
+  {label:'שם מלא',              dbField:'EMP_NAME',        filler:'E_'},
+  {label:'תעודת זהות',          dbField:'TZ',              filler:'E_'},
+  {label:'תאריך תחילת עבודה',   dbField:'EMP_DATE_START',  filler:'E_'},
+];
+function renderEmpFieldsCfg(){
+  var host=document.getElementById('empFieldsCfg'); if(!host) return;
+  host.innerHTML='';
+  empFieldsCfg.forEach(function(f,i){
+    var row=document.createElement('div');
+    row.style.cssText='display:flex;gap:6px;align-items:center;background:#FAFAFA;border:1px solid #E5E7EB;border-radius:8px;padding:7px 9px;margin-bottom:6px;';
+    var lbl=document.createElement('div');
+    lbl.textContent=f.label;
+    lbl.style.cssText='flex:1;font-size:12px;font-weight:500;color:var(--text);';
+    var dbSel=(typeof buildDBDropdown==='function')
+      ? buildDBDropdown(f.dbField, function(v){empFieldsCfg[i].dbField=v;render();})
+      : (function(){var s=document.createElement('select');var o=document.createElement('option');o.textContent=f.dbField;s.appendChild(o);return s;})();
+    var fillerSel=(typeof buildFillerSelect==='function')
+      ? buildFillerSelect(f.filler, function(v){empFieldsCfg[i].filler=v;})
+      : (function(){var s=document.createElement('select');['עובד','מנהל','מנהל על','כולם'].forEach(function(t){var o=document.createElement('option');o.textContent=t;s.appendChild(o);});return s;})();
+    row.appendChild(lbl); row.appendChild(dbSel); row.appendChild(fillerSel);
+    host.appendChild(row);
+  });
+}
+renderEmpFieldsCfg();
+
+/* DB MAPPING */
+var dbMappings = [];
+function addDBMapping(){
+  dbMappings.push({fieldName:'', dbField:'', filler:'E_'});
+  renderDBMappings();
+}
+function renderDBMappings(){
+  var list = document.getElementById('dbMappingList');
+  if(!list) return;
+  list.innerHTML = '';
+  dbMappings.forEach(function(m, i){
+    var row = document.createElement('div');
+    row.style.cssText = 'display:flex;gap:4px;align-items:center;background:#FAFAFA;border:1px solid #E5E7EB;border-radius:8px;padding:6px 8px;';
+    var fnInp = document.createElement('input');
+    fnInp.placeholder = 'שם שדה בטופס';
+    fnInp.value = m.fieldName||'';
+    fnInp.style.cssText = 'flex:1;padding:4px 6px;font-size:11px;border:1px solid #E5E7EB;border-radius:5px;font-family:inherit;outline:none;';
+    (function(idx){fnInp.oninput=function(){dbMappings[idx].fieldName=this.value;};})(i);
+    var dbSel = document.createElement('select');
+    dbSel.style.cssText = 'flex:1;padding:4px 5px;font-size:11px;border:1px solid #C7D2FE;border-radius:5px;font-family:inherit;outline:none;background:#EEF2FF;color:#4338CA;';
+    var empty = document.createElement('option');empty.value='';empty.textContent='-- DB --';dbSel.appendChild(empty);
+    if(typeof SYNEL_DB_FIELDS!=='undefined'){
+      var cats={};
+      SYNEL_DB_FIELDS.forEach(function(f){if(!cats[f.category])cats[f.category]=[];cats[f.category].push(f);});
+      Object.keys(cats).forEach(function(cat){
+        var og=document.createElement('optgroup');og.label=cat;
+        cats[cat].forEach(function(f){var o=document.createElement('option');o.value=f.dbField;o.textContent=f.labelHe;if(f.dbField===m.dbField)o.selected=true;og.appendChild(o);});
+        dbSel.appendChild(og);
+      });
+    }
+    (function(idx){dbSel.onchange=function(){dbMappings[idx].dbField=this.value;};})(i);
+    var fillerSel = document.createElement('select');
+    fillerSel.style.cssText = 'padding:4px 5px;font-size:11px;border:1px solid #E5E7EB;border-radius:5px;font-family:inherit;outline:none;';
+    [{v:'E_',l:'E'},{v:'M_',l:'M'},{v:'S_',l:'S'}].forEach(function(opt){var o=document.createElement('option');o.value=opt.v;o.textContent=opt.l;if(opt.v===m.filler)o.selected=true;fillerSel.appendChild(o);});
+    (function(idx){fillerSel.onchange=function(){dbMappings[idx].filler=this.value;};})(i);
+    var rm = document.createElement('button');rm.textContent='x';rm.style.cssText='width:22px;height:22px;border-radius:50%;border:1px solid #E5E7EB;background:none;cursor:pointer;color:#9CA3AF;font-size:10px;flex-shrink:0;';
+    (function(idx){rm.onclick=function(){dbMappings.splice(idx,1);renderDBMappings();};})(i);
+    row.appendChild(fnInp);row.appendChild(dbSel);row.appendChild(fillerSel);row.appendChild(rm);
+    list.appendChild(row);
+  });
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Form Studio — Synel</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--bg:#F5F5F0;--surface:#fff;--border:#E5E7EB;--text:#1a1a1a;--text2:#6B7280;--text3:#9CA3AF;--accent:#4F46E5;--green:#2D7A4F;--orange:#E8603C;--r:12px;}
+body{font-family:'Helvetica Neue',Arial,sans-serif;direction:rtl;background:var(--bg);min-height:100vh;}
+.header{background:#1e1b4b;height:52px;display:flex;align-items:center;padding:0 24px;gap:12px;}
+.logo{font-size:15px;font-weight:700;color:white;}
+.h-sep{width:1px;height:18px;background:rgba(255,255,255,.2);}
+.h-sub{font-size:12px;color:rgba(255,255,255,.5);}
+.main{max-width:960px;margin:0 auto;padding:32px 20px;}
+.hero{margin-bottom:32px;text-align:center;}
+.hero h1{font-size:26px;font-weight:700;color:var(--text);margin-bottom:8px;}
+.hero p{font-size:14px;color:var(--text2);line-height:1.6;}
+.tabs{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:24px;}
+.tab{padding:10px 22px;font-size:13px;cursor:pointer;color:var(--text2);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;font-family:inherit;}
+.tab:hover{color:var(--text);}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:500;}
+.section-title{font-size:11px;font-weight:600;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:14px;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:32px;}
+.card{background:white;border:1.5px solid var(--border);border-radius:14px;padding:18px;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;gap:8px;text-decoration:none;}
+.card:hover{border-color:var(--accent);box-shadow:0 4px 20px rgba(79,70,229,.1);transform:translateY(-2px);}
+.card-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;}
+.card-name{font-size:13px;font-weight:600;color:var(--text);}
+.card-desc{font-size:11px;color:var(--text2);line-height:1.5;}
+.card-tag{font-size:10px;padding:2px 8px;border-radius:20px;display:inline-block;margin-top:2px;}
+.upload-card{background:white;border:2px dashed var(--border);border-radius:16px;padding:36px;text-align:center;cursor:pointer;transition:all .15s;display:block;text-decoration:none;}
+.upload-card:hover{border-color:var(--accent);background:#EEF2FF;}
+.upload-icon{font-size:44px;margin-bottom:12px;}
+.upload-title{font-size:16px;font-weight:600;color:var(--text);margin-bottom:6px;}
+.upload-sub{font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.5;}
+.btn-primary{display:inline-block;padding:11px 28px;font-size:13px;font-weight:600;border-radius:50px;background:var(--accent);color:white;text-decoration:none;cursor:pointer;}
+.scratch-grid{display:flex;gap:16px;margin-bottom:24px;}
+.scratch-card{flex:1;background:white;border:1.5px solid var(--border);border-radius:14px;padding:24px;text-align:center;text-decoration:none;display:block;transition:all .15s;}
+.scratch-card:hover{border-color:var(--accent);box-shadow:0 4px 20px rgba(79,70,229,.1);transform:translateY(-2px);}
+.sc-icon{font-size:38px;margin-bottom:10px;}
+.sc-name{font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px;}
+.sc-desc{font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:14px;}
+.sc-badge{font-size:11px;padding:3px 12px;border-radius:20px;display:inline-block;}
+.send-mode{flex:1;padding:9px;font-size:13px;border-radius:8px;border:1px solid var(--border);background:white;cursor:pointer;font-family:inherit;color:var(--text2);}
+.send-mode.active{background:var(--accent);color:white;border-color:var(--accent);font-weight:600;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">⚡ Form Studio</div>
+  <div class="h-sep"></div>
+  <div class="h-sub">מחולל טפסים — Synel</div>
+  <span id="brandMount" style="margin-right:auto;"></span>
+</div>
+
+<div class="main">
+  <div class="hero">
+    <h1>בנה טופס דיגיטלי</h1>
+    <p>בחר תבנית מוכנה, או צור טופס חדש ממסמך קיים או מדף ריק</p>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('templates',this)">📋 תבניות מוכנות</div>
+    <div class="tab" onclick="showTab('create',this)">➕ צור טופס חדש</div>
+    <div class="tab" onclick="showTab('saved',this)">💾 שמורים</div>
+  </div>
+
+  <!-- TEMPLATES -->
+  <div id="tab-templates">
+    <div class="section-title">בחר תבנית — תיפתח ישירות לעריכה</div>
+    <div class="grid">
+
+      <a href="template-qa.html" class="card">
+        <div class="card-icon" style="background:#EEF2FF;">📝</div>
+        <div class="card-name">שאלה / תשובה</div>
+        <div class="card-desc">שאלות עם תיבות טקסט חופשי — חפיפה, שאלון כניסה</div>
+        <span class="card-tag" style="background:#EEF2FF;color:#4338CA;">גנרי</span>
+      </a>
+
+      <a href="template-list.html" class="card">
+        <div class="card-icon" style="background:#ECFDF5;">📋</div>
+        <div class="card-name">רשימה + המשך</div>
+        <div class="card-desc">לוז, רשימת משימות, אישור קריאה כללי</div>
+        <span class="card-tag" style="background:#ECFDF5;color:#065F46;">לוז / עמוד</span>
+      </a>
+
+      <a href="template-conditional.html" class="card">
+        <div class="card-icon" style="background:#FEF3C7;">🔀</div>
+        <div class="card-name">שאלה מותנית</div>
+        <div class="card-desc">כן/לא עם ענפים — החזרת ציוד, מכתב המלצה</div>
+        <span class="card-tag" style="background:#FEF3C7;color:#92400E;">דינמי</span>
+      </a>
+
+      <a href="template-survey.html" class="card">
+        <div class="card-icon" style="background:#FDF4FF;">📊</div>
+        <div class="card-name">סקר</div>
+        <div class="card-desc">כוכבים, סקאלה, NPS, בחירה, טקסט חופשי</div>
+        <span class="card-tag" style="background:#FDF4FF;color:#7E22CE;">סקר</span>
+      </a>
+
+      <a href="template-info-db.html" class="card">
+        <div class="card-icon" style="background:#EFF6FF;">🗄</div>
+        <div class="card-name">הצגת מידע DB</div>
+        <div class="card-desc">גמר חשבון, נתונים מהמערכת + חתימה</div>
+        <span class="card-tag" style="background:#EFF6FF;color:#1D4ED8;">DB</span>
+      </a>
+
+      <a href="template-highlights.html" class="card">
+        <div class="card-icon" style="background:#EEF2FF;">⭐</div>
+        <div class="card-name">Highlights + מסמך</div>
+        <div class="card-desc">כרטיסיות בולטות + מסמך לחתימה — חוזה העסקה</div>
+        <span class="card-tag" style="background:#EEF2FF;color:#4338CA;">חוזה</span>
+      </a>
+
+      <a href="template-quiz.html" class="card">
+        <div class="card-icon" style="background:#FFF7ED;">🧠</div>
+        <div class="card-name">מידע + שאלות הבנה</div>
+        <div class="card-desc">הצג מידע ← שאל ← תגובה מיידית</div>
+        <span class="card-tag" style="background:#FFF7ED;color:#C2410C;">הבנה</span>
+      </a>
+
+      <a href="template-pension.html" class="card">
+        <div class="card-icon" style="background:#F0FDF4;">💰</div>
+        <div class="card-name">שאלון פנסיה</div>
+        <div class="card-desc">זרימה קבועה — ביטוח קיים / פנסיה ברירת מחדל</div>
+        <span class="card-tag" style="background:#F0FDF4;color:#065F46;">פנסיה</span>
+      </a>
+
+      <a href="template-101.html" class="card">
+        <div class="card-icon" style="background:#FEF2F2;">🪪</div>
+        <div class="card-name">טופס 101</div>
+        <div class="card-desc">צילום ת"ז + ספח + מילוי פרטים אישיים מלא</div>
+        <span class="card-tag" style="background:#FEF2F2;color:#991B1B;">רשמי</span>
+      </a>
+
+      <a href="template-flow.html" class="card">
+        <div class="card-icon" style="background:#FFF1EC;">🚪</div>
+        <div class="card-name">מעטפת תהליך</div>
+        <div class="card-desc">עמודי פתיחה · מקדים · סיום — קליטה / סיום העסקה</div>
+        <span class="card-tag" style="background:#FFF1EC;color:#C2410C;">קליטה / סיום</span>
+      </a>
+
+    </div>
+  </div>
+
+  <!-- SCRATCH -->
+  <!-- CREATE — איחוד מסמך קיים / דף ריק -->
+  <div id="tab-create" style="display:none;">
+    <div class="section-title">איך תרצה להתחיל?</div>
+    <div class="scratch-grid">
+      <a href="template-upload-ocr.html" class="scratch-card">
+        <div class="sc-icon">📄</div>
+        <div class="sc-name">מסמך קיים</div>
+        <div class="sc-desc">העלה תמונה או PDF של טופס/חוזה — המערכת תזהה את השדות אוטומטית ותהפוך אותו לדיגיטלי</div>
+        <span class="sc-badge" style="background:#EEF2FF;color:#4338CA;">תמונה · PDF · טקסט</span>
+      </a>
+      <a href="form-studio.html" class="scratch-card">
+        <div class="sc-icon">✏️</div>
+        <div class="sc-name">דף ריק</div>
+        <div class="sc-desc">בנה טופס מאפס — כתוב טקסט חופשי, עצב, וגרור שדות לאן שתרצה. כמו Word עם שדות דיגיטליים</div>
+        <span class="sc-badge" style="background:#ECFDF5;color:#065F46;">עורך חופשי</span>
+      </a>
+    </div>
+    <div style="margin-top:18px;background:white;border:1px solid var(--border);border-radius:14px;padding:18px;">
+      <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:10px;">⚡ מכאן הזרימה זהה בשתי הדרכים</div>
+      <div style="display:flex;flex-direction:column;gap:8px;font-size:13px;color:var(--text2);">
+        <div>✅ אישור ועריכת השדות (תווית, סוג, מי ממלא, ולידציה, שיוך DB)</div>
+        <div>🗂 שיוך הטופס — תהליך, אוכלוסייה ועובד אחראי</div>
+        <div>👁 תצוגה מקדימה ושמירה בשם לשימוש חוזר</div>
+        <div>📤 שליחה לקבוצה או ליחיד מתוך "שמורים"</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <!-- SAVED -->
+  <div id="tab-saved" style="display:none;">
+    <div class="section-title">הטפסים השמורים שלך — לפתיחה או לשליחה</div>
+    <div id="savedList" class="grid"></div>
+    <div id="savedEmpty" style="display:none;text-align:center;padding:40px 20px;color:var(--text3);font-size:13px;">
+      עדיין אין טפסים שמורים.<br>צרו טופס (תבנית / בנה מאפס / העלאת מסמך) ולחצו "שמור בשם".
+    </div>
+  </div>
+
+  <!-- מודאל שליחה -->
+  <div id="sendModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center;">
+    <div style="background:white;border-radius:16px;width:400px;max-width:92%;padding:22px;box-shadow:0 20px 50px rgba(0,0,0,.25);">
+      <div style="font-size:16px;font-weight:700;margin-bottom:4px;">שליחת טופס</div>
+      <div id="sendFormName" style="font-size:12px;color:var(--text2);margin-bottom:16px;"></div>
+      <div style="display:flex;gap:8px;margin-bottom:14px;">
+        <button id="sendModeGroup" class="send-mode active" onclick="setSendMode('group')">קבוצה</button>
+        <button id="sendModeInd" class="send-mode" onclick="setSendMode('individual')">עובד יחיד</button>
+      </div>
+      <div id="sendGroupBox">
+        <select id="sendGroup" style="width:100%;padding:9px;font-size:13px;border:1px solid var(--border);border-radius:8px;font-family:inherit;"></select>
+      </div>
+      <div id="sendIndBox" style="display:none;">
+        <select id="sendEmployee" style="width:100%;padding:9px;font-size:13px;border:1px solid var(--border);border-radius:8px;font-family:inherit;"></select>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:18px;">
+        <button class="btn-primary" style="flex:1;" onclick="confirmSend()">שלח</button>
+        <button onclick="closeSend()" style="flex:1;padding:11px;font-size:13px;border-radius:50px;border:1px solid var(--border);background:white;cursor:pointer;font-family:inherit;">ביטול</button>
+      </div>
+      <div style="font-size:10px;color:var(--text3);margin-top:10px;text-align:center;">הנמענים מנתוני דמו — יוחלפו בנתונים מ-Harmony</div>
+    </div>
+  </div>
+
+<script>
+function showTab(name, el){
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+  el.classList.add('active');
+  ['templates','create','saved'].forEach(function(n){
+    document.getElementById('tab-'+n).style.display = n===name ? 'block' : 'none';
+  });
+  if(name==='saved')renderSaved();
+}
+
+/* ── טעינת טפסים שמורים מ-localStorage ── */
+function loadSavedForms(){
+  var out=[];
+  for(var i=0;i<localStorage.length;i++){
+    var k=localStorage.key(i);
+    if(k && k.indexOf('ocr_')===0){
+      try{var d=JSON.parse(localStorage.getItem(k));out.push({key:k,name:d.name||k.slice(4),savedAt:d.savedAt,count:(d.fields||[]).length});}catch(e){}
+    }
+  }
+  return out.sort(function(a,b){return (b.savedAt||'').localeCompare(a.savedAt||'');});
+}
+
+function renderSaved(){
+  var list=document.getElementById('savedList');var empty=document.getElementById('savedEmpty');
+  var forms=loadSavedForms();
+  list.innerHTML='';
+  if(!forms.length){empty.style.display='block';return;}
+  empty.style.display='none';
+  forms.forEach(function(f){
+    var card=document.createElement('div');card.className='card';card.style.cursor='default';
+    var date=f.savedAt?new Date(f.savedAt).toLocaleDateString('he-IL'):'';
+    card.innerHTML='<div class="card-icon" style="background:#EEF2FF;">📄</div>'
+      +'<div class="card-name">'+f.name+'</div>'
+      +'<div class="card-desc">'+f.count+' שדות'+(date?' · '+date:'')+'</div>';
+    var btns=document.createElement('div');btns.style.cssText='display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;';
+    var openBtn=document.createElement('button');openBtn.textContent='הצג';
+    openBtn.style.cssText='flex:1;padding:7px;font-size:12px;font-weight:600;border-radius:8px;border:1px solid var(--accent);background:white;color:var(--accent);cursor:pointer;font-family:inherit;';
+    openBtn.onclick=function(){location.href='template-upload-ocr.html?open='+encodeURIComponent(f.key);};
+    var sendBtn=document.createElement('button');sendBtn.textContent='שלח';
+    sendBtn.style.cssText='flex:1;padding:7px;font-size:12px;font-weight:600;border-radius:8px;border:none;background:var(--accent);color:white;cursor:pointer;font-family:inherit;';
+    sendBtn.onclick=function(){openSend(f);};
+    var delBtn=document.createElement('button');delBtn.textContent='מחק';
+    delBtn.style.cssText='padding:7px 12px;font-size:12px;border-radius:8px;border:1px solid #FECACA;background:#FEF2F2;color:#DC2626;cursor:pointer;font-family:inherit;';
+    delBtn.onclick=function(){if(confirm('למחוק את "'+f.name+'"?')){localStorage.removeItem(f.key);renderSaved();}};
+    btns.appendChild(openBtn);btns.appendChild(sendBtn);btns.appendChild(delBtn);
+    card.appendChild(btns);
+    list.appendChild(card);
+  });
+}
+
+/* ── מודאל שליחה ── */
+var _sendForm=null, _sendMode='group';
+function openSend(f){
+  _sendForm=f;_sendMode='group';
+  document.getElementById('sendFormName').textContent='"'+f.name+'" · '+f.count+' שדות';
+  if(typeof SynelOrg!=='undefined'){
+    SynelOrg.populateGroups(document.getElementById('sendGroup'));
+    SynelOrg.populateEmployees(document.getElementById('sendEmployee'));
+  }
+  setSendMode('group');
+  document.getElementById('sendModal').style.display='flex';
+}
+function setSendMode(m){
+  _sendMode=m;
+  document.getElementById('sendModeGroup').classList.toggle('active',m==='group');
+  document.getElementById('sendModeInd').classList.toggle('active',m==='individual');
+  document.getElementById('sendGroupBox').style.display=m==='group'?'block':'none';
+  document.getElementById('sendIndBox').style.display=m==='individual'?'block':'none';
+}
+function closeSend(){document.getElementById('sendModal').style.display='none';_sendForm=null;}
+function confirmSend(){
+  var target, label;
+  if(_sendMode==='group'){
+    target=document.getElementById('sendGroup').value;
+    label=document.getElementById('sendGroup').selectedOptions[0]?document.getElementById('sendGroup').selectedOptions[0].textContent:'';
+  }else{
+    target=document.getElementById('sendEmployee').value;
+    label=document.getElementById('sendEmployee').selectedOptions[0]?document.getElementById('sendEmployee').selectedOptions[0].textContent:'';
+  }
+  if(!target){alert('בחר/י נמען');return;}
+  // רישום השליחה (זמני ב-localStorage — בהמשך נשלח ל-Harmony)
+  var rec={form:_sendForm.name,formKey:_sendForm.key,mode:_sendMode,target:target,targetLabel:label,sentAt:new Date().toISOString()};
+  try{var log=JSON.parse(localStorage.getItem('send_log')||'[]');log.push(rec);localStorage.setItem('send_log',JSON.stringify(log));}catch(e){}
+  closeSend();
+  alert('הטופс "'+_sendForm.name+'" נשלח אל: '+label+'\n(רישום זמני — יוחלף בשליחה דרך Harmony)');
+}
+</script>
+<script src="synel-org.js"></script>
+<script src="synel-export.js"></script>
+<script src="synel-brand.js"></script>
+<script>
+(function(){
+  function mount(){
+    if(typeof SynelBrand!=='undefined' && document.getElementById('brandMount')){
+      document.getElementById('brandMount').appendChild(SynelBrand.button());
+    }
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',mount); else mount();
+})();
+</script>
+<script src="synel-help.js"></script>
+
+<script>
+/* Synel seed: טפסי אונבורדינג/אופבורדינג כרשומות OCR — נשמרים פעם אחת ל"שמורים" */
+(function(){
+  var SEED={"ocr_טופס 101 — קליטת עובד": {"name": "טופס 101 — קליטת עובד", "docTitle": "טופס 101 — קליטת עובד", "rawText": "טופס 101 — קליטת עובד\nצילום ת״ז וספח ומילוי פרטי שכר\n\nשם מלא: ____________\nתעודת זהות: ____________\nתאריך לידה: ____________\nמצב משפחתי: ____________\nמספר ילדים: ____________", "fields": [{"id": "f0", "label": "שם מלא", "type": "text", "required": true, "placeholder": "", "dbField": ""}, {"id": "f1", "label": "תעודת זהות", "type": "text", "required": true, "placeholder": "", "dbField": ""}, {"id": "f2", "label": "תאריך לידה", "type": "date", "required": true, "placeholder": "", "dbField": ""}, {"id": "f3", "label": "מצב משפחתי", "type": "text", "required": true, "placeholder": "", "dbField": ""}, {"id": "f4", "label": "מספר ילדים", "type": "number", "required": true, "placeholder": "", "dbField": ""}], "imageData": "", "pages": [], "assign": null, "logoData": "", "logoAllPages": false, "process": "onboarding", "stepCur": "1", "stepTotal": "6", "savedAt": "2026-06-28T08:03:00.000Z"}, "ocr_חוזה העסקה": {"name": "חוזה העסקה", "docTitle": "חוזה העסקה", "rawText": "חוזה העסקה\nתנאי ההעסקה שלך — לקריאה וחתימה\n\nתפקיד: ____________\nמחלקה: ____________\nתאריך תחילה: ____________\nשכר חודשי: ____________\nחתימה דיגיטלית: ____________", "fields": [{"id": "f0", "label": "תפקיד", "type": "text", "required": true, "placeholder": "", "dbField": ""}, {"id": "f1", "label": "מחלקה", "type": "text", "required": true, "placeholder": "", "dbField": ""}, {"id": "f2", "label": "תאריך תחילה", "type": "date", "required": true, "placeholder": "", "dbField": ""}, {"id": "f3", "label": "שכר חודשי", "type": "number", "required": true, "placeholder": "", "dbField": ""}, {"id": "f4", "label": "חתימה דיגיטלית", "type": "signature", "required": true, "placeholder": "", "dbField": ""}], "imageData": "", "pages": [], "assign": null, "logoData": "", "logoAllPages": false, "process": "onboarding", "stepCur": "2", "stepTotal": "6", "savedAt": "2026-06-28T08:06:00.000Z"}, "ocr_סעיף 14": {"name": "סעיף 14", "docTitle": "סעיף 14", "rawText": "סעיף 14\nהסדר פיצויים ופנסיה לפי סעיף 14\n\nהסכמה לסעיף 14: ____________\nאחוז הפקדה: ____________\nחתימה דיגיטלית: ____________", "fields": [{"id": "f0", "label": "הסכמה לסעיף 14", "type": "text", "required": true, "placeholder": "", "dbField": ""}, {"id": "f1", "label": "אחוז הפקדה", "type": "number", "required": true, "placeholder": "", "dbField": ""}, {"id": "f2", "label": "חתימה דיגיטלית", "type": "signature", "required": true, "placeholder": "", "dbField": ""}], "imageData": "", "pages": [], "assign": null, "logoData": "", "logoAllPages": false, "process": "onboarding", "stepCur": "3", "stepTotal": "6", "savedAt": "2026-06-28T08:09:00.000Z"}, "ocr_נהלי החברה": {"name": "נהלי החברה", "docTitle": "נהלי החברה", "rawText": "נהלי החברה\nמדיניות החברה ושאלות הבנה\n\nאישור קריאת הנהלים: ____________\nשאלת הבנה 1: ____________\nשאלת הבנה 2: ____________", "fields": [{"id": "f0", "label": "אישור קריאת הנהלים", "type": "text", "required": true, "placeholder": "", "dbField": ""}, {"id": "f1", "label": "שאלת הבנה 1", "type": "text", "required": true, "placeholder": "", "dbField": ""}, {"id": "f2", "label": "שאלת הבנה 2", "type": "text", "required": true, "placeholder": "", "dbField": ""}], "imageData": "", "pages": [], "assign": null, "logoData": "", "logoAllPages": false, "process": "onboarding", "stepCur": "4", "stepTotal": "6", "savedAt": "2026-06-28T08:12:00.000Z"}, "ocr_קבלת ציוד והרשאות": {"name": "קבלת ציוד והרשאות", "docTitle": "קבלת ציוד והרשאות", "rawText": "קבלת ציוד והרשאות\nאישור קבלת הציוד וההרשאות שהוקצו לך\n\nלפטופ: ____________\nטלפון: ____________\nכרטיס כניסה: ____________\nהרשאות מערכת: ____________", "fields": [{"id": "f0", "label": "לפטופ", "type": "text", "required": true, "placeholder": "", "dbField": ""}, {"id": "f1", "label": "טלפון", "type": "text", "required": true, "placeholder": "", "dbField": ""}, {"id": "f2", "label": "כרטיס כניסה", "type": "text", "required": true, "placeholder": "", "dbField": ""}, {"id": "f3", "label": "הרשאות מערכת", "type": "text", "required": true, "placeholder": "", "dbField": ""}], "imageData": "", "pages": [], "assign": null, "logoData": "", "logoAllPages": false, "process": "onboarding", "stepCur": "5", "stepTotal": "6", "savedAt": "2026-06-28T08:15:00.000Z"}, "ocr_הצטרפות לפנסיה": {"name": "הצטרפות לפנסיה", "docTitle": "הצטרפות לפנסיה", "rawText": "הצטרפות לפנסיה\nבחירת קרן ומסלול וצירוף לביטוח פנסיוני\n\nקרן פנסיה: ____________\nמסלול השקעה: ____________\nאחוז הפקדה: ____________\nמוטבים: ____________", "fields": [{"id": "f0", "label": "קרן פנסיה", "type": "text", "required": true, "placeholder": "", "dbField": ""}, {"id": "f1", "label": "מסלול השקעה", "type": "text", "required": true, "placeholder": "", "dbField": ""}, {"id": "f2", "label": "אחוז הפקדה", "type": "number", "required": true, "placeholder": "", "dbField": ""}, {"id": "f3", "label": "מוטבים", "type": "text", "required": true, "placeholder": "", "dbField": ""}], "imageData": "", "pages": [], "assign": null, "logoData": "", "logoAllPages": false, "process": "onboarding", "stepCur": "6", "stepTotal": "6", "savedAt": "2026-06-28T08:18:00.000Z"}, "ocr_רשימת קליטה — טפסים למילוי": {"name": "רשימת קליטה — טפסים למילוי", "docTitle": "רשימת קליטה — טפסים למילוי", "rawText": "רשימת קליטה — טפסים למילוי\nסקירת כל הטפסים שעליך להשלים בקליטה\n\nטופס 101: ____________\nחוזה העסקה: ____________\nסעיף 14: ____________\nנהלי החברה: ____________\nקבלת ציוד: ____________\nפנסיה: ____________", "fields": [{"id": "f0", "label": "טופס 101", "type": "text", "required": true, "placeholder": "", "dbField": ""}, {"id": "f1", "label": "חוזה העסקה", "type": "text", "required": true, "placeholder": "", "dbField": ""}, {"id": "f2", "label": "סעיף 14", "type": "text", "required": true, "placeholder": "", "dbField": ""}, {"id": "f3", "label": "נהלי החברה", "type": "text", "required": true, "placeholder": "", "dbField": ""}, {"id": "f4", "label": "קבלת ציוד", "type": "text", "required": true, "placeholder": "", "dbField": ""}, {"id": "f5", "label": "פנסיה", "type": "text", "required": true, "placeholder": "", "dbField": ""}], "imageData": "", "pages": [], "assign": null, "logoData": "", "logoAllPages": false, "process": "onboarding", "stepCur": "1", "stepTotal": "6", "savedAt": "2026-06-28T08:03:00.000Z"}, "ocr_ראיון עזיבה": {"name": "ראיון עזיבה", "docTitle": "ראיון עזיבה", "rawText": "ראיון עזיבה\nשיתוף החוויה שלך לפני סיום ההעסקה\n\nסיבת העזיבה: ____________\nשביעות רצון: ____________\nהמלצות לשיפור: ____________", "fields": [{"id": "f0", "label": "סיבת העזיבה", "type": "text", "required": true, "placeholder": "", "dbField": ""}, {"id": "f1", "label": "שביעות רצון", "type": "text", "required": true, "placeholder": "", "dbField": ""}, {"id": "f2", "label": "המלצות לשיפור", "type": "text", "required": true, "placeholder": "", "dbField": ""}], "imageData": "", "pages": [], "assign": null, "logoData": "", "logoAllPages": false, "process": "offboarding", "stepCur": "1", "stepTotal": "6", "savedAt": "2026-06-28T08:33:00.000Z"}, "ocr_טופס 161 — גמר חשבון": {"name": "טופס 161 — גמר חשבון", "docTitle": "טופס 161 — גמר חשבון", "rawText": "טופס 161 — גמר חשבון\nסיכום נתוני גמר החשבון וחתימה\n\nתאריך סיום: ____________\nפיצויים: ____________\nימי חופשה לפדיון: ____________\nחתימה דיגיטלית: ____________", "fields": [{"id": "f0", "label": "תאריך סיום", "type": "date", "required": true, "placeholder": "", "dbField": ""}, {"id": "f1", "label": "פיצויים", "type": "number", "required": true, "placeholder": "", "dbField": ""}, {"id": "f2", "label": "ימי חופשה לפדיון", "type": "number", "required": true, "placeholder": "", "dbField": ""}, {"id": "f3", "label": "חתימה דיגיטלית", "type": "signature", "required": true, "placeholder": "", "dbField": ""}], "imageData": "", "pages": [], "assign": null, "logoData": "", "logoAllPages": false, "process": "offboarding", "stepCur": "2", "stepTotal": "6", "savedAt": "2026-06-28T08:36:00.000Z"}, "ocr_החזרת ציוד": {"name": "החזרת ציוד", "docTitle": "החזרת ציוד", "rawText": "החזרת ציוד\nאישור החזרת הציוד לפני סיום ההעסקה\n\nלפטופ: ____________\nטלפון: ____________\nכרטיס כניסה: ____________\nמצב הפריטים: ____________", "fields": [{"id": "f0", "label": "לפטופ", "type": "text", "required": true, "placeholder": "", "dbField": ""}, {"id": "f1", "label": "טלפון", "type": "text", "required": true, "placeholder": "", "dbField": ""}, {"id": "f2", "label": "כרטיס כניסה", "type": "text", "required": true, "placeholder": "", "dbField": ""}, {"id": "f3", "label": "מצב הפריטים", "type": "text", "required": true, "placeholder": "", "dbField": ""}], "imageData": "", "pages": [], "assign": null, "logoData": "", "logoAllPages": false, "process": "offboarding", "stepCur": "3", "stepTotal": "6", "savedAt": "2026-06-28T08:39:00.000Z"}, "ocr_לו״ז יום אחרון": {"name": "לו״ז יום אחרון", "docTitle": "לו״ז יום אחרון", "rawText": "לו״ז יום אחרון\nסדר היום של יום העזיבה\n\nפגישת סיכום HR: ____________\nהחזרת ציוד ל-IT: ____________\nראיון עזיבה: ____________\nפינוי שולחן: ____________", "fields": [{"id": "f0", "label": "פגישת סיכום HR", "type": "text", "required": true, "placeholder": "", "dbField": ""}, {"id": "f1", "label": "החזרת ציוד ל-IT", "type": "text", "required": true, "placeholder": "", "dbField": ""}, {"id": "f2", "label": "ראיון עזיבה", "type": "text", "required": true, "placeholder": "", "dbField": ""}, {"id": "f3", "label": "פינוי שולחן", "type": "text", "required": true, "placeholder": "", "dbField": ""}], "imageData": "", "pages": [], "assign": null, "logoData": "", "logoAllPages": false, "process": "offboarding", "stepCur": "4", "stepTotal": "6", "savedAt": "2026-06-28T08:42:00.000Z"}, "ocr_חפיפה למחליף/ה": {"name": "חפיפה למחליף/ה", "docTitle": "חפיפה למחליף/ה", "rawText": "חפיפה למחליף/ה\nהעברת ידע מסודרת למחליף/ה\n\nמשימות פתוחות: ____________\nאנשי קשר חשובים: ____________\nמיקום הקבצים: ____________", "fields": [{"id": "f0", "label": "משימות פתוחות", "type": "text", "required": true, "placeholder": "", "dbField": ""}, {"id": "f1", "label": "אנשי קשר חשובים", "type": "text", "required": true, "placeholder": "", "dbField": ""}, {"id": "f2", "label": "מיקום הקבצים", "type": "text", "required": true, "placeholder": "", "dbField": ""}], "imageData": "", "pages": [], "assign": null, "logoData": "", "logoAllPages": false, "process": "offboarding", "stepCur": "5", "stepTotal": "6", "savedAt": "2026-06-28T08:45:00.000Z"}, "ocr_בקשת מכתב המלצה": {"name": "בקשת מכתב המלצה", "docTitle": "בקשת מכתב המלצה", "rawText": "בקשת מכתב המלצה\nבקשה אופציונלית למכתב המלצה\n\nשם הממליץ/ה: ____________\nדגשים למכתב: ____________\nפורמט ויעד: ____________", "fields": [{"id": "f0", "label": "שם הממליץ/ה", "type": "text", "required": true, "placeholder": "", "dbField": ""}, {"id": "f1", "label": "דגשים למכתב", "type": "text", "required": true, "placeholder": "", "dbField": ""}, {"id": "f2", "label": "פורמט ויעד", "type": "text", "required": true, "placeholder": "", "dbField": ""}], "imageData": "", "pages": [], "assign": null, "logoData": "", "logoAllPages": false, "process": "offboarding", "stepCur": "6", "stepTotal": "6", "savedAt": "2026-06-28T08:48:00.000Z"}};
+  function go(){ try{
+    if(localStorage.getItem('seed_onoff_ocr_v1')) return;
+    Object.keys(SEED).forEach(function(k){ if(localStorage.getItem(k)===null) localStorage.setItem(k, JSON.stringify(SEED[k])); });
+    localStorage.setItem('seed_onoff_ocr_v1','1');
+    if(typeof renderSaved==='function'){ try{renderSaved();}catch(e){} }
+  }catch(e){} }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',go); else go();
+})();
+</script>
+</body>
+</html>

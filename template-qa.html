@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>עורך תבנית שאלה/תשובה</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#F5F5F0;--surface:#fff;--border:#E5E7EB;
+  --text:#1a1a1a;--text2:#6B7280;--text3:#9CA3AF;
+  --accent:#4F46E5;--green:#2D7A4F;--orange:#E8603C;
+  --r:12px;--rl:16px;
+}
+body{font-family:'Helvetica Neue',Arial,sans-serif;direction:rtl;background:var(--bg);min-height:100vh;display:flex;gap:0;}
+
+/* ── EDITOR PANEL ── */
+.editor-panel{width:380px;flex-shrink:0;background:var(--surface);border-left:1px solid var(--border);height:100vh;overflow-y:auto;display:flex;flex-direction:column;}
+.ep-head{padding:16px 18px;border-bottom:1px solid var(--border);background:#FAFAFA;}
+.ep-head h2{font-size:14px;font-weight:600;color:var(--text);margin-bottom:2px;}
+.ep-head p{font-size:11px;color:var(--text3);}
+.ep-body{flex:1;padding:16px 18px;display:flex;flex-direction:column;gap:16px;}
+.ep-section{display:flex;flex-direction:column;gap:6px;}
+.ep-section label{font-size:11px;font-weight:600;color:var(--text2);letter-spacing:.04em;text-transform:uppercase;}
+.ep-input{width:100%;padding:8px 12px;font-size:13px;border:1px solid var(--border);border-radius:var(--r);font-family:inherit;color:var(--text);outline:none;background:#FAFAFA;}
+.ep-input:focus{border-color:var(--accent);background:var(--surface);}
+.ep-textarea{width:100%;padding:8px 12px;font-size:13px;border:1px solid var(--border);border-radius:var(--r);font-family:inherit;color:var(--text);outline:none;background:#FAFAFA;resize:none;min-height:64px;}
+.ep-textarea:focus{border-color:var(--accent);background:var(--surface);}
+.ep-row{display:flex;gap:8px;}
+.ep-row .ep-input{flex:1;}
+.divider{height:1px;background:var(--border);}
+/* Questions */
+.q-list{display:flex;flex-direction:column;gap:10px;}
+.q-item{background:#FAFAFA;border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;position:relative;}
+.q-item-head{display:flex;align-items:center;gap:6px;margin-bottom:8px;}
+.q-num{width:22px;height:22px;border-radius:50%;background:var(--accent);color:white;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.q-item-title{flex:1;font-size:12px;font-weight:500;color:var(--text);}
+.q-rm{width:22px;height:22px;border-radius:50%;border:1px solid var(--border);background:none;cursor:pointer;color:var(--text3);font-size:12px;display:flex;align-items:center;justify-content:center;}
+.q-rm:hover{background:#FEE2E2;color:#DC2626;border-color:#FECACA;}
+.q-item input{width:100%;padding:6px 10px;font-size:12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;outline:none;background:var(--surface);margin-bottom:5px;color:var(--text);}
+.q-item input:focus{border-color:var(--accent);}
+.q-item textarea{width:100%;padding:6px 10px;font-size:11px;border:1px solid var(--border);border-radius:8px;font-family:inherit;outline:none;background:var(--surface);resize:none;color:var(--text2);min-height:44px;}
+.q-item textarea:focus{border-color:var(--accent);}
+.add-q-btn{width:100%;padding:9px;font-size:12px;border:1.5px dashed #C7D2FE;border-radius:var(--r);background:none;color:var(--accent);cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px;transition:all .1s;}
+.add-q-btn:hover{background:var(--accent);color:white;border-color:var(--accent);}
+.ep-footer{padding:14px 18px;border-top:1px solid var(--border);display:flex;gap:8px;}
+.btn{flex:1;padding:9px;font-size:13px;border-radius:var(--r);border:1px solid var(--border);background:var(--surface);cursor:pointer;font-family:inherit;font-weight:500;}
+.btn.primary{background:var(--accent);color:white;border-color:var(--accent);}
+.btn.primary:hover{background:#4338CA;}
+.btn:hover{background:#F9FAFB;}
+
+/* ── PREVIEW ── */
+.preview-panel{flex:1;background:var(--bg);padding:24px;overflow-y:auto;display:flex;justify-content:center;}
+.phone-wrap{width:375px;background:var(--surface);border-radius:24px;box-shadow:0 8px 40px rgba(0,0,0,.1);overflow:hidden;min-height:600px;display:flex;flex-direction:column;}
+.phone-bar{height:44px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:8px;}
+.pbar-step{font-size:11px;color:var(--text3);}
+.pbar-dots{display:flex;gap:4px;margin-right:auto;}
+.pdot{width:6px;height:6px;border-radius:50%;background:var(--border);}
+.pdot.active{background:var(--accent);}
+.phone-content{flex:1;padding:20px 16px 24px;overflow-y:auto;}
+.form-title{font-size:22px;font-weight:700;color:var(--text);margin-bottom:4px;text-align:right;}
+.form-subtitle{font-size:13px;color:var(--text2);margin-bottom:12px;text-align:right;line-height:1.5;}
+.time-badge{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;background:#F5F5F0;border-radius:20px;font-size:12px;color:var(--text2);margin-bottom:20px;border:1px solid var(--border);}
+/* Q cards in preview */
+.pq-card{background:#F8F8F6;border-radius:var(--r);padding:14px 16px;margin-bottom:12px;}
+.pq-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;text-align:right;}
+.pq-desc{font-size:12px;color:var(--text3);margin-bottom:10px;text-align:right;line-height:1.5;}
+.pq-input{width:100%;padding:10px 12px;font-size:13px;border:1px solid var(--border);border-radius:8px;font-family:inherit;background:var(--surface);color:var(--text);resize:none;outline:none;min-height:72px;direction:rtl;text-align:right;}
+.pq-input:focus{border-color:var(--accent);}
+.pq-placeholder{color:var(--text3);}
+/* Validation bar */
+.validation-bar{background:#FFFBEB;border:1px solid #FCD34D;border-radius:var(--r);padding:10px 14px;margin-bottom:12px;font-size:12px;color:#92400E;display:none;}
+/* Action buttons */
+.phone-footer{padding:16px;border-top:1px solid var(--border);background:var(--surface);}
+.action-btn{width:100%;padding:16px;font-size:16px;font-weight:600;border-radius:50px;border:none;background:var(--orange);color:white;cursor:pointer;font-family:inherit;margin-bottom:10px;}
+.action-btn:hover{background:#D04D2B;}
+.back-link{display:block;text-align:center;font-size:13px;color:var(--text3);cursor:pointer;}
+.back-link:hover{color:var(--text);}
+
+/* Toast */
+.toast{position:fixed;bottom:20px;right:50%;transform:translateX(50%);background:#111;color:white;font-size:12px;padding:7px 18px;border-radius:20px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:99;font-family:sans-serif;}
+.toast.show{opacity:1;}
+</style>
+<script src="synel-db.js"></script>
+<script src="synel-validation.js"></script>
+<script src="synel-autosave.js"></script>
+<script src="synel-accessibility.js"></script>
+<script src="synel-versions.js"></script>
+<script src="synel-mobile.js"></script>
+<script src="synel-brand.js"></script>
+<script src="synel-nav.js"></script>
+<script src="synel-publish.js"></script>
+</head>
+<body>
+
+<!-- EDITOR -->
+<div class="editor-panel">
+  <div class="ep-head">
+    <h2>✏️ עורך תבנית שאלה/תשובה</h2>
+    <p>ערוך ← הצג בתצוגה מקדימה בזמן אמת</p>
+  </div>
+  <div class="ep-body">
+
+    <div class="ep-section">
+      <label>שם הטופס</label>
+      <input class="ep-input" id="fName" placeholder="למשל: מסמך חפיפה" oninput="render()" value="מסמך חפיפה למחליף/ה">
+    </div>
+
+    <div class="ep-section">
+      <label>כותרת משנה</label>
+      <textarea class="ep-textarea" id="fSub" oninput="render()" rows="2">עזרי למחליף/ה שלך להתחיל בצורה הטובה ביותר.</textarea>
+    </div>
+
+    <div class="ep-section">
+      <label>זמן משוער (דקות)</label>
+      <input class="ep-input" id="fTime" placeholder="למשל: 4" oninput="render()" value="4" style="width:100px;">
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="ep-section">
+      <label>שאלות</label>
+      <div class="q-list" id="qList"></div>
+      <button class="add-q-btn" onclick="addQ()">+ הוסף שאלה</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="ep-section">
+      <label>טקסט כפתור פעולה</label>
+      <input class="ep-input" id="fBtn" placeholder="אישור והמשך" oninput="render()" value="אישור והמשך ←">
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="ep-section">
+      <label>שיוך לתהליך</label>
+      <select class="ep-input" id="fProcess" onchange="updateAssign()">
+        <option value="">— בחר תהליך —</option>
+        <option value="onboarding">🚀 Onboarding</option>
+        <option value="offboarding">🚪 Offboarding</option>
+        <option value="lifecycle">🔄 Life Cycle</option>
+        <option value="payroll">💰 שכר</option>
+        <option value="custom">🔗 URL מותאם</option>
+      </select>
+    </div>
+
+    <div class="ep-section" id="customUrlSec" style="display:none;">
+      <label>URL מותאם</label>
+      <input class="ep-input" id="fCustomUrl" placeholder="https://..." oninput="updateAssign()">
+    </div>
+
+    <div class="ep-section">
+      <label>שלב בתהליך</label>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input class="ep-input" id="fStepCur" type="number" min="1" placeholder="שלב" value="1" oninput="updateAssign()" style="width:70px;">
+        <span style="font-size:13px;color:var(--text3);">מתוך</span>
+        <input class="ep-input" id="fStepTotal" type="number" min="1" placeholder="סה״כ" value="6" oninput="updateAssign()" style="width:70px;">
+      </div>
+    </div>
+
+    <div class="ep-section">
+      <label>עובד אחראי</label>
+      <select class="ep-input" id="fOwner" onchange="updateAssign()">
+        <option value="">— לא הוגדר —</option>
+        <option value="hr">HR</option>
+        <option value="manager">מנהל ישיר</option>
+        <option value="it">IT</option>
+        <option value="payroll">חשב שכר</option>
+      </select>
+    </div>
+
+    <!-- Summary -->
+    <div id="assignSummary" style="display:none;background:#F0FDF4;border:1px solid #A7F3D0;border-radius:10px;padding:10px 12px;font-size:11px;color:#065F46;line-height:1.7;"></div>
+
+  </div>
+  <div class="ep-footer" style="flex-wrap:wrap;gap:6px;">
+    <button class="btn" style="flex:1;" onclick="saveForm()">💾 שמור</button>
+    <button class="btn" style="flex:1;" onclick="saveAs()">📋 שמור בשם</button>
+    <button class="btn primary" style="width:100%;" onclick="exportForm()">🚀 פרסם</button>
+    <button class="btn" style="width:100%;background:#1e1b4b;color:white;border-color:#1e1b4b;" onclick="exportJSON()">{ } ייצא JSON</button>
+    <button class="btn" style="width:100%;font-size:11px;" onclick="openLoad()">📂 טפסים שמורים</button>
+  </div>
+</div>
+
+<!-- PREVIEW -->
+<div class="preview-panel">
+  <div class="phone-wrap">
+    <div class="phone-bar">
+      <span class="pbar-step" id="stepLbl">שלב 1 מתוך 1</span>
+      <div class="pbar-dots" id="pbarDots"></div>
+    </div>
+    <div class="phone-content" id="phoneContent"></div>
+    <div class="phone-footer">
+      <div class="validation-bar" id="validBar">⚠️ שדות חובה חסרים</div>
+      <button class="action-btn" id="actionBtn" onclick="submitForm()">אישור והמשך ←</button>
+      <span class="back-link">חזרה לרשימה</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- SAVE AS MODAL -->
+<div id="saveAsModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:center;justify-content:center;">
+  <div style="background:white;border-radius:14px;padding:22px 24px;width:340px;box-shadow:0 20px 50px rgba(0,0,0,.15);">
+    <h3 style="font-size:14px;font-weight:600;color:#1a1a1a;margin-bottom:12px;">📋 שמור בשם</h3>
+    <input id="saveAsName" style="width:100%;padding:8px 12px;font-size:13px;border:1px solid #E5E7EB;border-radius:10px;font-family:inherit;outline:none;margin-bottom:12px;" placeholder="שם הטופס החדש..." onkeydown="if(event.key==='Enter')confirmSaveAs()">
+    <div style="display:flex;gap:8px;">
+      <button onclick="document.getElementById('saveAsModal').style.display='none'" style="flex:1;padding:8px;font-size:13px;border-radius:10px;border:1px solid #E5E7EB;background:none;cursor:pointer;font-family:inherit;">ביטול</button>
+      <button onclick="confirmSaveAs()" style="flex:1;padding:8px;font-size:13px;border-radius:10px;border:none;background:#4F46E5;color:white;cursor:pointer;font-family:inherit;font-weight:500;">שמור ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOAD MODAL -->
+<div id="loadModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:center;justify-content:center;" onclick="if(event.target===this)this.style.display='none'">
+  <div style="background:white;border-radius:14px;padding:22px 24px;width:380px;max-height:70vh;display:flex;flex-direction:column;box-shadow:0 20px 50px rgba(0,0,0,.15);">
+    <h3 style="font-size:14px;font-weight:600;color:#1a1a1a;margin-bottom:12px;">📂 טפסים שמורים</h3>
+    <div id="savedList" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:6px;margin-bottom:12px;"></div>
+    <button onclick="document.getElementById('loadModal').style.display='none'" style="width:100%;padding:8px;font-size:13px;border-radius:10px;border:1px solid #E5E7EB;background:none;cursor:pointer;font-family:inherit;">סגור</button>
+  </div>
+</div>
+
+<div class="toast" id="toastEl"></div>
+
+<script>
+var questions = [
+  {title:'משימות פתוחות', desc:'מה צריך להמשיך? פרויקטים, דד-ליינים קרובים, דד-ליינים חשובים', placeholder:'לדוגמה: סיום מפרט API ללקוח X עד 15/6...'},
+  {title:'אנשי קשר חשובים', desc:'ספקים, לקוחות, עמיתים – שם, תפקיד, מה חשוב לדעת', placeholder:'לדוגמה: יוסי כהן (ספק רכש) – מטפל בהזמנות חודשיות...'},
+  {title:'איפה הקבצים?', desc:'תיקיות משותפות, דרייב, ויקי, אקסלים חשובים', placeholder:'לדוגמה: SharePoint/Marketing/2026 – תכנית עבודה מלאה...'},
+];
+
+/* ── RENDER QUESTIONS IN EDITOR ── */
+function renderEditor(){
+  var list = document.getElementById('qList');
+  list.innerHTML = '';
+  questions.forEach(function(q, i){
+    var d = document.createElement('div');
+    d.className = 'q-item';
+    d.innerHTML = '<div class="q-item-head">'
+      +'<div class="q-num">'+(i+1)+'</div>'
+      +'<span class="q-item-title">שאלה '+(i+1)+'</span>'
+      +'<button class="q-rm" onclick="removeQ('+i+')">✕</button>'
+      +'</div>';
+    var ti = document.createElement('input');
+    ti.placeholder = 'כותרת השאלה';
+    ti.value = q.title;
+    (function(idx){ti.oninput=function(){questions[idx].title=this.value;render();};})(i);
+    var de = document.createElement('textarea');
+    de.rows = 2;
+    de.placeholder = 'תיאור / הנחיה (אופציונלי)';
+    de.value = q.desc;
+    (function(idx){de.oninput=function(){questions[idx].desc=this.value;render();};})(i);
+    var ph = document.createElement('input');
+    ph.placeholder = 'Placeholder בתיבת הטקסט';
+    ph.value = q.placeholder;
+    ph.style.cssText='margin-bottom:0;color:#9CA3AF;font-size:11px;';
+    (function(idx){ph.oninput=function(){questions[idx].placeholder=this.value;render();};})(i);
+    var icWrap2=document.createElement('div');icWrap2.style.cssText='display:flex;gap:4px;margin-top:0;';
+    var icInp=document.createElement('input');icInp.placeholder='אייקון (אופציונלי)';icInp.value=q.icon||'';icInp.style.cssText='flex:1;padding:5px 9px;font-size:12px;border:1px solid #E5E7EB;border-radius:8px;font-family:inherit;outline:none;background:white;';
+    (function(idx){icInp.oninput=function(){questions[idx].icon=this.value;};})(i);
+    var icBtn2=document.createElement('button');icBtn2.textContent='😀';
+    icBtn2.style.cssText='width:32px;height:32px;border:1px solid #E5E7EB;border-radius:8px;background:none;cursor:pointer;font-size:15px;flex-shrink:0;';
+    (function(inp){icBtn2.onclick=function(e){e.stopPropagation();showIconPicker(inp);};})(icInp);
+    icWrap2.appendChild(icInp);icWrap2.appendChild(icBtn2);
+    d.appendChild(ti);d.appendChild(de);d.appendChild(ph);d.appendChild(icWrap2);
+    // Required toggle
+    var reqRow=document.createElement('div');
+    reqRow.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-top:5px;';
+    var reqLbl=document.createElement('span');reqLbl.style.cssText='font-size:11px;color:#6B7280;';reqLbl.textContent='שדה חובה';
+    var togLabel=document.createElement('label');togLabel.style.cssText='position:relative;display:inline-block;width:30px;height:17px;cursor:pointer;';
+    var togInp=document.createElement('input');togInp.type='checkbox';togInp.style.cssText='opacity:0;width:0;height:0;position:absolute;';
+    togInp.checked=q.required||false;
+    (function(idx,lbl){
+      togInp.onchange=function(){questions[idx].required=this.checked;};
+      var span=document.createElement('span');
+      span.style.cssText='position:absolute;inset:0;border-radius:17px;cursor:pointer;transition:.15s;background:'+(q.required?'#4F46E5':'#D1D5DB')+';';
+      var knob=document.createElement('span');
+      knob.style.cssText='position:absolute;height:11px;width:11px;right:3px;top:3px;background:white;border-radius:50%;transition:.15s;transform:'+(q.required?'translateX(-13px)':'translateX(0)')+';';
+      span.appendChild(knob);
+      togInp.onchange=function(){
+        questions[idx].required=this.checked;
+        span.style.background=this.checked?'#4F46E5':'#D1D5DB';
+        knob.style.transform=this.checked?'translateX(-13px)':'translateX(0)';
+      };
+      togLabel.appendChild(togInp);togLabel.appendChild(span);
+    })(i, reqLbl);
+
+    // DB field + filler
+    var dbWrap=document.createElement('div');dbWrap.style.cssText='display:flex;gap:5px;align-items:center;margin-top:5px;';
+    var dbLbl=document.createElement('span');dbLbl.style.cssText='font-size:10px;color:#6B7280;flex-shrink:0;';dbLbl.textContent='DB:';
+    var dbSel=document.createElement('select');
+    dbSel.style.cssText='flex:1;padding:4px 6px;font-size:11px;border:1px solid #C7D2FE;border-radius:6px;font-family:inherit;outline:none;background:#EEF2FF;color:#4338CA;';
+    var dbEmpty=document.createElement('option');dbEmpty.value='';dbEmpty.textContent='-- שדה DB --';dbSel.appendChild(dbEmpty);
+    if(typeof SYNEL_DB_FIELDS!=='undefined'){
+      var dbCats={};
+      SYNEL_DB_FIELDS.forEach(function(f){if(!dbCats[f.category])dbCats[f.category]=[];dbCats[f.category].push(f);});
+      Object.keys(dbCats).forEach(function(cat){
+        var og=document.createElement('optgroup');og.label=cat;
+        dbCats[cat].forEach(function(f){var o=document.createElement('option');o.value=f.dbField;o.textContent=f.labelHe+' - '+f.dbField;if(f.dbField===(q.dbField||''))o.selected=true;og.appendChild(o);});
+        dbSel.appendChild(og);
+      });
+    }
+    (function(idx2){dbSel.onchange=function(){questions[idx2].dbField=this.value;var meta=SYNEL_DB_MAP&&SYNEL_DB_MAP[this.value];if(meta){questions[idx2].type=meta.type;}};})(i);
+    var fillerSel=document.createElement('select');
+    fillerSel.style.cssText='padding:4px 6px;font-size:11px;border:1px solid #E5E7EB;border-radius:6px;font-family:inherit;outline:none;background:white;';
+    [{v:'E_',l:'עובד'},{v:'M_',l:'מנהל'},{v:'S_',l:'מנהל-על'},{v:'',l:'כולם'}].forEach(function(opt){var o=document.createElement('option');o.value=opt.v;o.textContent=opt.l;if(opt.v===(q.filler||'E_'))o.selected=true;fillerSel.appendChild(o);});
+    (function(idx2){fillerSel.onchange=function(){questions[idx2].filler=this.value;};})(i);
+    dbWrap.appendChild(dbLbl);dbWrap.appendChild(dbSel);dbWrap.appendChild(fillerSel);
+    d.appendChild(dbWrap);
+    reqRow.appendChild(reqLbl);reqRow.appendChild(togLabel);
+    d.appendChild(reqRow);
+    list.appendChild(d);
+  });
+}
+
+function addQ(){
+  questions.push({title:'', desc:'', placeholder:''});
+  renderEditor();
+  render();
+}
+
+function removeQ(i){
+  if(questions.length===1){toast('חייב להיות לפחות שאלה אחת');return;}
+  questions.splice(i,1);
+  renderEditor();
+  render();
+}
+
+/* ── RENDER PREVIEW ── */
+function render(){
+  var name = document.getElementById('fName').value || 'טופס';
+  var sub  = document.getElementById('fSub').value || '';
+  var time = document.getElementById('fTime').value || '';
+  var btn  = document.getElementById('fBtn').value || 'אישור והמשך ←';
+
+  // Step indicator
+  document.getElementById('stepLbl').textContent = 'שלב 1 מתוך 1';
+  var dots = document.getElementById('pbarDots');
+  dots.innerHTML = '<div class="pdot active"></div>';
+
+  // Action button
+  document.getElementById('actionBtn').textContent = btn;
+
+  // Content
+  var c = document.getElementById('phoneContent');
+  c.innerHTML = '';
+
+  // Title
+  var h = document.createElement('div');
+  h.className = 'form-title'; h.textContent = name; c.appendChild(h);
+
+  // Subtitle
+  if(sub){
+    var s = document.createElement('div');
+    s.className = 'form-subtitle'; s.textContent = sub; c.appendChild(s);
+  }
+
+  // Time badge
+  if(time){
+    var tb = document.createElement('div');
+    tb.className = 'time-badge';
+    tb.innerHTML = '⏱ זמן משוער: ~'+time+' דק\'';
+    c.appendChild(tb);
+  }
+
+  // Questions
+  questions.forEach(function(q, i){
+    var card = document.createElement('div');
+    card.className = 'pq-card';
+    if(q.title){
+      var qt = document.createElement('div');
+      qt.className = 'pq-title'; qt.textContent = q.title;
+      card.appendChild(qt);
+    }
+    if(q.desc){
+      var qd = document.createElement('div');
+      qd.className = 'pq-desc'; qd.textContent = q.desc;
+      card.appendChild(qd);
+    }
+    var ta = document.createElement('textarea');
+    ta.className = 'pq-input';
+    ta.placeholder = q.placeholder || 'הכנס תשובה...';
+    ta.rows = 3;
+    if(q.required) ta.dataset.required='true';
+    if(q.required){
+      var reqMark=document.createElement('div');
+      reqMark.style.cssText='font-size:10px;color:#DC2626;margin-bottom:4px;';
+      reqMark.textContent='* שדה חובה';
+      card.appendChild(reqMark);
+    }
+    card.appendChild(ta);
+    c.appendChild(card);
+  });
+}
+
+/* ── SUBMIT ── */
+function submitForm(){
+  var inputs = document.querySelectorAll('.pq-input[data-required="true"]');
+  var missing = Array.from(inputs).filter(function(i){return !i.value.trim();});
+  var vb = document.getElementById('validBar');
+  // Highlight missing
+  document.querySelectorAll('.pq-input').forEach(function(i){i.style.borderColor='#E5E7EB';});
+  missing.forEach(function(i){i.style.borderColor='#DC2626';i.style.background='#FEF2F2';});
+  if(missing.length){
+    vb.style.display='block';
+    vb.innerHTML='⚠️ <strong>שדות חובה חסרים:</strong> ' + missing.length + ' שאלות לא מולאו';
+    setTimeout(function(){vb.style.display='none';},3000);
+  } else {
+    vb.style.display='none';
+    document.getElementById('actionBtn').textContent='✓ נשלח!';
+    document.getElementById('actionBtn').style.background='#2D7A4F';
+    toast('✓ הטופס הוגש בהצלחה');
+  }
+}
+
+/* ── SAVE / EXPORT ── */
+function exportJSON(){
+  var name = document.getElementById('fName').value || 'שאלה-תשובה';
+  var json = {
+    formType: 'qa',
+    meta: {
+      name: name,
+      subtitle: document.getElementById('fSub').value || '',
+      estimatedTime: parseInt(document.getElementById('fTime').value) || 4,
+      process: document.getElementById('fProcess') ? document.getElementById('fProcess').value : '',
+      stepCurrent: document.getElementById('fStepCur') ? parseInt(document.getElementById('fStepCur').value) : 1,
+      stepTotal: document.getElementById('fStepTotal') ? parseInt(document.getElementById('fStepTotal').value) : 6,
+      owner: document.getElementById('fOwner') ? document.getElementById('fOwner').value : '',
+      exportedAt: new Date().toISOString(),
+    },
+    completion: {
+      actionButton: document.getElementById('fBtn') ? document.getElementById('fBtn').value : '',
+    },
+    questions: questions.map(function(q){
+      return {
+        title: q.title,
+        description: q.desc || '',
+        placeholder: q.placeholder || '',
+        icon: q.icon || '',
+        dbField: q.dbField || '',
+        filler: q.filler || 'E_',
+        required: q.required !== false,
+        type: q.type || 'text',
+      };
+    }),
+  };
+  var blob = new Blob([JSON.stringify(json, null, 2)], {type:'application/json'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href=url; a.download=name.replace(/\s+/g,'_')+'.json';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+  toast('JSON יוצא: '+name+'.json');
+}
+
+function saveForm(){
+  var data = {
+    name: document.getElementById('fName').value,
+    sub:  document.getElementById('fSub').value,
+    time: document.getElementById('fTime').value,
+    btn:  document.getElementById('fBtn').value,
+    questions: questions.slice(),
+    process:   document.getElementById('fProcess').value,
+    stepCur:   document.getElementById('fStepCur').value,
+    stepTotal: document.getElementById('fStepTotal').value,
+    owner:     document.getElementById('fOwner').value,
+    customUrl: document.getElementById('fCustomUrl').value
+  };
+  try{localStorage.setItem('qa_template_'+data.name, JSON.stringify(data));}catch(e){}
+  toast('✓ נשמר: "'+data.name+'"');
+}
+
+function exportForm(){
+  if(typeof saveForm==='function') saveForm();
+  var _nm=(document.getElementById('fName')||{}).value||'טופס';
+  if(typeof SynelPublish!=='undefined') SynelPublish.publish(_nm);
+  else toast('🚀 פורסם!');
+}
+
+var tt=null;
+function toast(msg){
+  var t=document.getElementById('toastEl');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(tt);tt=setTimeout(function(){t.classList.remove('show');},2500);
+}
+
+/* ── SAVE AS ── */
+function saveAs(){
+  var modal = document.getElementById('saveAsModal');
+  document.getElementById('saveAsName').value = document.getElementById('fName').value + ' — עותק';
+  modal.style.display='flex';
+  setTimeout(function(){
+    var inp=document.getElementById('saveAsName');
+    inp.select();
+  },50);
+}
+
+function confirmSaveAs(){
+  var name = document.getElementById('saveAsName').value.trim();
+  if(!name){toast('הכנס שם');return;}
+  // Update form name
+  document.getElementById('fName').value = name;
+  render();
+  saveForm();
+  document.getElementById('saveAsModal').style.display='none';
+  toast('✓ נשמר בשם: "'+name+'"');
+}
+
+function openLoad(){
+  var list = document.getElementById('savedList');
+  list.innerHTML = '';
+  // Get all saved forms
+  var keys = [];
+  try{
+    for(var i=0;i<localStorage.length;i++){
+      var k=localStorage.key(i);
+      if(k&&k.startsWith('qa_template_'))keys.push(k);
+    }
+  }catch(e){}
+  if(!keys.length){
+    list.innerHTML='<div style="font-size:12px;color:#9CA3AF;text-align:center;padding:12px;">אין טפסים שמורים עדיין</div>';
+  } else {
+    keys.forEach(function(k){
+      try{
+        var data=JSON.parse(localStorage.getItem(k));
+        var d=document.createElement('div');
+        d.style.cssText='display:flex;align-items:center;gap:8px;padding:9px 12px;border:1px solid #E5E7EB;border-radius:10px;cursor:pointer;transition:all .1s;';
+        d.onmouseover=function(){this.style.background='#F5F5F5';};
+        d.onmouseout=function(){this.style.background='';};
+        var info=document.createElement('div');info.style.flex='1';
+        var nm=document.createElement('div');nm.style.cssText='font-size:13px;font-weight:500;color:#1a1a1a;';nm.textContent=data.name||k;
+        var qs=document.createElement('div');qs.style.cssText='font-size:11px;color:#9CA3AF;margin-top:1px;';
+        qs.textContent=(data.questions||[]).length+' שאלות';
+        info.appendChild(nm);info.appendChild(qs);
+        var loadBtn=document.createElement('button');
+        loadBtn.style.cssText='padding:4px 12px;font-size:11px;border-radius:20px;border:none;background:#4F46E5;color:white;cursor:pointer;font-family:inherit;';
+        loadBtn.textContent='טען';
+        (function(dat){loadBtn.onclick=function(){loadForm(dat);document.getElementById('loadModal').style.display='none';};})(data);
+        var delBtn=document.createElement('button');
+        delBtn.style.cssText='padding:4px 10px;font-size:11px;border-radius:20px;border:1px solid #FECACA;background:#FEF2F2;color:#DC2626;cursor:pointer;font-family:inherit;';
+        delBtn.textContent='מחק';
+        (function(key){delBtn.onclick=function(e){e.stopPropagation();if(confirm('למחוק?')){localStorage.removeItem(key);openLoad();}};})(k);
+        d.appendChild(info);d.appendChild(loadBtn);d.appendChild(delBtn);
+        list.appendChild(d);
+      }catch(ex){}
+    });
+  }
+  document.getElementById('loadModal').style.display='flex';
+}
+
+function loadForm(data){
+  document.getElementById('fName').value=data.name||'';
+  document.getElementById('fSub').value=data.sub||'';
+  document.getElementById('fTime').value=data.time||'';
+  document.getElementById('fBtn').value=data.btn||'אישור והמשך ←';
+  questions=data.questions||[];
+  if(data.process)  document.getElementById('fProcess').value=data.process;
+  if(data.stepCur)  document.getElementById('fStepCur').value=data.stepCur;
+  if(data.stepTotal)document.getElementById('fStepTotal').value=data.stepTotal;
+  if(data.owner)    document.getElementById('fOwner').value=data.owner;
+  if(data.customUrl)document.getElementById('fCustomUrl').value=data.customUrl;
+  updateAssign();
+  renderEditor();
+  render();
+  toast('✓ נטען: "'+data.name+'"');
+}
+
+/* ── ASSIGN ── */
+function updateAssign(){
+  var process = document.getElementById('fProcess').value;
+  var customSec = document.getElementById('customUrlSec');
+  customSec.style.display = process==='custom' ? 'flex' : 'none';
+
+  var cur   = document.getElementById('fStepCur').value;
+  var total = document.getElementById('fStepTotal').value;
+  var owner = document.getElementById('fOwner');
+  var ownerText = owner.options[owner.selectedIndex].text;
+
+  var processNames = {
+    onboarding:'🚀 Onboarding', offboarding:'🚪 Offboarding',
+    lifecycle:'🔄 Life Cycle', payroll:'💰 שכר', custom:'🔗 URL מותאם', '':'—'
+  };
+
+  var sum = document.getElementById('assignSummary');
+  if(process){
+    sum.style.display='block';
+    var backUrl = process==='custom'
+      ? (document.getElementById('fCustomUrl').value||'לא הוגדר')
+      : 'app.synel.co.il/'+process+'/list';
+    sum.innerHTML =
+      '<strong>תהליך:</strong> '+(processNames[process]||process)+'<br>'
+      +'<strong>שלב:</strong> '+cur+' מתוך '+total+'<br>'
+      +'<strong>אחראי:</strong> '+(owner.value?ownerText:'לא הוגדר')+'<br>'
+      +'<strong>"חזרה לרשימה" מוביל ל:</strong> '+backUrl;
+  } else {
+    sum.style.display='none';
+  }
+
+  // Update preview step indicator
+  document.getElementById('stepLbl').textContent='שלב '+cur+' מתוך '+total;
+  var dots=document.getElementById('pbarDots');
+  dots.innerHTML='';
+  var t=parseInt(total)||1;var c=parseInt(cur)||1;
+  for(var i=1;i<=Math.min(t,6);i++){
+    var dot=document.createElement('div');
+    dot.className='pdot'+(i===c?' active':'');
+    dots.appendChild(dot);
+  }
+}
+
+// Icon picker component - reusable across all templates
+// Usage: showIconPicker(inputElement) - attaches picker to any input
+
+var ICON_SETS = {
+  'כללי':      ['✅','❌','⚠️','ℹ️','🔔','📌','📍','🔑','🔒','🔓','⭐','💡','🎯','✨','🔥','💎','🏆','🎖️'],
+  'אנשים':     ['👤','👥','👨','👩','🧑','👶','🧓','👨‍💼','👩‍💼','👨‍💻','👩‍💻','🤝','👋','🙌','👏'],
+  'עבודה':     ['💼','📁','📂','📄','📝','📋','📊','📈','📉','🖥️','💻','📱','⌨️','🖨️','📞','☎️'],
+  'זמן':       ['⏰','⏱️','🕐','🕑','🕒','🕓','🕔','🕕','📅','📆','🗓️','⌚'],
+  'תחבורה':    ['🚗','🚕','🚌','🚎','🚑','🚒','✈️','🚂','🚲','🛵','🏍️','🚶'],
+  'בניין/מקום':['🏢','🏠','🏪','🏫','🏥','🏦','🏨','🗺️','📍','🚪','🪑','🖼️'],
+  'ציוד':      ['💻','🖥️','📱','⌨️','🖱️','🖨️','📷','📸','🎥','📺','📻','🔋','🔌','💡','🔦','🛠️','🔧','🔨'],
+  'תקשורת':   ['📧','📨','📩','📬','📭','💬','🗨️','📢','📣','📡'],
+  'כסף/עסקים':['💰','💵','💳','🏦','📊','📈','📉','🤑','💹','🏷️'],
+  'סימנים':    ['✓','✗','→','←','↑','↓','★','☆','♦','♠','♣','♥','•','–','—','©','®','™','°'],
+};
+
+function showIconPicker(inputEl){
+  // Remove existing picker
+  var existing = document.getElementById('iconPickerPanel');
+  if(existing){
+    if(existing._forInput === inputEl){ existing.remove(); return; }
+    existing.remove();
+  }
+
+  var panel = document.createElement('div');
+  panel.id = 'iconPickerPanel';
+  panel._forInput = inputEl;
+  panel.style.cssText = 'position:fixed;background:white;border:1px solid #E5E7EB;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.15);z-index:500;width:280px;max-height:320px;display:flex;flex-direction:column;overflow:hidden;direction:rtl;font-family:sans-serif;';
+
+  // Header
+  var head = document.createElement('div');
+  head.style.cssText='padding:8px 12px;border-bottom:1px solid #E5E7EB;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;';
+  head.innerHTML='<span style="font-size:12px;font-weight:600;color:#374151;">בחר אייקון</span>';
+  var close = document.createElement('button');
+  close.textContent='✕';
+  close.style.cssText='border:none;background:none;cursor:pointer;font-size:13px;color:#9CA3AF;padding:0;';
+  close.onclick=function(){panel.remove();};
+  head.appendChild(close);
+  panel.appendChild(head);
+
+  // Categories + icons
+  var body = document.createElement('div');
+  body.style.cssText='flex:1;overflow-y:auto;padding:8px;';
+
+  Object.keys(ICON_SETS).forEach(function(cat){
+    var catTitle = document.createElement('div');
+    catTitle.style.cssText='font-size:10px;font-weight:600;color:#9CA3AF;letter-spacing:.04em;text-transform:uppercase;margin:6px 2px 4px;';
+    catTitle.textContent = cat;
+    body.appendChild(catTitle);
+
+    var grid = document.createElement('div');
+    grid.style.cssText='display:flex;flex-wrap:wrap;gap:3px;';
+
+    ICON_SETS[cat].forEach(function(icon){
+      var btn = document.createElement('button');
+      btn.textContent = icon;
+      btn.style.cssText='width:30px;height:30px;border:1px solid #E5E7EB;border-radius:6px;background:none;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .1s;';
+      btn.onmouseover=function(){this.style.background='#EEF2FF';this.style.borderColor='#818CF8';};
+      btn.onmouseout=function(){this.style.background='none';this.style.borderColor='#E5E7EB';};
+      btn.onclick=function(){
+        inputEl.value = icon;
+        inputEl.dispatchEvent(new Event('input'));
+        panel.remove();
+      };
+      grid.appendChild(btn);
+    });
+    body.appendChild(grid);
+  });
+
+  panel.appendChild(body);
+
+  // Position near input
+  document.body.appendChild(panel);
+  var rect = inputEl.getBoundingClientRect();
+  var panelH = 320;
+  var top = rect.bottom + 4;
+  if(top + panelH > window.innerHeight) top = rect.top - panelH - 4;
+  panel.style.top = Math.max(4, top)+'px';
+  var left = rect.right - 280;
+  if(left < 4) left = 4;
+  panel.style.left = left+'px';
+
+  // Close on outside click
+  setTimeout(function(){
+    document.addEventListener('click', function handler(e){
+      if(!panel.contains(e.target) && e.target !== inputEl){
+        panel.remove();
+        document.removeEventListener('click', handler);
+      }
+    });
+  }, 100);
+}
+
+
+/* ── INIT ── */
+renderEditor();
+render();
+
+/* ── CONFIRM TYPE ── */
+function updateConfirmType(){
+  var hasSig = document.getElementById('hasSigOpt') && document.getElementById('hasSigOpt').checked;
+  var hasCheck = document.getElementById('hasCheckOpt') && document.getElementById('hasCheckOpt').checked;
+  var txt = document.getElementById('confirmOptText') ? document.getElementById('confirmOptText').value : 'קראתי והבנתי';
+  // Update in preview if render exists
+  if(typeof render === 'function') render();
+}
+
+</script>
+<script src="synel-help.js"></script>
+</body>
+</html>
