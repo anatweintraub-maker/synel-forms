@@ -718,5 +718,8 @@ function toast(msg){var t=document.getElementById('toastEl');t.textContent=msg;t
 updateAssign();renderEditor();render();
 </script>
 <script src="synel-help.js"></script>
+
+<script>/* Synel: פתיחת מופע שמור לפי ?load= */
+(function(){var m=location.search.match(/[?&]load=([^&]+)/);if(!m)return;var key="info_"+decodeURIComponent(m[1]);function go(){try{var raw=localStorage.getItem(key);if(!raw)return;var d=JSON.parse(raw);if(typeof loadForm==='function')loadForm(d);}catch(e){}}if(document.readyState==='complete')setTimeout(go,350);else window.addEventListener('load',function(){setTimeout(go,350);});})();</script>
 </body>
 </html>

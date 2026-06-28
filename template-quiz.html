@@ -723,5 +723,8 @@ function renderDBMappings(){
 
 </script>
 <script src="synel-help.js"></script>
+
+<script>/* Synel: פתיחת מופע שמור לפי ?load= */
+(function(){var m=location.search.match(/[?&]load=([^&]+)/);if(!m)return;var key="quiz_"+decodeURIComponent(m[1]);function go(){try{var raw=localStorage.getItem(key);if(!raw)return;var d=JSON.parse(raw);if(typeof loadForm==='function')loadForm(d);}catch(e){}}if(document.readyState==='complete')setTimeout(go,350);else window.addEventListener('load',function(){setTimeout(go,350);});})();</script>
 </body>
 </html>
