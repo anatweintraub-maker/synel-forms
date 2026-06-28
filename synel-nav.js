@@ -149,6 +149,44 @@ var SynelNav = {
     }
   },
 
+  _injectPanel: function () {
+    var panel = document.querySelector('.editor-panel, .ep');
+    if (!panel || document.getElementById('synel-nav-panel')) return;
+    var c = this.cfg;
+    function esc(v){return (''+(v||'')).replace(/"/g,'&quot;');}
+    function block(id,label,txtId,txtVal,show){
+      return '<div style="margin-bottom:10px;">'
+        + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">'
+        +   '<span style="font-size:12px;color:#374151;">'+label+'</span>'
+        +   '<input type="checkbox" id="'+id+'" '+(show?'checked':'')+' style="width:16px;height:16px;cursor:pointer;">'
+        + '</div>'
+        + '<input id="'+txtId+'" value="'+esc(txtVal)+'" style="width:100%;padding:6px 10px;font-size:12px;border:1px solid #E5E7EB;border-radius:8px;font-family:inherit;outline:none;box-sizing:border-box;">'
+        + '</div>';
+    }
+    var sec = document.createElement('div');
+    sec.id = 'synel-nav-panel';
+    sec.style.cssText = 'border-top:1px solid #E5E7EB;margin-top:14px;padding-top:14px;padding-bottom:8px;';
+    sec.innerHTML =
+      '<div style="font-size:12px;font-weight:700;color:#6B7280;margin-bottom:4px;">ניווט (מעטפת אחידה)</div>'
+      + '<div style="font-size:11px;color:#9CA3AF;margin-bottom:10px;">משותף לכל הטפסים. כבה/שנה טקסט — מתעדכן בתצוגה.</div>'
+      + block('snBack','כפתור "חזרה ←" (עליון)','snBackTxt',c.backText,c.showBack)
+      + block('snLater','"המשך מאוחר יותר" (עליון)','snLaterTxt',c.laterText,c.showLater)
+      + block('snBackList','"חזרה לרשימה" (תחתון)','snBackListTxt',c.backListText,c.showBackList);
+    panel.appendChild(sec);
+    function bind(){
+      SynelNav.set({
+        showBack: document.getElementById('snBack').checked,
+        backText: document.getElementById('snBackTxt').value,
+        showLater: document.getElementById('snLater').checked,
+        laterText: document.getElementById('snLaterTxt').value,
+        showBackList: document.getElementById('snBackList').checked,
+        backListText: document.getElementById('snBackListTxt').value
+      });
+    }
+    ['snBack','snLater','snBackList'].forEach(function(id){var el=document.getElementById(id);if(el)el.onchange=bind;});
+    ['snBackTxt','snLaterTxt','snBackListTxt'].forEach(function(id){var el=document.getElementById(id);if(el)el.oninput=bind;});
+  },
+
   apply: function () {
     this._injectCss();
     if (typeof SynelBrand !== 'undefined' && SynelBrand.get) {
@@ -159,6 +197,7 @@ var SynelNav = {
     var wraps = document.querySelectorAll('.phone-wrap, .phone');
     for (var i = 0; i < wraps.length; i++) this._build(wraps[i]);
     this._injected = true;
+    try { this._injectPanel(); } catch (e) {}
   },
 
   /* עדכון ערכים (שם עובד, התקדמות) — בונה מחדש את המעטפת */
