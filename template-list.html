@@ -208,6 +208,15 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;direction:rtl;background:var(
     </div>
 
     <div class="ep-sec">
+      <label>ההתקדמות שלך</label>
+      <div class="tog-row">
+        <span>הצג פס "ההתקדמות שלך"</span>
+        <label class="tog"><input type="checkbox" id="hasStepProgress" onchange="render()"><span class="togs"></span></label>
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:4px;">מחושב אוטומטית: כמה שלבים הושלמו + זמן נותר. סמנו שלב בתצוגה כדי להשלים.</div>
+    </div>
+
+    <div class="ep-sec">
       <label>אישור סיום</label>
       <div class="tog-row">
         <span>הצג אישור קריאה</span>
@@ -506,6 +515,24 @@ function render(){
   if(sub){var s=document.createElement('div');s.className='pv-sub';s.textContent=sub;c.appendChild(s);}
   if(time){var t=document.createElement('div');t.className='pv-time';t.innerHTML='⏱ זמן משוער: ~'+time+' דק\'';c.appendChild(t);}
 
+  // ההתקדמות שלך (פס מחושב אוטומטית)
+  var hasStepProg = document.getElementById('hasStepProgress') && document.getElementById('hasStepProgress').checked;
+  if(hasStepProg){
+    var actT=['time-text','text-desc','time-text-desc','icon-text-est','checkbox','link'];
+    var compH = window._completedRows||{};
+    var totalS=0, doneS=0, remainM=0;
+    rows.forEach(function(r,i){ if(actT.indexOf(r.type)>=0){ totalS++; if(compH[i])doneS++; else{ var mm=(''+(r.est||'')).match(/\d+/); remainM += mm?parseInt(mm[0]):0; } } });
+    var pctH = totalS? Math.round(doneS/totalS*100):0;
+    var ph=document.createElement('div');
+    ph.style.cssText='background:#FFF7F4;border:1px solid #FBD9CC;border-radius:14px;padding:14px;margin-bottom:12px;';
+    ph.innerHTML='<div style="font-size:14px;font-weight:700;margin-bottom:10px;text-align:right;">ההתקדמות שלך</div>'
+      +'<div style="background:#F0EDE9;border-radius:99px;height:8px;overflow:hidden;margin-bottom:8px;"><div style="background:#E8603C;height:100%;width:'+pctH+'%;border-radius:99px;"></div></div>'
+      +'<div style="display:flex;justify-content:space-between;font-size:12px;color:#6B7280;">'
+      +'<span>⏱ כ-'+remainM+' דקות נותרו</span>'
+      +'<span>'+doneS+' מתוך '+totalS+' שלבים הושלמו</span></div>';
+    c.appendChild(ph);
+  }
+
   // Date
   if(dateMode!=='none'){
     var d=new Date();
@@ -567,8 +594,8 @@ function buildPreviewRow(row, isNext, isDone, rowIdx){
   }
   if(row.type==='time-text'||row.type==='time-text-desc'){
     el=document.createElement('div');el.className='pv-item';el.style.position='relative';
-    if(isDone){el.style.cssText='display:flex;align-items:flex-start;gap:10px;padding:11px 14px;border-radius:12px;background:#F0FDF4;margin-bottom:8px;border:1px solid #A7F3D0;opacity:.7;';}
-    if(isNext){var tg=document.createElement('div');tg.className='pv-tag';tg.style.background='#E8603C';tg.textContent='הבא';el.appendChild(tg);}
+    if(isDone){el.style.cssText='display:flex;align-items:flex-start;gap:10px;padding:11px 14px;border-radius:12px;background:#F0FDF4;margin-bottom:8px;border:1px solid #A7F3D0;opacity:.7;position:relative;';}
+    if(isNext){var tg=document.createElement('div');tg.className='pv-tag';tg.style.background='#E8603C';tg.textContent='הבא';el.appendChild(tg);}if(isDone){var tgD=document.createElement('div');tgD.className='pv-tag';tgD.style.background='#2D7A4F';tgD.textContent='הושלם';el.appendChild(tgD);}
     var tm=document.createElement('div');tm.className='pv-item-time';
     if(isDone){tm.innerHTML='<span style="color:#2D7A4F;font-size:16px;">✓</span>';}
     else{tm.textContent=row.time||'';}
@@ -589,8 +616,8 @@ function buildPreviewRow(row, isNext, isDone, rowIdx){
   }
   if(row.type==='text-desc'){
     el=document.createElement('div');el.className='pv-item';el.style.position='relative';
-    if(isDone){el.style.cssText='display:flex;align-items:flex-start;gap:10px;padding:11px 14px;border-radius:12px;background:#F0FDF4;margin-bottom:8px;border:1px solid #A7F3D0;opacity:.7;';}
-    if(isNext){var tg2=document.createElement('div');tg2.className='pv-tag';tg2.style.background='#E8603C';tg2.textContent='הבא';el.appendChild(tg2);}
+    if(isDone){el.style.cssText='display:flex;align-items:flex-start;gap:10px;padding:11px 14px;border-radius:12px;background:#F0FDF4;margin-bottom:8px;border:1px solid #A7F3D0;opacity:.7;position:relative;';}
+    if(isNext){var tg2=document.createElement('div');tg2.className='pv-tag';tg2.style.background='#E8603C';tg2.textContent='הבא';el.appendChild(tg2);}if(isDone){var tgD2=document.createElement('div');tgD2.className='pv-tag';tgD2.style.background='#2D7A4F';tgD2.textContent='הושלם';el.appendChild(tgD2);}
     var cont2=document.createElement('div');cont2.className='pv-item-content';
     var ti2=document.createElement('div');ti2.className='pv-item-title';if(isDone){ti2.style.textDecoration='line-through';ti2.style.color='#9CA3AF';}ti2.textContent=row.text||'';cont2.appendChild(ti2);
     if(row.desc){var ds2=document.createElement('div');ds2.className='pv-item-sub';ds2.textContent=row.desc;cont2.appendChild(ds2);}
@@ -600,7 +627,7 @@ function buildPreviewRow(row, isNext, isDone, rowIdx){
   }
   if(row.type==='icon-text-est'){
     el=document.createElement('div');el.className='pv-item';el.style.position='relative';
-    if(isNext){var tg3=document.createElement('div');tg3.className='pv-tag';tg3.style.background='#E8603C';tg3.textContent='הבא';el.appendChild(tg3);}
+    if(isNext){var tg3=document.createElement('div');tg3.className='pv-tag';tg3.style.background='#E8603C';tg3.textContent='הבא';el.appendChild(tg3);}if(isDone){var tgD3=document.createElement('div');tgD3.className='pv-tag';tgD3.style.background='#2D7A4F';tgD3.textContent='הושלם';el.appendChild(tgD3);}
     // Icon
     var ic=document.createElement('div');ic.className='pv-item-icon';ic.textContent=row.icon||'📌';
     // Content (title + subtitle)
@@ -616,7 +643,7 @@ function buildPreviewRow(row, isNext, isDone, rowIdx){
       estWrap.appendChild(estBadge);
     }
     el.appendChild(ic);el.appendChild(cont3);el.appendChild(estWrap);
-    if(isDone){el.style.cssText='display:flex;align-items:flex-start;gap:10px;padding:11px 14px;border-radius:12px;background:#F0FDF4;margin-bottom:8px;border:1px solid #A7F3D0;opacity:.7;';}
+    if(isDone){el.style.cssText='display:flex;align-items:flex-start;gap:10px;padding:11px 14px;border-radius:12px;background:#F0FDF4;margin-bottom:8px;border:1px solid #A7F3D0;opacity:.7;position:relative;';}
     (function(idx){el.onclick=function(){if(!document.getElementById('hasProgress').checked)return;if(!window._completedRows)window._completedRows={};window._completedRows[idx]=!window._completedRows[idx];render();};})(rowIdx);
     return el;
   }
@@ -695,6 +722,7 @@ function getData(){
     time: document.getElementById('fTime').value,
     dateMode: document.getElementById('fDateMode').value,
     hasProgress: document.getElementById('hasProgress').checked,
+    hasStepProgress: document.getElementById('hasStepProgress')?document.getElementById('hasStepProgress').checked:false,
     hasRC: document.getElementById('hasRC').checked,
     rcText: document.getElementById('rcText').value,
     hasSig: document.getElementById('hasSig').checked,
@@ -753,6 +781,7 @@ function loadForm(data){
   document.getElementById('fTime').value=data.time||'';
   document.getElementById('fDateMode').value=data.dateMode||'today';
   document.getElementById('hasProgress').checked=data.hasProgress!==false;
+  if(document.getElementById('hasStepProgress'))document.getElementById('hasStepProgress').checked=!!data.hasStepProgress;
   document.getElementById('hasRC').checked=data.hasRC!==false;
   document.getElementById('rcText').value=data.rcText||'';
   document.getElementById('hasSig').checked=data.hasSig||false;
@@ -900,7 +929,8 @@ updateAssign(); renderEditor(); render();
 </script>
 <script src="synel-help.js"></script>
 
-<script>/* Synel: פתיחת מופע שמור לפי ?load= */
-(function(){var m=location.search.match(/[?&]load=([^&]+)/);if(!m)return;var key="list_template_"+decodeURIComponent(m[1]);function go(){try{var raw=localStorage.getItem(key);if(!raw)return;var d=JSON.parse(raw);if(typeof loadForm==='function')loadForm(d);}catch(e){}}if(document.readyState==='complete')setTimeout(go,350);else window.addEventListener('load',function(){setTimeout(go,350);});})();</script>
+
+<script>/* Synel: טפסי רשימה מוטמעים + טעינה לפי ?load= */
+(function(){function dec(x){try{return JSON.parse(decodeURIComponent(escape(atob(x))));}catch(e){return {};}}var BUILTIN=dec("eyLXqNep15nXnteqINen15zXmdeY15Qg4oCUINeY16TXodeZ150g15zXnteZ15zXldeZIjogeyJuYW1lIjogIteo16nXmdee16og16fXnNeZ15jXlCDigJQg15jXpNeh15nXnSDXnNee15nXnNeV15kiLCAic3ViIjogIteb15wg15TXqdec15HXmdedINep16LXnNeZ15og15zXlNep15zXmdedINeR16fXnNeZ15jXlCIsICJ0aW1lIjogIiIsICJkYXRlTW9kZSI6ICJub25lIiwgImhhc1Byb2dyZXNzIjogdHJ1ZSwgImhhc1N0ZXBQcm9ncmVzcyI6IHRydWUsICJoYXNSQyI6IGZhbHNlLCAicmNUZXh0IjogIiIsICJoYXNTaWciOiBmYWxzZSwgInByb2Nlc3MiOiAib25ib2FyZGluZyIsICJzdGVwQ3VyIjogIjEiLCAic3RlcFRvdGFsIjogIjYiLCAib3duZXIiOiAiIiwgInJvd3MiOiBbeyJ0eXBlIjogImljb24tdGV4dC1lc3QiLCAiaWNvbiI6ICLwn6qqIiwgInRleHQiOiAi15jXldek16EgMTAxIiwgInN1YiI6ICLXpteZ15zXldedINeq17TXliDXldeh16TXlyArINep15DXnNeV16og16nXm9eoIiwgImVzdCI6ICI0INeT16fXldeqIn0sIHsidHlwZSI6ICJpY29uLXRleHQtZXN0IiwgImljb24iOiAi8J+TnSIsICJ0ZXh0IjogIteX15XXlteUINeU16LXoden15QiLCAic3ViIjogIteq16DXkNeZ150gKyDXl9eq15nXnteUINeT15nXkteZ15jXnNeZ16oiLCAiZXN0IjogIjMg15PXp9eV16oifSwgeyJ0eXBlIjogImljb24tdGV4dC1lc3QiLCAiaWNvbiI6ICLwn5K8IiwgInRleHQiOiAi16HXoteZ16MgMTQiLCAic3ViIjogIteU16HXk9eoINek15nXpteV15nXmdedINeV16TXoNeh15nXlCIsICJlc3QiOiAiMiDXk9en15XXqiJ9LCB7InR5cGUiOiAiaWNvbi10ZXh0LWVzdCIsICJpY29uIjogIvCfk4siLCAidGV4dCI6ICLXoNeU15zXmSDXlNeX15HXqNeUIiwgInN1YiI6ICLXnteT15nXoNeZ15XXqiArINep15DXnNeV16og15TXkdeg15QiLCAiZXN0IjogIjIg15PXp9eV16oifSwgeyJ0eXBlIjogImljb24tdGV4dC1lc3QiLCAiaWNvbiI6ICLwn5K7IiwgInRleHQiOiAi16fXkdec16og16bXmdeV15MiLCAic3ViIjogIteQ15nXqdeV16gg16fXkdec16og16bXmdeV15MiLCAiZXN0IjogIjIg15PXp9eV16oifSwgeyJ0eXBlIjogImljb24tdGV4dC1lc3QiLCAiaWNvbiI6ICLwn4+mIiwgInRleHQiOiAi15TXpteY16jXpNeV16og15zXpNeg16HXmdeUIiwgInN1YiI6ICLXkdeX15nXqNeqINen16jXnyDXldee16HXnNeV15wiLCAiZXN0IjogIjMg15PXp9eV16oifV0sICJzYXZlZEF0IjogIjIwMjYtMDYtMjhUMDk6MDA6MDAuMDAwWiJ9LCAi15zXlde015Yg15nXldedINeQ15fXqNeV158iOiB7Im5hbWUiOiAi15zXlde015Yg15nXldedINeQ15fXqNeV158iLCAic3ViIjogIteh15PXqCDXlNeZ15XXnSDXqdecINeZ15XXnSDXlNei15bXmdeR15QiLCAidGltZSI6ICIiLCAiZGF0ZU1vZGUiOiAibm9uZSIsICJoYXNQcm9ncmVzcyI6IHRydWUsICJoYXNTdGVwUHJvZ3Jlc3MiOiBmYWxzZSwgImhhc1JDIjogZmFsc2UsICJyY1RleHQiOiAiIiwgImhhc1NpZyI6IGZhbHNlLCAicHJvY2VzcyI6ICJvZmZib2FyZGluZyIsICJzdGVwQ3VyIjogIjQiLCAic3RlcFRvdGFsIjogIjYiLCAib3duZXIiOiAiIiwgInJvd3MiOiBbeyJ0eXBlIjogInRpbWUtdGV4dCIsICJ0aW1lIjogIjA5OjAwIiwgInRleHQiOiAi16TXkteZ16nXqiDXodeZ15vXldedINei150gSFIifSwgeyJ0eXBlIjogInRpbWUtdGV4dCIsICJ0aW1lIjogIjEwOjMwIiwgInRleHQiOiAi15TXl9eW16jXqiDXpteZ15XXkyDXnOKAkUlUIn0sIHsidHlwZSI6ICJpY29uLXRleHQtZXN0IiwgImljb24iOiAi8J+SvCIsICJ0ZXh0IjogIteo15DXmdeV158g16LXlteZ15HXlCDXpNeV16jXntec15kiLCAic3ViIjogItep15nXl9eUINei15wg15fXldeV15nXmdeqINeU16LXkdeV15PXlCIsICJlc3QiOiAiMTUg15PXp9eV16oifSwgeyJ0eXBlIjogImljb24tdGV4dC1lc3QiLCAiaWNvbiI6ICLwn5al77iPIiwgInRleHQiOiAi16DXmdeq15XXpyDXkteZ16nXldeqINee16LXqNeb15XXqiIsICJzdWIiOiAiSVQg15nXkdem16Ig15HXoNeV15vXl9eV16rXmiIsICJlc3QiOiAiNSDXk9en15XXqiJ9LCB7InR5cGUiOiAidGltZS10ZXh0IiwgInRpbWUiOiAiMTY6MDAiLCAidGV4dCI6ICLXm9eZ15HXldeTINek16jXmdeT15Qg15XXpNeZ16DXldeZINep15XXnNeX158ifV0sICJzYXZlZEF0IjogIjIwMjYtMDYtMjhUMDk6MDA6MDAuMDAwWiJ9fQ==");var m=location.search.match(/[?&]load=([^&]+)/);if(!m)return;var name=decodeURIComponent(m[1]);function go(){try{var d=BUILTIN[name]||null;if(!d){var raw=localStorage.getItem("list_template_"+name);if(raw)d=JSON.parse(raw);}if(d&&typeof loadForm==="function")loadForm(d);}catch(e){}}if(document.readyState==="complete")setTimeout(go,400);else window.addEventListener("load",function(){setTimeout(go,400);});})();</script>
 </body>
 </html>
