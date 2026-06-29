@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Form Studio — Synel · v8</title>
+<title>Form Studio — Synel · v9</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{--bg:#F5F5F0;--surface:#fff;--border:#E5E7EB;--text:#1a1a1a;--text2:#6B7280;--text3:#9CA3AF;--accent:#4F46E5;--green:#2D7A4F;--orange:#E8603C;--r:12px;}
@@ -342,6 +342,17 @@ function confirmSend(){
       CLEAN.forEach(function(k){try{localStorage.removeItem(k);}catch(e){}});
       OLDOCR.forEach(function(k){try{localStorage.removeItem(k);}catch(e){}});
       localStorage.setItem("cleanup_v7","1");
+    }
+    if(!localStorage.getItem("cleanup_v9")){
+      var CONDNAMES=["קבלת ציוד","החזרת ציוד","בקשת מכתב המלצה"];
+      var rm9=[];
+      for(var j=0;j<localStorage.length;j++){ var kk=localStorage.key(j); if(!kk)continue;
+        if(kk.indexOf("onoff_")===0){rm9.push(kk);continue;}
+        if(kk.indexOf("cond_")===0)continue;
+        try{ var rec=JSON.parse(localStorage.getItem(kk)); if(rec&&rec.name&&CONDNAMES.indexOf(rec.name)>=0) rm9.push(kk); }catch(e){}
+      }
+      rm9.forEach(function(k){try{localStorage.removeItem(k);}catch(e){}});
+      localStorage.setItem("cleanup_v9","1");
     }
     if(!localStorage.getItem("seed_v8")){
       Object.keys(SEED).forEach(function(k){ if(localStorage.getItem(k)===null) localStorage.setItem(k, JSON.stringify(SEED[k])); });

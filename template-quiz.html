@@ -526,7 +526,7 @@ function render(){
     var answered=false;
 
     (q.answers||[]).forEach(function(ans){
-      var btn2=document.createElement('button');btn2.className='pv-choice';btn2.textContent=ans.text||'תשובה';
+      var btn2=document.createElement('button');btn2.className='pv-choice';btn2.textContent=ans.text||'תשובה';btn2.setAttribute('data-atype',ans.type||'neutral');
       (function(a,fb,ch,fd){
         btn2.onclick=function(){
           if(answered)return;
@@ -536,6 +536,8 @@ function render(){
           // Mark this
           if(a.type==='correct'){btn2.classList.add('correct');}
           else if(a.type==='wrong'){btn2.classList.add('wrong');}
+          // חשיפת התשובה הנכונה תמיד (גם אם נבחרה תשובה שגויה)
+          ch.querySelectorAll('.pv-choice').forEach(function(b){ if(b.getAttribute('data-atype')==='correct'){ b.classList.add('correct'); } });
           // Show feedback
           if(a.feedback){
             fd.textContent=a.feedback;
