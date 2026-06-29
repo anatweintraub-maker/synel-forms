@@ -665,13 +665,13 @@
       document.getElementById('ta').value=SAMPLE;
       inLbl.textContent='fromText()';
     } else if(current==='image'){
-      inputArea.innerHTML=dropHTML('תמונה או סריקה','PNG · JPG · WEBP','image/*')+'<div id="prev" class="preview"></div>';
+      inputArea.innerHTML=dropHTML('תמונה, סריקה או PDF','PNG · JPG · WEBP · PDF','image/*,application/pdf')+'<div id="prev" class="preview"></div>';
       inLbl.textContent='fromImage()';
-      wireDrop('image/');
+      wireDrop('image');
     } else {
       inputArea.innerHTML=dropHTML('קובץ PDF','עד כמה עמודים','application/pdf')+'<div id="prev" class="preview"></div>';
       inLbl.textContent='fromPDF()';
-      wireDrop('application/pdf');
+      wireDrop('pdf');
     }
   }
 
@@ -697,20 +697,45 @@
   }
 
   async function handleFile(f,kind){
-    if(kind==='application/pdf'){
-      if(!/pdf$/i.test(f.name) && f.type!=='application/pdf'){alert('יש להעלות PDF');return;}
-      await processPDF(f);
+    var isPdf = /pdf$/i.test(f.name) || f.type==='application/pdf';
+    if(kind==='image'){
+      if(isPdf){
+        // PDF במסך התמונה — ממירים את העמוד הראשון לתמונה ומריצים זיהוי כרגיל
+        setStatus('ממיר PDF לתמונה…',true);
+        try{
+          var dataUrl=await pdfFirstPageToImage(f);
+          await processImageFromDataUrl(dataUrl);
+        }catch(err){ setStatus('שגיאה בהמרת ה-PDF: '+err.message,false); }
+      } else if(f.type.startsWith('image/')){
+        await processImage(f);
+      } else { alert('יש להעלות תמונה או PDF'); }
     } else {
-      if(!f.type.startsWith('image/')){alert('יש להעלות תמונה');return;}
-      await processImage(f);
+      if(!isPdf){alert('יש להעלות PDF');return;}
+      await processPDF(f);
     }
+  }
+
+  // ממיר את העמוד הראשון של PDF לתמונה ברזולוציה גבוהה (לזיהוי קווים מדויק)
+  async function pdfFirstPageToImage(f){
+    var buf=await readAsArrayBuffer(f);
+    var pdf=await pdfjsLib.getDocument({data:buf}).promise;
+    var page=await pdf.getPage(1);
+    var vp=page.getViewport({scale:2.2});
+    var c=document.createElement('canvas'); c.width=vp.width; c.height=vp.height;
+    await page.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;
+    return c.toDataURL('image/png');
   }
 
   function readAsDataURL(f){return new Promise(function(res){var r=new FileReader();r.onload=function(){res(r.result);};r.readAsDataURL(f);});}
   function readAsArrayBuffer(f){return new Promise(function(res){var r=new FileReader();r.onload=function(){res(r.result);};r.readAsArrayBuffer(f);});}
 
   async function processImage(f){
-    uploadedImage=await readAsDataURL(f);
+    var dataUrl=await readAsDataURL(f);
+    await processImageFromDataUrl(dataUrl);
+  }
+
+  async function processImageFromDataUrl(dataUrl){
+    uploadedImage=dataUrl;
     await new Promise(function(res){var im=new Image();im.onload=function(){uploadedImgW=im.naturalWidth;uploadedImgH=im.naturalHeight;res();};im.onerror=function(){res();};im.src=uploadedImage;});
     var prev=document.getElementById('prev');
     prev.dataset.keep='<img src="'+uploadedImage+'">';
