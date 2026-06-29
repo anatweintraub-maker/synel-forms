@@ -239,6 +239,59 @@ var SynelNav = {
     list.innerHTML = html;
   },
 
+  _sigEnsure: function (cb) {
+    if (typeof window.SynelSignature !== 'undefined') { cb(); return; }
+    var ex = document.getElementById('synel-sig-dyn');
+    if (ex) { ex.addEventListener('load', cb); return; }
+    var sc = document.createElement('script');
+    sc.id = 'synel-sig-dyn'; sc.src = 'synel-signature.js';
+    sc.onload = function () { cb(); };
+    document.head.appendChild(sc);
+  },
+
+  _enhanceSignatures: function () {
+    var self = this;
+    var cans = document.querySelectorAll('.phone-wrap canvas, .phone canvas');
+    for (var i = 0; i < cans.length; i++) {
+      (function (canvas) {
+        if (canvas.getAttribute('data-ssig')) return;
+        canvas.setAttribute('data-ssig', '1');
+        canvas.style.cursor = 'pointer';
+        function openBig(ev) {
+          if (ev) { ev.preventDefault(); if (ev.stopImmediatePropagation) ev.stopImmediatePropagation(); }
+          if (Date.now() - (self._sigLastOpen || 0) < 500) return;
+          self._sigLastOpen = Date.now();
+          var nm = (document.getElementById('fName') || {}).value || '';
+          self._sigEnsure(function () {
+            if (typeof window.SynelSignature === 'undefined') return;
+            window.SynelSignature.open({ title: 'חתימה דיגיטלית', signer: nm }, function (result) {
+              if (!result || !result.image) return;
+              var img = new Image();
+              img.onload = function () {
+                try { var ctx = canvas.getContext('2d'); ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.drawImage(img, 0, 0, canvas.width, canvas.height); } catch (e) {}
+              };
+              img.src = result.image;
+              canvas.classList.add('signed');
+            });
+          });
+        }
+        canvas.addEventListener('pointerdown', openBig, true);
+        canvas.addEventListener('mousedown', openBig, true);
+        canvas.addEventListener('touchstart', openBig, true);
+      })(cans[i]);
+    }
+  },
+
+  _watchSignatures: function () {
+    var self = this;
+    var host = document.querySelector('.phone-content') || document.getElementById('pvContent') || document.querySelector('.phone-wrap') || document.querySelector('.phone') || document.body;
+    this._enhanceSignatures();
+    if (host && !this._sigObserver) {
+      this._sigObserver = new MutationObserver(function () { self._enhanceSignatures(); });
+      this._sigObserver.observe(host, { childList: true, subtree: true });
+    }
+  },
+
   apply: function () {
     this._injectCss();
     if (typeof SynelBrand !== 'undefined' && SynelBrand.get) {
@@ -256,6 +309,8 @@ var SynelNav = {
       var fn = document.getElementById('fName');
       if (fn) fn.addEventListener('input', function(){ self._updateBackstage(); });
       setTimeout(function(){ self._injectBackstage(); self._updateBackstage(); }, 700);
+      this._watchSignatures();
+      setTimeout(function(){ self._watchSignatures(); }, 700);
     } catch (e) {}
   },
 
