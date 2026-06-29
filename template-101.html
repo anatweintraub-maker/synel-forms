@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>טופס 101 — קליטת עובד · v11</title>
+<title>טופס 101 — קליטת עובד · v13</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{--bg:#F5F5F0;--surface:#fff;--border:#E5E7EB;--text:#1a1a1a;--text2:#6B7280;--text3:#9CA3AF;--accent:#4F46E5;--green:#2D7A4F;--orange:#E8603C;--red:#DC2626;--r:12px;}
@@ -226,25 +226,16 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;direction:rtl;background:var(
     <div class="divider"></div>
 
     <div class="ep-sec">
-      <label>סעיפים פעילים</label>
-      <div class="tog-row"><span>א – פרטי מעסיק</span><label class="tog"><input type="checkbox" checked onchange="toggleSec('secA',this.checked)"><span class="togs"></span></label></div>
-      <div class="tog-row"><span>ב – פרטי עובד</span><label class="tog"><input type="checkbox" checked onchange="toggleSec('secB',this.checked)"><span class="togs"></span></label></div>
-      <div class="tog-row"><span>ג – ילדים</span><label class="tog"><input type="checkbox" checked onchange="toggleSec('secC',this.checked)"><span class="togs"></span></label></div>
-      <div class="tog-row"><span>ד – מעסיק נוסף</span><label class="tog"><input type="checkbox" checked onchange="toggleSec('secD',this.checked)"><span class="togs"></span></label></div>
-      <div class="tog-row"><span>ה – הטבות מס</span><label class="tog"><input type="checkbox" checked onchange="toggleSec('secE',this.checked)"><span class="togs"></span></label></div>
-      <div class="tog-row"><span>ו – פרטי בנק</span><label class="tog"><input type="checkbox" checked onchange="toggleSec('secF',this.checked)"><span class="togs"></span></label></div>
-      <div class="tog-row"><span>ז – בן/בת הזוג</span><label class="tog"><input type="checkbox" checked onchange="toggleSec('secG',this.checked)"><span class="togs"></span></label></div>
-      <div class="tog-row"><span>ט – תיאום מס</span><label class="tog"><input type="checkbox" checked onchange="toggleSec('secI',this.checked)"><span class="togs"></span></label></div>
-    </div>
-
-    <div class="divider"></div>
-
-    <div class="ep-sec">
-      <label>שדות חובה</label>
-      <div class="tog-row"><span>אימייל</span><label class="tog"><input type="checkbox" checked><span class="togs"></span></label></div>
-      <div class="tog-row"><span>קופת חולים</span><label class="tog"><input type="checkbox" checked><span class="togs"></span></label></div>
-      <div class="tog-row"><span>פרטי בנק</span><label class="tog"><input type="checkbox" checked><span class="togs"></span></label></div>
-      <div class="tog-row"><span>צילום ת"ז + ספח</span><label class="tog"><input type="checkbox" checked><span class="togs"></span></label></div>
+      <label>סעיפים ושדות</label>
+      <div class="tog-row" style="margin-bottom:7px;"><span style="font-weight:700;color:#9CA3AF;font-size:10px;">סעיף</span><span style="display:flex;gap:14px;align-items:center;"><span style="font-size:9px;color:#9CA3AF;width:34px;text-align:center;">חובה</span><span style="font-size:9px;color:#9CA3AF;width:34px;text-align:center;">פעיל</span></span></div>
+      <div class="tog-row"><span>א – פרטי מעסיק</span><span style="display:flex;gap:14px;align-items:center;"><span style="width:34px;display:flex;justify-content:center;"><input type="checkbox" title="חובה" style="width:15px;height:15px;cursor:pointer;"></span><label class="tog"><input type="checkbox" checked onchange="toggleSec('secA',this.checked)"><span class="togs"></span></label></span></div>
+      <div class="tog-row"><span>ב – פרטי עובד</span><span style="display:flex;gap:14px;align-items:center;"><span style="width:34px;display:flex;justify-content:center;"><input type="checkbox" checked title="חובה" style="width:15px;height:15px;cursor:pointer;"></span><label class="tog"><input type="checkbox" checked onchange="toggleSec('secB',this.checked)"><span class="togs"></span></label></span></div>
+      <div class="tog-row"><span>ג – ילדים</span><span style="display:flex;gap:14px;align-items:center;"><span style="width:34px;display:flex;justify-content:center;"><input type="checkbox" title="חובה" style="width:15px;height:15px;cursor:pointer;"></span><label class="tog"><input type="checkbox" checked onchange="toggleSec('secC',this.checked)"><span class="togs"></span></label></span></div>
+      <div class="tog-row"><span>ד – מעסיק נוסף</span><span style="display:flex;gap:14px;align-items:center;"><span style="width:34px;display:flex;justify-content:center;"><input type="checkbox" title="חובה" style="width:15px;height:15px;cursor:pointer;"></span><label class="tog"><input type="checkbox" checked onchange="toggleSec('secD',this.checked)"><span class="togs"></span></label></span></div>
+      <div class="tog-row"><span>ה – הטבות מס</span><span style="display:flex;gap:14px;align-items:center;"><span style="width:34px;display:flex;justify-content:center;"><input type="checkbox" title="חובה" style="width:15px;height:15px;cursor:pointer;"></span><label class="tog"><input type="checkbox" checked onchange="toggleSec('secE',this.checked)"><span class="togs"></span></label></span></div>
+      <div class="tog-row"><span>ו – פרטי בנק</span><span style="display:flex;gap:14px;align-items:center;"><span style="width:34px;display:flex;justify-content:center;"><input type="checkbox" checked title="חובה" style="width:15px;height:15px;cursor:pointer;"></span><label class="tog"><input type="checkbox" checked onchange="toggleSec('secF',this.checked)"><span class="togs"></span></label></span></div>
+      <div class="tog-row"><span>ז – בן/בת הזוג</span><span style="display:flex;gap:14px;align-items:center;"><span style="width:34px;display:flex;justify-content:center;"><input type="checkbox" title="חובה" style="width:15px;height:15px;cursor:pointer;"></span><label class="tog"><input type="checkbox" checked onchange="toggleSec('secG',this.checked)"><span class="togs"></span></label></span></div>
+      <div class="tog-row"><span>ט – תיאום מס</span><span style="display:flex;gap:14px;align-items:center;"><span style="width:34px;display:flex;justify-content:center;"><input type="checkbox" title="חובה" style="width:15px;height:15px;cursor:pointer;"></span><label class="tog"><input type="checkbox" checked onchange="toggleSec('secI',this.checked)"><span class="togs"></span></label></span></div>
     </div>
 
     <div class="divider"></div>
@@ -374,7 +365,7 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;direction:rtl;background:var(
       <label>חבר/ה בקופת חולים?</label>
       <select id="hmo" onchange="toggleHmo()"><option>-- בחר/י --</option><option>כן</option><option>לא</option></select>
     </div>
-    <div class="field-group" id="hmoNameGroup" style="display:none;">
+    <div class="field-group" id="hmoNameGroup">
       <label>שם קופת חולים</label>
       <select id="hmoName"><option>-- בחר/י --</option><option>מכבי</option><option>כללית</option><option>מאוחדת</option><option>לאומית</option></select>
     </div>
@@ -436,6 +427,10 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;direction:rtl;background:var(
       <div class="ms-item" onclick="toggleMs(this)"><div class="ms-check"><svg width="12" height="10" viewBox="0 0 12 10"><path d="M1 5L4.5 8.5L11 1.5" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/></svg></div><span class="ms-text">💍 בן/בת זוג ללא הכנסה</span></div>
       <div class="ms-item" onclick="toggleMs(this)"><div class="ms-check"><svg width="12" height="10" viewBox="0 0 12 10"><path d="M1 5L4.5 8.5L11 1.5" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/></svg></div><span class="ms-text">🎖️ שירות מילואים בשנת המס</span></div>
     </div>
+    <div class="field-group" id="benefitsUpload" style="display:none;margin-top:8px;">
+      <label>צירוף מסמך מגבה (להטבה/זיכוי שסומן)</label>
+      <div class="upload-zone" onclick="toast('מדמה העלאה...')">📎 העלאת מסמך מגבה</div>
+    </div>
     <div style="font-size:11px;color:var(--text3);margin-top:6px;margin-bottom:12px;">אם אף מצב אינו מתאים לך – פשוט המשך/י הלאה, אין חובה לסמן.</div>
 
     <!-- INCOME TYPES -->
@@ -444,7 +439,7 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;direction:rtl;background:var(
       <div class="ms-item" onclick="toggleMs(this)"><div class="ms-check"><svg width="12" height="10" viewBox="0 0 12 10"><path d="M1 5L4.5 8.5L11 1.5" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/></svg></div><span class="ms-text">משכורת ממעסיק נוסף</span></div>
       <div class="ms-item" onclick="toggleMs(this)"><div class="ms-check"><svg width="12" height="10" viewBox="0 0 12 10"><path d="M1 5L4.5 8.5L11 1.5" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/></svg></div><span class="ms-text">קצבה (ביטוח לאומי / פנסיה)</span></div>
       <div class="ms-item" onclick="toggleMs(this)"><div class="ms-check"><svg width="12" height="10" viewBox="0 0 12 10"><path d="M1 5L4.5 8.5L11 1.5" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/></svg></div><span class="ms-text">מלגה</span></div>
-      <div class="ms-item" onclick="toggleMs(this)"><div class="ms-check"><svg width="12" height="10" viewBox="0 0 12 10"><path d="M1 5L4.5 8.5L11 1.5" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/></svg></div><span class="ms-text" style="color:var(--red);">שכר דירה / שכירות</span></div>
+      <div class="ms-item" onclick="toggleMs(this)"><div class="ms-check"><svg width="12" height="10" viewBox="0 0 12 10"><path d="M1 5L4.5 8.5L11 1.5" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/></svg></div><span class="ms-text" style="color:var(--text);">שכר דירה / שכירות</span></div>
       <div class="ms-item" onclick="toggleMs(this)"><div class="ms-check"><svg width="12" height="10" viewBox="0 0 12 10"><path d="M1 5L4.5 8.5L11 1.5" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/></svg></div><span class="ms-text">הכנסה מעסק / עצמאי</span></div>
     </div>
     <div class="field-group" style="margin-top:10px;"><label>סכום חודשי משוער (אם רלוונטי)</label><input placeholder="₪" inputmode="numeric" id="extraIncome"></div>
@@ -646,7 +641,6 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;direction:rtl;background:var(
       <input type="checkbox" id="cb101" onchange="check101(this)" style="width:18px;height:18px">
       <span style="font-size:13px">קראתי את הפרטים ואני מאשר/ת שהם נכונים</span>
     </label>
-  </div>
 
   <div class="bottom-bar">
     <button class="btn btn-primary" id="s10-btn" disabled onclick="submitForm101()">חתום/י ואשר/י ←</button>
@@ -725,7 +719,7 @@ function loadBranches(){
   for(var i=0;i<list.length;i++){ html+='<option>'+list[i]+'</option>'; }
   br.innerHTML=html;
 }
-function toggleHmo(){ var v=document.getElementById('hmo').value; var g=document.getElementById('hmoNameGroup'); if(g) g.style.display=(v==='כן')?'block':'none'; }
+function toggleHmo(){ var g=document.getElementById('hmoNameGroup'); if(g) g.style.display='block'; }
 function validate(){
   var missing=[];
   if(!document.getElementById('email').value)missing.push('כתובת אימייל');
@@ -748,6 +742,8 @@ function validate(){
 
 function toggleMs(el){
   el.classList.toggle('sel');
+  var tc=document.getElementById('taxCredits');
+  if(tc){ var any=tc.querySelectorAll('.ms-item.sel').length>0; var up=document.getElementById('benefitsUpload'); if(up) up.style.display=any?'block':'none'; }
 }
 
 var childCount=2;
@@ -970,6 +966,7 @@ function renderDBMappings(){
   if(document.readyState==='complete')setTimeout(go,400);else window.addEventListener('load',function(){setTimeout(go,400);});
 })();</script>
 
+
 <script>/* ===== OFFICIAL FORM 101 — functions (ported) ===== */
 function showForm101Preview() {
   function val(id, def){ var el=document.getElementById(id); return (el && el.value && el.value.trim()) ? el.value.trim() : def; }
@@ -1141,6 +1138,11 @@ function closeForm101Fullscreen() {
 
 function check101(cb){ var b=document.getElementById('s10-btn'); if(b) b.disabled=!cb.checked; }
 function submitForm101(){ toast('✓ טופס 101 הוגש בהצלחה!'); var b=document.getElementById('s10-btn'); if(b){ b.textContent='✓ נשלח'; b.style.background='#2D7A4F'; } }
+</script>
+
+<script>/* #4 — תאריך: 020524 -> 02/05/2024 */
+function autoDate(el){ var v=(el.value||'').replace(/\D/g,''); if(v.length===6){ el.value=v.slice(0,2)+'/'+v.slice(2,4)+'/20'+v.slice(4,6); } else if(v.length===8){ el.value=v.slice(0,2)+'/'+v.slice(2,4)+'/'+v.slice(4,8); } }
+document.addEventListener('DOMContentLoaded',function(){ var ins=document.querySelectorAll('input[placeholder*="yyyy"],input[placeholder*="mm"]'); for(var i=0;i<ins.length;i++){ ins[i].addEventListener('blur',function(){autoDate(this);}); ins[i].setAttribute('inputmode','numeric'); } });
 </script>
 </body>
 </html>
