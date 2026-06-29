@@ -587,7 +587,27 @@ function updateConfirmText(val){
 }
 
 function clearSig(){var c=document.getElementById('sigCanvas');if(c)c.getContext('2d').clearRect(0,0,340,90);}
-function saveForm(){toast('✓ נשמר');}
+function getData101(){
+  return {
+    name:'טופס 101 — קליטת עובד',
+    sub:'צילום ת״ז וספח + שאלות שכר',
+    hasSig: document.getElementById('hasSig')?document.getElementById('hasSig').checked:false,
+    hasConfirm: document.getElementById('hasConfirm')?document.getElementById('hasConfirm').checked:true,
+    confirmText: document.getElementById('confirmText')?document.getElementById('confirmText').value:'',
+    process: document.getElementById('fProcess')?document.getElementById('fProcess').value:'onboarding',
+    fieldsCount:5,
+    savedAt:new Date().toISOString()
+  };
+}
+function saveForm(){ try{ var d=getData101(); localStorage.setItem('f101_'+d.name, JSON.stringify(d)); }catch(e){} toast('✓ נשמר'); }
+function loadForm(data){ try{
+  if(document.getElementById('hasSig')) document.getElementById('hasSig').checked=!!data.hasSig;
+  if(document.getElementById('hasConfirm')) document.getElementById('hasConfirm').checked=(data.hasConfirm!==false);
+  if(data.confirmText && document.getElementById('confirmText')) document.getElementById('confirmText').value=data.confirmText;
+  if(data.process && document.getElementById('fProcess')) document.getElementById('fProcess').value=data.process;
+  if(typeof updateConfirm==='function') updateConfirm();
+  if(typeof render==='function') render();
+}catch(e){} }
 function saveAs(){
   var n=prompt('שם הטופס החדש:','טופס 101 — עותק');
   if(n)toast('✓ נשמר בשם: "'+n+'"');
@@ -697,5 +717,13 @@ function renderDBMappings(){
 
 </script>
 <script src="synel-help.js"></script>
+
+<script>/* Synel: טעינת טופס 101 לפי ?load= (מוטמע) */
+(function(){
+  var BUILTIN101={'טופס 101 — קליטת עובד':{name:'טופס 101 — קליטת עובד',sub:'צילום ת״ז וספח + שאלות שכר',hasSig:false,hasConfirm:true,confirmText:'אני מאשר/ת שהפרטים שמסרתי נכונים',process:'onboarding',fieldsCount:5}};
+  var m=location.search.match(/[?&]load=([^&]+)/);if(!m)return;var name=decodeURIComponent(m[1]);
+  function go(){try{var d=BUILTIN101[name]||null;if(!d){var raw=localStorage.getItem('f101_'+name);if(raw)d=JSON.parse(raw);}if(d&&typeof loadForm==='function')loadForm(d);}catch(e){}}
+  if(document.readyState==='complete')setTimeout(go,400);else window.addEventListener('load',function(){setTimeout(go,400);});
+})();</script>
 </body>
 </html>
