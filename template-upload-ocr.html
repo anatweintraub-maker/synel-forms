@@ -3,1385 +3,1354 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>זיהוי מסמך — טופס דיגיטלי</title>
+<title>FormSpec — מקור אמת אחד</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.4/tesseract.min.js"></script>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;}
-:root{--bg:#F5F5F0;--surface:#fff;--border:#E5E7EB;--text:#1a1a1a;--text2:#6B7280;--text3:#9CA3AF;--accent:#4F46E5;--green:#2D7A4F;--orange:#E8603C;--red:#DC2626;--r:10px;}
-body{font-family:'Helvetica Neue',Arial,sans-serif;direction:rtl;background:var(--bg);min-height:100vh;display:flex;flex-direction:column;}
-.header{background:white;border-bottom:1px solid var(--border);height:50px;display:flex;align-items:center;padding:0 20px;gap:10px;flex-shrink:0;}
-.logo{font-size:13px;font-weight:700;color:var(--accent);}
-.h-sep{width:1px;height:16px;background:var(--border);}
-.h-title{font-size:12px;color:var(--text2);}
-.back-btn{margin-right:auto;padding:5px 12px;font-size:12px;border-radius:var(--r);border:1px solid var(--border);background:white;cursor:pointer;font-family:inherit;color:var(--text2);}
-.main{flex:1;overflow:hidden;display:flex;}
-/* Steps */
-.ocr-steps{height:44px;background:white;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:0;flex-shrink:0;}
-.ocr-step{display:flex;align-items:center;gap:6px;padding:0 16px;font-size:12px;color:var(--text3);border-bottom:2px solid transparent;height:100%;}
-.ocr-step.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:500;}
-.ocr-step.done{color:var(--green);}
-.ocr-step-num{width:20px;height:20px;border-radius:50%;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;}
-.ocr-wrap{flex:1;overflow:hidden;display:flex;flex-direction:column;}
-.ocr-body{flex:1;overflow:hidden;display:flex;}
-.ocr-screen{display:none;flex:1;}
-.ocr-screen.active{display:flex;}
-/* S1 */
-#os1{flex-direction:column;align-items:center;justify-content:center;padding:28px;gap:16px;background:var(--bg);}
-.ocr-options{display:flex;gap:14px;max-width:700px;width:100%;}
-.ocr-opt{flex:1;background:white;border:1.5px solid var(--border);border-radius:14px;padding:22px;transition:all .15s;}
-.ocr-opt:hover{border-color:var(--accent);}
-.ocr-opt-icon{font-size:36px;text-align:center;margin-bottom:10px;}
-.ocr-opt-title{font-size:14px;font-weight:600;color:var(--text);text-align:center;margin-bottom:6px;}
-.ocr-opt-desc{font-size:12px;color:var(--text2);text-align:center;line-height:1.5;margin-bottom:14px;}
-/* S2 */
-#os2{flex-direction:row;}
-.os2-left{flex:1;overflow-y:auto;padding:16px;border-left:1px solid var(--border);background:var(--bg);}
-.os2-right{width:380px;flex-shrink:0;display:flex;flex-direction:column;background:white;}
-.panel-head{padding:12px 16px;border-bottom:1px solid var(--border);background:#FAFAFA;flex-shrink:0;}
-.panel-head h3{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px;}
-.panel-head p{font-size:11px;color:var(--text3);}
-.fields-review{flex:1;overflow-y:auto;padding:12px 14px;}
-.frc{background:#FAFAFA;border:1px solid var(--border);border-radius:10px;margin-bottom:7px;overflow:hidden;}
-.frc-head{padding:7px 11px;display:flex;align-items:center;gap:7px;background:white;border-bottom:1px solid var(--border);}
-.frc-drag{color:var(--text3);cursor:grab;font-size:13px;}
-.frc-type{font-size:10px;padding:1px 7px;border-radius:10px;background:#EEF2FF;color:var(--accent);}
-.frc-req{font-size:10px;padding:1px 7px;border-radius:10px;background:#FEF2F2;color:var(--red);}
-.frc-del{width:20px;height:20px;border-radius:50%;border:1px solid var(--border);background:none;cursor:pointer;color:var(--text3);font-size:11px;margin-right:auto;}
-.frc-del:hover{background:#FEE2E2;color:var(--red);}
-.frc-body{padding:8px 11px;display:flex;flex-direction:column;gap:5px;}
-.frc-body input,.frc-body select{width:100%;padding:5px 9px;font-size:12px;border:1px solid var(--border);border-radius:7px;font-family:inherit;outline:none;background:white;color:var(--text);}
-.frc-row{display:flex;gap:5px;}
-.frc-row input,.frc-row select{flex:1;}
-.os2-footer{padding:12px 14px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:7px;flex-shrink:0;}
-/* S3 */
-#os3{flex-direction:row;}
-.os3-doc{flex:1;overflow-y:auto;padding:28px;background:#E8E8E4;display:flex;justify-content:center;}
-.doc-paper{background:white;max-width:660px;width:100%;border-radius:4px;box-shadow:0 4px 30px rgba(0,0,0,.15);padding:44px;font-family:'David','Times New Roman',serif;font-size:11pt;line-height:2;color:var(--text);direction:rtl;}
-.doc-paper h1{font-size:15pt;font-weight:bold;text-align:center;margin-bottom:12px;}
-.inline-field{display:inline-block;border:none;border-bottom:1.5px solid #4F46E5;background:transparent;font-family:'David','Times New Roman',serif;font-size:11pt;text-align:right;direction:rtl;outline:none;color:#1D4ED8;vertical-align:bottom;padding:0 3px;}
-.inline-field:focus{background:#EEF2FF;border-radius:3px;}
-.inline-field.filled{color:#065F46;border-bottom-color:#059669;}
-.os3-right{width:260px;flex-shrink:0;background:white;border-right:1px solid var(--border);display:flex;flex-direction:column;}
-.s3-fields{flex:1;overflow-y:auto;padding:12px;}
-.s3-fi{display:flex;align-items:center;gap:7px;padding:7px 9px;border-radius:8px;border:1px solid var(--border);background:#FAFAFA;margin-bottom:6px;font-size:12px;cursor:pointer;}
-.s3-fi:hover{border-color:var(--accent);}
-.s3-fi.filled{border-color:#A7F3D0;background:#F0FDF4;}
-.os3-footer{padding:12px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:7px;flex-shrink:0;}
-/* Buttons */
-.btn-primary{width:100%;padding:11px;font-size:13px;font-weight:600;border-radius:50px;border:none;background:var(--orange);color:white;cursor:pointer;font-family:inherit;}
-.btn-primary.green{background:var(--green);}
-.btn-secondary{width:100%;padding:9px;font-size:12px;border-radius:50px;border:1.5px solid var(--accent);background:white;color:var(--accent);cursor:pointer;font-family:inherit;}
-.btn-ghost{width:100%;padding:9px;font-size:12px;border-radius:50px;border:1px solid var(--border);background:white;color:var(--text2);cursor:pointer;font-family:inherit;}
-.assign-box{background:#F8F8F6;border-radius:10px;padding:11px;display:flex;flex-direction:column;gap:6px;}
-.assign-box select,.assign-box input{width:100%;padding:6px 9px;font-size:12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;outline:none;background:white;}
-.loading{display:none;position:fixed;inset:0;background:rgba(79,70,229,.08);backdrop-filter:blur(2px);z-index:100;align-items:center;justify-content:center;}
-.loading.show{display:flex;}
-.loading-card{background:white;border-radius:16px;padding:28px 36px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.12);}
-.spin{width:38px;height:38px;border:3px solid #C7D2FE;border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px;}
-@keyframes spin{to{transform:rotate(360deg);}}
-.toast{position:fixed;bottom:14px;right:50%;transform:translateX(50%);background:#111;color:white;font-size:12px;padding:7px 18px;border-radius:20px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999;}
-.toast.show{opacity:1;}
-.ocr-ov{border:1.5px solid #4F46E5;background:rgba(238,242,255,.55);border-radius:4px;box-sizing:border-box;cursor:move;display:flex;align-items:center;z-index:2;}
-.ocr-ov:hover{background:rgba(238,242,255,.8);}
-.ocr-ov-sig{justify-content:center;background:rgba(240,253,244,.6);border-color:#2D7A4F;}
+  :root{
+    --bg:#F4F2EC; --ink:#191712; --soft:#6B655A; --line:#E2DED4;
+    --card:#FFFFFF; --orange:#E2570B; --orange-soft:#FBEDE2;
+    --code-bg:#16140F; --code-ink:#E8E4D8; --green:#2F8A4E; --ok-bg:#E7F4EC;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Assistant',system-ui,sans-serif;background:var(--bg);color:var(--ink);
+       line-height:1.6;-webkit-font-smoothing:antialiased;padding:0 0 60px;}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px;}
+  header{padding:48px 0 28px;border-bottom:1px solid var(--line);margin-bottom:32px;}
+  .eyebrow{font-size:12px;font-weight:600;letter-spacing:.12em;color:var(--orange);text-transform:uppercase;margin-bottom:10px;}
+  h1{font-size:clamp(34px,6vw,58px);font-weight:800;letter-spacing:-.02em;line-height:1.02;}
+  h1 .mono{font-family:'JetBrains Mono',monospace;font-weight:500;background:var(--ink);color:#fff;
+           padding:0 14px;border-radius:10px;display:inline-block;transform:translateY(-4px);font-size:.82em;}
+  .lead{font-size:18px;color:var(--soft);max-width:620px;margin-top:16px;}
+  .sources{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px;}
+  .src-btn{flex:1;min-width:150px;background:var(--card);border:1.5px solid var(--line);border-radius:14px;
+           padding:16px 18px;cursor:pointer;text-align:right;transition:.15s;font-family:inherit;}
+  .src-btn:hover{border-color:var(--orange);}
+  .src-btn.on{border-color:var(--orange);background:var(--orange-soft);box-shadow:0 4px 18px -8px var(--orange);}
+  .src-btn .k{font-size:11px;font-weight:600;letter-spacing:.08em;color:var(--orange);font-family:'JetBrains Mono',monospace;}
+  .src-btn .t{font-size:17px;font-weight:700;margin-top:3px;}
+  .src-btn .d{font-size:13px;color:var(--soft);margin-top:2px;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:28px;align-items:start;}
+  @media(max-width:820px){.grid{grid-template-columns:1fr;}}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;}
+  .panel-h{padding:14px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;}
+  .panel-h .lbl{font-size:13px;font-weight:700;letter-spacing:.04em;}
+  .panel-h .sub{font-size:12px;color:var(--soft);margin-right:auto;font-family:'JetBrains Mono',monospace;}
+  .panel-b{padding:20px;}
+  textarea{width:100%;min-height:200px;border:1px solid var(--line);border-radius:12px;padding:14px;
+           font-family:'Assistant',sans-serif;font-size:14px;line-height:1.7;resize:vertical;direction:rtl;background:#FCFBF8;}
+  textarea:focus{outline:none;border-color:var(--orange);}
+  .drop{border:2px dashed var(--line);border-radius:14px;padding:34px 20px;text-align:center;cursor:pointer;transition:.15s;background:#FCFBF8;}
+  .drop:hover,.drop.over{border-color:var(--orange);background:var(--orange-soft);}
+  .drop .ic{font-size:30px;}
+  .drop .big{font-size:16px;font-weight:700;margin-top:8px;}
+  .drop .sm{font-size:13px;color:var(--soft);margin-top:3px;}
+  .preview{margin-top:14px;display:flex;flex-direction:column;gap:10px;}
+  .preview img{width:100%;border:1px solid var(--line);border-radius:10px;}
+  .status{font-size:13px;color:var(--soft);padding:10px 0;display:flex;align-items:center;gap:8px;}
+  .spin{width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--orange);border-radius:50%;animation:s .8s linear infinite;}
+  @keyframes s{to{transform:rotate(360deg)}}
+  .run{margin-top:14px;width:100%;background:var(--orange);color:#fff;border:none;border-radius:12px;
+       padding:14px;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;transition:.15s;}
+  .run:hover{filter:brightness(1.05);}
+  .run:disabled{opacity:.5;cursor:not-allowed;}
+  .empty{color:var(--soft);font-size:14px;text-align:center;padding:50px 20px;}
+  .meta-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;}
+  .chip{font-size:12px;font-family:'JetBrains Mono',monospace;background:#F2EFE8;border:1px solid var(--line);border-radius:8px;padding:4px 10px;}
+  .chip b{color:var(--orange);}
+  .fields-h{font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--soft);margin:6px 0 10px;text-transform:uppercase;}
+  .field{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;margin-bottom:7px;background:#FCFBF8;}
+  .field .ty{font-size:10px;font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--orange);background:var(--orange-soft);border-radius:6px;padding:2px 7px;white-space:nowrap;}
+  .field .lb{font-size:14px;font-weight:600;flex:1;}
+  .field .pg{font-size:11px;color:var(--soft);font-family:'JetBrains Mono',monospace;}
+  .field .rq{color:var(--orange);font-weight:700;}
+  .valid{display:flex;align-items:center;gap:8px;background:var(--ok-bg);color:var(--green);border-radius:10px;padding:10px 14px;font-size:13px;font-weight:600;margin-top:4px;}
+  .warn{background:#FCF3E6;color:#9A6700;}
+  details{margin-top:22px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--card);}
+  summary{padding:14px 20px;cursor:pointer;font-weight:700;font-size:14px;list-style:none;display:flex;align-items:center;gap:8px;}
+  summary::-webkit-details-marker{display:none;}
+  summary .arw{transition:.2s;color:var(--orange);}
+  details[open] summary .arw{transform:rotate(90deg);}
+  pre{background:var(--code-bg);color:var(--code-ink);padding:20px;overflow:auto;direction:ltr;text-align:left;font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.65;}
+  .converge{margin-top:30px;background:var(--ink);color:#fff;border-radius:18px;padding:26px 28px;}
+  .converge h3{font-size:18px;font-weight:700;margin-bottom:6px;}
+  .converge p{font-size:14px;color:#C9C4B6;max-width:640px;}
+  .fp{display:flex;align-items:center;gap:10px;margin-top:16px;flex-wrap:wrap;}
+  .fp .src-tag{font-size:12px;font-family:'JetBrains Mono',monospace;background:#2A2620;border:1px solid #3A352C;border-radius:8px;padding:6px 12px;color:#E8E4D8;}
+  .fp .eq{color:var(--orange);font-weight:800;font-size:18px;}
+  .fp .res{font-size:12px;font-family:'JetBrains Mono',monospace;background:var(--orange);color:#fff;border-radius:8px;padding:6px 12px;font-weight:600;}
 
-/* ===== הדפסה / שמירה כ-PDF ===== */
-@media print{
-  @page{ margin:18mm 16mm 22mm; }
-  body *{ visibility:hidden !important; }
-  #os3Paper, #os3Paper *{ visibility:visible !important; }
-  #os3Paper{ position:absolute; inset:0; width:100%; box-shadow:none !important; border:none !important; padding:0 !important; margin:0 !important; background:white !important; }
-  .os3-right, .os3-footer, .ocr-steps, .top-bar, .back-btn, #fsHelpBtn, #fsHelpPanel, .toast, #loadingOverlay{ display:none !important; }
-  #os3Paper input, #os3Paper select{ border:none !important; border-bottom:1px solid #555 !important; border-radius:0 !important; background:transparent !important; }
-  .ocr-ov{ background:transparent !important; border:none !important; border-bottom:1px solid #333 !important; border-radius:0 !important; }
-  .ocr-ov-rz{ display:none !important; }
-  .ocr-ov-sig{ border-bottom:1px solid #2D7A4F !important; }
-  /* כותרת תחתונה עם מספור עמודים */
-  body.printing-pdf::after{ }
-}
-@media print{
-  .pdf-footer{ display:block !important; position:fixed; bottom:6mm; left:0; right:0; text-align:center; font-size:10px; color:#666; }
-}
-.pdf-footer{ display:none; }
-/* לוגו שחוזר בכל עמוד מודפס — דרך thead של טבלה (נתמך בכל הדפדפנים) */
-@media print{
-  /* שחרור הגובה כדי שהתוכן יתפצל לעמודים והכותרת תחזור */
-  body.logo-all-pages #os3Paper{ bottom:auto !important; height:auto !important; }
-  body.logo-all-pages #printLogoTable{ width:100%; border-collapse:collapse; }
-  body.logo-all-pages #printLogoTable thead{ display:table-header-group; }
-  body.logo-all-pages #printLogoTable thead td{ text-align:center; padding-bottom:10px; visibility:visible !important; }
-  body.logo-all-pages #printLogoTable .repeat-logo-img{ visibility:visible !important; max-height:40px; max-width:170px; object-fit:contain; }
-  /* הסתרת הלוגו ה-inline כדי שלא יופיע פעמיים בעמוד הראשון */
-  body.logo-all-pages .doc-logo{ display:none !important; }
-}
+  /* תצוגת overlay — המסמך עם תיבות השדה עליו */
+  #overlayView{margin-top:30px;display:none;width:94vw;max-width:1500px;margin-left:50%;transform:translateX(-50%);}
+  .ov-head{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;}
+  .ov-head h2{font-size:22px;font-weight:800;}
+  .ov-head .count{font-size:13px;color:var(--soft);font-family:'JetBrains Mono',monospace;}
+  .ov-grid{display:grid;grid-template-columns:2.6fr 1fr;gap:22px;align-items:start;}
+  @media(max-width:900px){.ov-grid{grid-template-columns:1fr;}}
+  .ov-doc{position:relative;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;line-height:0;}
+  .ov-doc img{width:100%;display:block;}
+  .fbox{position:absolute;border:2px solid var(--orange);background:rgba(226,87,11,.10);border-radius:4px;
+        cursor:move;transition:border-color .12s,background .12s;display:flex;align-items:center;justify-content:center;min-height:16px;}
+  .fbox:hover{background:rgba(226,87,11,.20);}
+  .fbox.sel{border-color:#1E1B4B;background:rgba(30,27,75,.16);box-shadow:0 0 0 2px #1E1B4B;}
+  .fbox .tag{font-size:10px;font-family:'JetBrains Mono',monospace;font-weight:700;color:#fff;background:var(--orange);
+             border-radius:4px;padding:1px 6px;line-height:1.3;white-space:nowrap;pointer-events:none;}
+  .fbox.sel .tag{background:#1E1B4B;}
+  .fbox .del-box{position:absolute;top:-10px;left:-10px;width:20px;height:20px;border-radius:50%;background:#C0392B;color:#fff;
+             font-size:11px;line-height:18px;text-align:center;cursor:pointer;display:none;border:2px solid #fff;font-weight:700;}
+  .fbox:hover .del-box,.fbox.sel .del-box{display:block;}
+  .ov-doc.built .fbox{background:#fff;border-color:#94A3B8;border-style:solid;}
+  .ov-doc.built .fbox .tag{background:#64748B;}
+
+  /* סרגל שיוך + לוגו */
+  .ov-toolbar{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:12px;align-items:end;
+              background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:16px;}
+  @media(max-width:820px){.ov-toolbar{grid-template-columns:1fr 1fr;}}
+  .fld{display:flex;flex-direction:column;gap:5px;}
+  .fld label{font-size:12px;font-weight:600;color:var(--soft);}
+  .fld select{font-family:inherit;font-size:13px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:#FCFBF8;}
+  .logo-cell{display:flex;flex-direction:column;gap:5px;}
+  .logo-up{display:flex;align-items:center;gap:8px;}
+  .logo-up button{font-family:inherit;font-size:12px;border:1px solid var(--orange);color:var(--orange);background:#fff;
+                  border-radius:8px;padding:8px 12px;cursor:pointer;white-space:nowrap;}
+  .logo-up button:hover{background:var(--orange);color:#fff;}
+  .logo-up img{height:34px;max-width:90px;object-fit:contain;border:1px solid var(--line);border-radius:6px;padding:2px;background:#fff;}
+
+  /* שמירה ושמורים */
+  .ov-save{display:flex;gap:8px;align-items:center;padding:12px;border-top:1px solid var(--line);}
+  .ov-save input{flex:1;font-family:inherit;font-size:13px;border:1px solid var(--line);border-radius:8px;padding:9px 11px;background:#FCFBF8;direction:rtl;}
+  .ov-save button{background:var(--green);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;}
+  .ov-save button:disabled{opacity:.45;cursor:not-allowed;}
+  .saved-wrap{margin-top:20px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;width:94vw;max-width:1500px;margin-left:50%;transform:translateX(-50%);}
+  .saved-wrap h3{font-size:15px;font-weight:700;margin-bottom:10px;}
+  .saved-item{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;}
+  .saved-item .si-info{flex:1;}
+  .saved-item .si-name{font-size:14px;font-weight:600;}
+  .saved-item .si-meta{font-size:11px;color:var(--soft);font-family:'JetBrains Mono',monospace;}
+  .saved-item button{font-family:inherit;font-size:12px;border-radius:8px;padding:6px 12px;cursor:pointer;border:1px solid var(--line);background:#fff;}
+  .saved-item .si-open{border-color:var(--orange);color:var(--orange);}
+  .saved-item .si-del{border-color:#FBD5C4;color:#C0392B;}
+  .saved-empty{font-size:13px;color:var(--soft);text-align:center;padding:14px;border:1px dashed var(--line);border-radius:10px;}
+  /* לוגו על המסמך */
+  .ov-doc .doc-logo-ov{position:absolute;top:2%;left:50%;transform:translateX(-50%);z-index:5;}
+  .ov-doc .doc-logo-ov img{max-height:46px;max-width:160px;object-fit:contain;}
+
+  .ov-panel{background:var(--card);border:1px solid var(--line);border-radius:14px;}
+  .ov-panel-h{padding:14px 18px;border-bottom:1px solid var(--line);font-weight:700;font-size:14px;}
+  .ov-list{max-height:520px;overflow-y:auto;padding:8px;}
+  .ov-item{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;cursor:pointer;transition:.12s;}
+  .ov-item:hover{border-color:var(--orange);}
+  .ov-item.sel{border-color:#1E1B4B;background:#F5F4FB;}
+  .ov-item .lbl{font-size:14px;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+  .ov-item .num{font-size:10px;font-family:'JetBrains Mono',monospace;background:#F2EFE8;border-radius:5px;padding:1px 6px;color:var(--soft);}
+  .ov-controls{display:flex;flex-wrap:wrap;gap:6px;}
+  .ov-controls select,.ov-controls label{font-family:inherit;font-size:12px;}
+  .ov-controls select{border:1px solid var(--line);border-radius:7px;padding:4px 8px;background:#FCFBF8;}
+  .ov-controls label{display:inline-flex;align-items:center;gap:4px;color:var(--soft);cursor:pointer;}
+  .ov-build{margin:8px;width:calc(100% - 16px);background:var(--orange);color:#fff;border:none;border-radius:10px;
+            padding:13px;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;}
+  .ov-build:hover{filter:brightness(1.05);}
+  .ov-hint{font-size:12px;color:var(--soft);padding:0 8px 10px;}
+  .ai-btn{margin:10px 10px 4px;width:calc(100% - 20px);background:linear-gradient(135deg,#6D28D9,#E2570B);color:#fff;
+          border:none;border-radius:10px;padding:12px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:.15s;}
+  .ai-btn:hover{filter:brightness(1.07);}
+  .ai-btn:disabled{opacity:.65;cursor:wait;}
+  .ov-drawer{display:flex;flex-wrap:wrap;gap:6px;padding:10px;border-bottom:1px solid var(--line);background:#FCFBF8;}
+  .ov-drawer .dh{width:100%;font-size:11px;font-weight:700;color:var(--soft);letter-spacing:.04em;margin-bottom:2px;}
+  .type-chip{font-size:12px;font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--orange);
+             background:#fff;border:1.5px solid var(--orange);border-radius:8px;padding:5px 11px;cursor:grab;user-select:none;transition:.12s;}
+  .type-chip:hover{background:var(--orange);color:#fff;}
+  .type-chip:active{cursor:grabbing;}
+  .ov-doc.drag-over{outline:3px dashed var(--orange);outline-offset:-3px;}
+
+  /* תצוגת טופס דיגיטלי */
+  .digi-overlay{position:fixed;inset:0;background:rgba(20,18,14,.55);z-index:100;display:none;justify-content:center;align-items:flex-start;overflow:auto;padding:30px 16px;}
+  .digi-overlay.show{display:flex;}
+  .digi-form{background:#fff;border-radius:18px;max-width:660px;width:100%;box-shadow:0 30px 80px -20px rgba(0,0,0,.4);overflow:hidden;}
+  .digi-form.wide{max-width:1000px;}
+  .digi-doc-wrap{padding:24px 28px;}
+  .digi-doc{position:relative;border:1px solid var(--line);border-radius:8px;overflow:hidden;line-height:0;}
+  .digi-doc img{width:100%;display:block;}
+  .digi-doc .dfield{position:absolute;}
+  .digi-doc .dfield input,.digi-doc .dfield select{width:100%;height:100%;min-height:18px;border:1.5px solid var(--orange);border-radius:3px;
+        font-family:inherit;font-size:12px;padding:0 4px;background:rgba(255,255,255,.96);direction:rtl;box-sizing:border-box;}
+  .digi-doc .dfield input:focus,.digi-doc .dfield select:focus{outline:none;border-color:#1E1B4B;background:#fff;}
+  .digi-doc .dlogo-doc{position:absolute;top:1.5%;left:50%;transform:translateX(-50%);z-index:5;}
+  .digi-doc .dlogo-doc img{max-height:44px;max-width:150px;object-fit:contain;}
+  .digi-head{padding:28px 32px 22px;border-bottom:1px solid var(--line);position:relative;text-align:center;}
+  .digi-head .dlogo{margin-bottom:12px;}
+  .digi-head .dlogo img{max-height:54px;max-width:170px;object-fit:contain;}
+  .digi-head h2{font-size:24px;font-weight:800;}
+  .digi-head .dsub{font-size:13px;color:var(--soft);margin-top:6px;}
+  .digi-head .dclose{position:absolute;top:18px;left:20px;width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:16px;color:var(--soft);}
+  .digi-head .dclose:hover{background:var(--bg);}
+  .digi-body{padding:26px 32px;}
+  .digi-field{margin-bottom:18px;}
+  .digi-field>label{display:block;font-size:14px;font-weight:600;margin-bottom:6px;}
+  .digi-field>label .req{color:var(--orange);}
+  .digi-field input,.digi-field select,.digi-field textarea{width:100%;font-family:inherit;font-size:14px;border:1px solid var(--line);border-radius:10px;padding:11px 13px;background:#FCFBF8;direction:rtl;}
+  .digi-field input:focus,.digi-field select:focus,.digi-field textarea:focus{outline:none;border-color:var(--orange);}
+  .digi-field textarea{min-height:90px;resize:vertical;}
+  .digi-field.chk{display:flex;align-items:center;gap:8px;}
+  .digi-field.chk input{width:auto;}
+  .digi-field.chk>label{margin:0;}
+  .digi-dmy{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+  .digi-sign{border:2px dashed var(--line);border-radius:10px;height:90px;display:flex;align-items:center;justify-content:center;color:var(--soft);font-size:13px;background:#FCFBF8;}
+  .digi-submit{width:100%;background:var(--orange);color:#fff;border:none;border-radius:12px;padding:15px;font-family:inherit;font-size:16px;font-weight:700;cursor:pointer;margin-top:6px;}
+  .digi-submit:hover{filter:brightness(1.05);}
+  .digi-empty{color:var(--soft);font-size:14px;text-align:center;padding:30px;}
 </style>
-<script src="synel-validation.js"></script>
-<script src="synel-autosave.js"></script>
-<script src="synel-export.js"></script>
-<script src="synel-org.js"></script>
-<script src="synel-assign.js"></script>
-<script src="synel-accessibility.js"></script>
-<script src="synel-versions.js"></script>
-<script src="synel-mobile.js"></script>
-<script src="synel-brand.js"></script>
-<script src="synel-nav.js"></script>
-<script src="synel-publish.js"></script>
-<!-- קריאת תמונות בתוך הדפדפן (OCR), ללא מפתח וללא שרת -->
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-<!-- עיבוד PDF בתוך הדפדפן -->
-<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.min.mjs" type="module"></script>
-<script type="module">
-  import * as pdfjsLib from 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.min.mjs';
-  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.worker.min.mjs';
-  window.pdfjsLib = pdfjsLib;
-</script>
 </head>
 <body>
+<a href="index.html" style="position:fixed;top:14px;right:16px;z-index:50;display:inline-flex;align-items:center;gap:6px;font-family:Assistant,sans-serif;font-size:13px;font-weight:600;color:#E2570B;background:#fff;border:1px solid #E2DED4;border-radius:50px;padding:8px 16px;text-decoration:none;box-shadow:0 2px 8px -2px rgba(0,0,0,.1);">→ חזרה לדף הבית</a>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Synel Form Studio · PoC</div>
+    <h1><span class="mono">FormSpec</span> מקור אמת אחד</h1>
+    <p class="lead">העלי קובץ אמיתי — PDF או תמונה — או הדביקי טקסט. כל מקור עובר דרך מתאם נפרד, אך כולם מתכנסים לאותו מבנה בדיוק. זה המבנה שנשמר, וזה גם ה-JSON שמתחבר ל-Harmony.</p>
+  </header>
 
-<div class="header">
-  <div class="logo">Form Studio</div>
-  <div class="h-sep"></div>
-  <div class="h-title">העלאת מסמך — זיהוי שדות אוטומטי</div>
-  <button class="back-btn" onclick="location.href='index.html'">חזרה</button>
-</div>
-
-<div class="ocr-wrap">
-  <div class="ocr-steps">
-    <div class="ocr-step active" id="ostep1"><div class="ocr-step-num">1</div>קלט מסמך</div>
-    <div class="ocr-step" id="ostep2"><div class="ocr-step-num">2</div>אישור שדות</div>
-    <div class="ocr-step" id="ostep3"><div class="ocr-step-num">3</div>טופס דיגיטלי</div>
+  <div class="sources">
+    <button class="src-btn on" data-src="text">
+      <div class="k">SOURCE · TEXT</div><div class="t">הדבקת טקסט</div>
+      <div class="d">זיהוי שדות ישיר מהטקסט</div>
+    </button>
+    <button class="src-btn" data-src="image">
+      <div class="k">SOURCE · IMAGE</div><div class="t">תמונה / סריקה</div>
+      <div class="d">העלאה + OCR בעברית</div>
+    </button>
+    <button class="src-btn" data-src="pdf">
+      <div class="k">SOURCE · PDF</div><div class="t">PDF רב-עמודי</div>
+      <div class="d">חילוץ טקסט מכל עמוד</div>
+    </button>
   </div>
-  <div class="ocr-body">
 
-    <!-- S1: INPUT -->
-    <div class="ocr-screen active" id="os1">
-      <div class="ocr-options">
-        <div class="ocr-opt" style="cursor:pointer;" onclick="document.getElementById('ocrFileIn').click()"
-             ondragover="event.preventDefault();this.style.borderColor='#4F46E5'"
-             ondragleave="this.style.borderColor=''"
-             ondrop="event.preventDefault();this.style.borderColor='';ocrHandleDrop(event)">
-          <div class="ocr-opt-icon">🖼</div>
-          <div class="ocr-opt-title">העלאת תמונה / PDF</div>
-          <div class="ocr-opt-desc">האתר יקרא את המסמך בדפדפן ויזהה את כל השדות</div>
-          <div style="text-align:center;margin-bottom:10px;"><span style="font-size:11px;padding:3px 10px;border-radius:20px;background:#EEF2FF;color:#4338CA;">קריאה בדפדפן</span></div>
-          <div style="text-align:center;"><button class="btn-primary" style="width:auto;padding:9px 22px;" onclick="event.stopPropagation();document.getElementById('ocrFileIn').click()">בחר קובץ</button></div>
-          <div style="text-align:center;font-size:11px;color:var(--text3);margin-top:6px;">PDF / PNG / JPG / WEBP</div>
-        </div>
-        <div class="ocr-opt">
-          <div class="ocr-opt-icon">📝</div>
-          <div class="ocr-opt-title">הדבק טקסט המסמך</div>
-          <div class="ocr-opt-desc">העתק את תוכן המסמך — זיהוי מדויק של כל השדות</div>
-          <div style="text-align:center;margin-bottom:10px;"><span style="font-size:11px;padding:3px 10px;border-radius:20px;background:#F0FDF4;color:#065F46;">הכי מדויק</span></div>
-          <textarea id="pasteText" placeholder="הדבק כאן את טקסט המסמך..." style="width:100%;min-height:120px;padding:9px;font-size:12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;resize:none;outline:none;direction:rtl;line-height:1.6;margin-bottom:8px;"></textarea>
-          <input id="ocrDocTitle" placeholder="שם המסמך" style="width:100%;padding:7px 9px;font-size:12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;outline:none;margin-bottom:8px;">
-          <button class="btn-primary" onclick="ocrAnalyzeText()">זהה שדות</button>
+  <div class="grid">
+    <div class="panel">
+      <div class="panel-h"><span class="lbl">קלט</span><span class="sub" id="inLbl">fromText()</span></div>
+      <div class="panel-b">
+        <div id="inputArea"></div>
+        <button class="run" id="runBtn">צור FormSpec ←</button>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-h"><span class="lbl">FormSpec שנוצר</span><span class="sub" id="outLbl">—</span></div>
+      <div class="panel-b" id="outArea">
+        <div class="empty">בחרי מקור והפעילי את המתאם כדי לראות את ה-FormSpec.</div>
+      </div>
+    </div>
+  </div>
+
+  <details id="jsonWrap" style="display:none;">
+    <summary><span class="arw">▶</span> ה-JSON שנשלח ל-Harmony</summary>
+    <pre id="jsonOut"></pre>
+  </details>
+
+  <div class="converge">
+    <h3>ההתכנסות</h3>
+    <p>לא משנה מאיפה הגיע הטופס — מבנה ה-schema ומבנה כל שדה זהים לחלוטין. מכאן ואילך כל הקוד עובד על מבנה אחד, בלי תנאים נפרדים לכל מקור.</p>
+    <div class="fp">
+      <span class="src-tag">טקסט</span><span class="src-tag">תמונה</span><span class="src-tag">PDF</span>
+      <span class="eq">→</span><span class="res" id="fpRes">schema זהה</span>
+    </div>
+  </div>
+
+  <div id="overlayView">
+    <div class="ov-head">
+      <h2>המסמך עם השדות שזוהו</h2>
+      <span class="count" id="ovCount"></span>
+    </div>
+    <div class="ov-toolbar">
+      <div class="fld"><label>תהליך</label>
+        <select id="asgProcess"><option value="">— בחרי תהליך —</option><option>קליטת עובד</option><option>עדכון פרטים</option><option>סיום העסקה</option><option>בקשת חופשה</option></select></div>
+      <div class="fld"><label>אוכלוסייה</label>
+        <select id="asgAudience"><option value="">— בחרי קבוצה —</option><option>כל העובדים</option><option>עובדים חדשים</option><option>מנהלים</option><option>שכר שעתי</option><option>שכר גלובלי</option></select></div>
+      <div class="fld"><label>עובד מטפל</label>
+        <select id="asgOwner"><option value="">— בחרי אחראי —</option><option>מנהל/ת HR</option><option>מנהל/ת ישיר</option><option>מחלקת שכר</option></select></div>
+      <div class="logo-cell"><label>לוגו ארגון</label>
+        <div class="logo-up" id="logoUp">
+          <button type="button" id="logoBtn">העלי לוגו</button>
+          <input type="file" id="logoFile" accept="image/*" style="display:none">
         </div>
       </div>
     </div>
-
-    <!-- S2: REVIEW -->
-    <div class="ocr-screen" id="os2">
-      <div class="os2-left">
-        <div class="panel-head"><h3>המסמך</h3><p id="os2DocName">מסמך</p></div>
-        <div style="padding:14px;">
-          <img id="os2Img" src="" style="width:100%;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.1);display:none;" alt="">
-          <div id="os2TextPreview" style="display:none;padding:14px;background:#F8F8F6;border-radius:10px;font-size:12px;color:var(--text2);line-height:1.8;white-space:pre-wrap;direction:rtl;max-height:400px;overflow-y:auto;"></div>
+    <div class="ov-grid">
+      <div class="ov-doc" id="ovDoc"></div>
+      <div class="ov-panel">
+        <div class="ov-panel-h">הגדרת שדות</div>
+        <button class="ai-btn" id="aiBtn">✨ זיהוי שדות חכם (AI)</button>
+        <div class="ov-drawer" id="ovDrawer"><div class="dh">גררי סוג שדה אל המסמך:</div></div>
+        <div class="ov-hint">לחצי על שדה בתמונה או ברשימה כדי להגדיר אותו. אפשר גם לגרור סוג שדה מלמעלה אל המסמך, או ללחוץ על מקום ריק להוספה. ✕ מוחק שדה.</div>
+        <div class="ov-list" id="ovList"></div>
+        <button class="ov-build" id="ovBuild">צור טופס — הכנס תיבות למסמך</button>
+        <div class="ov-save">
+          <input type="text" id="saveName" placeholder="שם הטופס לשמירה…">
+          <button id="saveBtn">שמור טופס</button>
         </div>
-      </div>
-      <div class="os2-right">
-        <div class="panel-head"><h3>שדות שזוהו — אשר ועדכן <span id="os2Count" style="font-size:11px;color:var(--text3);font-weight:400;"></span></h3><p>גרור לסידור · שכפל · ולידציה · נוסחה · רשימה · שיוך DB</p></div>
-        <div class="fields-review" id="ocrFieldsReview"></div>
-        <div class="os2-footer">
-          <div class="assign-box">
-            <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">שיוך הטופס — תהליך · אוכלוסייה · עובד אחראי</div>
-            <div id="ocrAssignSlot"></div>
-            <div style="display:flex;gap:8px;align-items:center;font-size:11px;color:var(--text2);margin-top:6px;">
-              <label style="display:flex;align-items:center;gap:5px;cursor:pointer;"><input type="checkbox" id="ocrHasSig" checked> חתימה דיגיטלית</label>
-              <label style="display:flex;align-items:center;gap:5px;cursor:pointer;"><input type="checkbox" id="ocrHasRC"> אישור קריאה</label>
-            </div>
-            <div style="display:flex;align-items:center;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);">
-              <div style="font-size:11px;color:var(--text2);white-space:nowrap;">לוגו ארגון:</div>
-              <div id="ocrLogoBox" style="flex:1;display:flex;align-items:center;gap:8px;">
-                <button type="button" class="btn-ghost" style="width:auto;padding:5px 12px;font-size:11px;" onclick="document.getElementById('ocrLogoIn').click()">העלה לוגו</button>
-                <span style="font-size:10px;color:var(--text3);">PNG / JPG / SVG</span>
-              </div>
-            </div>
-          </div>
-          <button class="btn-primary" onclick="ocrConfirm()">אשר והמשך לטופס</button>
-          <div style="display:flex;gap:6px;">
-            <button class="btn-ghost" style="flex:1;" onclick="ocrSaveNamed()">שמור בשם</button>
-            <button class="btn-ghost" style="flex:1;" onclick="ocrGoScreen(1)">חזור</button>
-          </div>
-        </div>
+        <button class="ov-build" id="digiBtn" style="background:#1E1B4B;margin-top:0;">👁 תצוגת טופס דיגיטלי</button>
       </div>
     </div>
+  </div>
 
-    <!-- S3: DIGITAL FORM -->
-    <div class="ocr-screen" id="os3">
-      <div class="os3-right">
-        <div class="panel-head"><h3>שדות הטופס</h3><p id="os3Count">ממלא...</p></div>
-        <div class="s3-fields" id="os3Fields"></div>
-        <div class="os3-footer">
-          <button class="btn-primary green" id="os3SubmitBtn" onclick="ocrSubmit()">הגש טופס</button>
-          <button class="btn-secondary" onclick="ocrSaveNamed()">שמור בשם לשימוש חוזר</button>
-          <button class="btn-ghost" onclick="ocrSavePDF()">🖨 שמור כ-PDF</button>
-          <button class="btn-ghost" style="background:#1e1b4b;color:white;border-color:#1e1b4b;" onclick="exportJSON()">{ } ייצא JSON</button>
-          <button class="btn-ghost" onclick="ocrGoScreen(2)">חזור לעריכה</button>
-        </div>
-      </div>
-      <div class="os3-doc"><div class="doc-paper" id="os3Paper"></div></div>
-    </div>
-
+  <div class="saved-wrap" id="savedWrap">
+    <h3>טפסים שמורים</h3>
+    <div id="savedList"></div>
   </div>
 </div>
 
-<div class="loading" id="loadingOverlay">
-  <div class="loading-card">
-    <div class="spin"></div>
-    <div style="font-size:14px;font-weight:600;color:var(--text);" id="loadingMsg">מעבד...</div>
-  </div>
+<div class="digi-overlay" id="digiOverlay">
+  <div class="digi-form" id="digiForm"></div>
 </div>
-<input type="file" id="ocrFileIn" accept=".png,.jpg,.jpeg,.webp,.pdf" style="display:none" onchange="ocrHandleFile(event)">
-<input type="file" id="ocrLogoIn" accept=".png,.jpg,.jpeg,.webp,.svg" style="display:none" onchange="ocrHandleLogo(event)">
-<div class="toast" id="toastEl"></div>
 
-<script>
-/* SYNEL DB FIELD MAPPING */
-var SYNEL_DB_FIELDS = [
-  {dbField:'EMP_NO',               labelHe:'מספר עובד',          type:'text',   category:'עובד'},
-  {dbField:'EMP_NAME',             labelHe:'שם מלא',             type:'text',   category:'עובד'},
-  {dbField:'EMP_FIRST_NAME',       labelHe:'שם פרטי',            type:'text',   category:'עובד'},
-  {dbField:'EMP_LAST_NAME',        labelHe:'שם משפחה',           type:'text',   category:'עובד'},
-  {dbField:'TZ',                   labelHe:'תעודת זהות',         type:'text',   category:'עובד'},
-  {dbField:'EMP_PASSPORTNO',       labelHe:'מספר דרכון',         type:'text',   category:'עובד'},
-  {dbField:'EMP_BIRTH_DAY',        labelHe:'תאריך לידה',         type:'date',   category:'עובד'},
-  {dbField:'EMP_MARITAL_STATUS',   labelHe:'מצב משפחתי',         type:'text',   category:'עובד'},
-  {dbField:'EMP_JOB_CODE',         labelHe:'קוד תפקיד',          type:'text',   category:'תפקיד'},
-  {dbField:'EMP_JOB_DESCR',        labelHe:'תיאור תפקיד',        type:'text',   category:'תפקיד'},
-  {dbField:'EMP_DEPARTMENT_CODE',  labelHe:'קוד מחלקה',          type:'text',   category:'תפקיד'},
-  {dbField:'EMP_DEPARTMENT_DESCR', labelHe:'שם מחלקה',           type:'text',   category:'תפקיד'},
-  {dbField:'EMP_DATE_START',       labelHe:'תאריך תחילת עבודה',  type:'date',   category:'תאריכים'},
-  {dbField:'EMP_DATE_START_DD',    labelHe:'יום תחילה',          type:'text',   category:'תאריכים'},
-  {dbField:'EMP_DATE_START_MM',    labelHe:'חודש תחילה',         type:'text',   category:'תאריכים'},
-  {dbField:'EMP_DATE_START_YYYY',  labelHe:'שנת תחילה',          type:'text',   category:'תאריכים'},
-  {dbField:'DATE_CURRENT',         labelHe:'תאריך נוכחי',        type:'date',   category:'תאריכים'},
-  {dbField:'EMP_CONTACT_001',      labelHe:'טלפון בית',          type:'tel',    category:'קשר'},
-  {dbField:'EMP_CONTACT_002',      labelHe:'אימייל',             type:'email',  category:'קשר'},
-  {dbField:'EMP_CONTACT_004',      labelHe:'נייד',               type:'tel',    category:'קשר'},
-  {dbField:'EMP_CONTACT_005',      labelHe:'כתובת',              type:'text',   category:'קשר'},
-  {dbField:'EMP_CONTACT_006',      labelHe:'עיר',                type:'text',   category:'קשר'},
-  {dbField:'MNG_NO',               labelHe:'מספר מנהל',          type:'text',   category:'מנהל'},
-  {dbField:'MNG_NAME',             labelHe:'שם מנהל',            type:'text',   category:'מנהל'},
-  {dbField:'EMP_TIK_NIKUIM_ID',    labelHe:'תיק ניכויים',        type:'text',   category:'מעסיק'},
-  {dbField:'NUM_SALARY',           labelHe:'שכר חודשי',          type:'number', category:'שכר'},
-  {dbField:'NUM_VACATION_DAYS',    labelHe:'ימי חופשה',          type:'number', category:'שכר'},
-  {dbField:'TXT_BENEFITS',         labelHe:'תנאים סוציאליים',    type:'text',   category:'שכר'},
-  {dbField:'NUM_BANK_NO',          labelHe:'מספר חשבון בנק',     type:'number', category:'שכר'},
-  {dbField:'TXT_BANK_NAME',        labelHe:'שם בנק',             type:'text',   category:'שכר'},
-];
-var SYNEL_DB_MAP = {};
-SYNEL_DB_FIELDS.forEach(function(f){ SYNEL_DB_MAP[f.dbField] = f; });
+<script>/* ============================================================================
+ * synel-formspec.js  —  PoC: מודל נתונים קנוני אחד + שכבת מתאמים (adapters)
+ * ----------------------------------------------------------------------------
+ * העיקרון: FormSpec הוא מקור האמת היחיד. הוא גם מצב העבודה הפנימי וגם
+ * בדיוק ה-JSON שמיוצא ל-Harmony. אין תרגום בין "מה שעל המסך" ל"מה שנשמר".
+ *
+ * כל מקור קלט (PDF / תמונה / טקסט / טופס שמור) עובר דרך מתאם אחד שמחזיר
+ * את אותו מבנה בדיוק. מהרגע הזה והלאה — אין יותר if(imageMode) מפוזר בקוד.
+ * ========================================================================== */
+(function (global) {
+  'use strict';
 
-function buildDBSelect(currentVal, onChangeFn){
-  var sel = document.createElement('select');
-  sel.style.cssText = 'width:100%;padding:4px 6px;font-size:11px;border:1px solid #C7D2FE;border-radius:6px;font-family:inherit;outline:none;background:#EEF2FF;color:#4338CA;margin-top:4px;';
-  var empty = document.createElement('option'); empty.value=''; empty.textContent='-- שדה DB (אופציונלי) --'; sel.appendChild(empty);
-  var cats = {};
-  SYNEL_DB_FIELDS.forEach(function(f){if(!cats[f.category])cats[f.category]=[];cats[f.category].push(f);});
-  Object.keys(cats).forEach(function(cat){
-    var og = document.createElement('optgroup'); og.label = cat;
-    cats[cat].forEach(function(f){
-      var o = document.createElement('option'); o.value=f.dbField;
-      o.textContent = f.labelHe+' - '+f.dbField;
-      if(f.dbField===currentVal) o.selected=true;
-      og.appendChild(o);
-    });
-    sel.appendChild(og);
-  });
-  sel.onchange = function(){ onChangeFn(this.value, SYNEL_DB_MAP[this.value]); };
-  return sel;
-}
+  var SCHEMA_VERSION = '2.0';
 
-/* OCR LOGIC */
-var ocrDocTitle='', ocrRawText='', ocrFields=[];
-var ocrImageData='', ocrLines=[];
-var ocrPages=[]; // [{image, lines}] — תמיכה בכמה עמודים
-var ocrPreferTextView=false; // הצגת טקסט נקי במקום תמונה (לטפסים שמורים)
-var ocrLogoData=''; // לוגו ארגון (Data URL) — מוצג בראש הטופס וב-PDF
-var ocrLogoAllPages=false; // true = הלוגו חוזר בכל עמוד מודפס; false = רק בעמוד הראשון
-
-function ocrGoScreen(n){
-  document.querySelectorAll('.ocr-screen').forEach(function(s){s.classList.remove('active');});
-  document.getElementById('os'+n).classList.add('active');
-  [1,2,3].forEach(function(i){
-    var el=document.getElementById('ostep'+i);
-    el.classList.remove('active','done');
-    if(i<n)el.classList.add('done');
-    if(i===n)el.classList.add('active');
-  });
-}
-
-function ocrHandleDrop(e){var f=e.dataTransfer.files[0];if(f)ocrProcessFile(f);}
-function ocrHandleFile(e){var f=e.target.files[0];if(f)ocrProcessFile(f);}
-
-/* ===== העלאת לוגו ארגון — נשמר כ-Data URL, מוצג בראש הטופס וב-PDF ===== */
-function ocrHandleLogo(e){
-  var f=e.target.files[0];if(!f)return;
-  var okType=f.type.startsWith('image/')||/\.svg$/i.test(f.name);
-  if(!okType){toast('יש להעלות קובץ תמונה (PNG / JPG / SVG)');return;}
-  if(f.size>2*1024*1024){toast('הלוגו גדול מ-2MB — נסי קובץ קטן יותר');return;}
-  var reader=new FileReader();
-  reader.onload=function(ev){
-    ocrLogoData=ev.target.result;
-    ocrRenderLogoBox();
-    if(document.getElementById('os3')&&document.getElementById('os3').classList.contains('active'))ocrBuildDoc();
-    toast('הלוגו נוסף לטופס');
-  };
-  reader.readAsDataURL(f);
-  e.target.value='';
-}
-
-function ocrRemoveLogo(){
-  ocrLogoData='';
-  ocrRenderLogoBox();
-  if(document.getElementById('os3')&&document.getElementById('os3').classList.contains('active'))ocrBuildDoc();
-  toast('הלוגו הוסר');
-}
-
-function ocrRenderLogoBox(){
-  var box=document.getElementById('ocrLogoBox');if(!box)return;
-  if(ocrLogoData){
-    box.innerHTML='';
-    box.style.flexWrap='wrap';
-    var img=document.createElement('img');
-    img.src=ocrLogoData;
-    img.style.cssText='height:28px;max-width:90px;object-fit:contain;border:1px solid var(--border);border-radius:6px;padding:2px;background:white;';
-    var replace=document.createElement('button');
-    replace.type='button';replace.className='btn-ghost';
-    replace.style.cssText='width:auto;padding:5px 10px;font-size:11px;';
-    replace.textContent='החלף';
-    replace.onclick=function(){document.getElementById('ocrLogoIn').click();};
-    var del=document.createElement('button');
-    del.type='button';del.className='btn-ghost';
-    del.style.cssText='width:auto;padding:5px 10px;font-size:11px;color:var(--red);border-color:#FECACA;';
-    del.textContent='הסר';
-    del.onclick=ocrRemoveLogo;
-    box.appendChild(img);box.appendChild(replace);box.appendChild(del);
-    // בחירה: הלוגו בכל העמודים או רק בראשון
-    var lbl=document.createElement('label');
-    lbl.style.cssText='display:flex;align-items:center;gap:5px;cursor:pointer;font-size:11px;color:var(--text2);width:100%;margin-top:4px;';
-    var cb=document.createElement('input');cb.type='checkbox';cb.id='ocrLogoAllPagesCb';cb.checked=ocrLogoAllPages;
-    cb.onchange=function(){ocrLogoAllPages=this.checked;var os3=document.getElementById('os3');if(os3&&os3.classList.contains('active'))ocrBuildDoc();};
-    lbl.appendChild(cb);lbl.appendChild(document.createTextNode('הצג את הלוגו בכל העמודים (אחרת — רק בעמוד הראשון)'));
-    box.appendChild(lbl);
-  }else{
-    box.style.flexWrap='';
-    box.innerHTML='<button type="button" class="btn-ghost" style="width:auto;padding:5px 12px;font-size:11px;" onclick="document.getElementById(\'ocrLogoIn\').click()">העלה לוגו</button>'+
-      '<span style="font-size:10px;color:var(--text3);">PNG / JPG / SVG</span>';
+  /* ---- כלי עזר ---- */
+  function uid(prefix) {
+    return (prefix || 'id') + '_' + Math.random().toString(36).slice(2, 9);
   }
-}
+  function nowISO() { return new Date().toISOString(); }
 
-/* ===== דרך א': העלאת תמונה — קריאה בתוך הדפדפן (Tesseract OCR), ללא מפתח/שרת ===== */
-function ocrProcessFile(file){
-  var isPdf = file.type==='application/pdf' || /\.pdf$/i.test(file.name);
-  if(isPdf){ ocrProcessPDF(file); return; }
-  if(!file.type.startsWith('image/')){toast('יש להעלות תמונה (PNG/JPG/WEBP) או PDF');return;}
-  var reader=new FileReader();
-  reader.onload=function(ev){
-    var dataUrl=ev.target.result;
-    ocrImageData=dataUrl;
-    document.getElementById('os2DocName').textContent=file.name;
-    document.getElementById('os2Img').src=dataUrl;
-    document.getElementById('os2Img').style.display='block';
-    document.getElementById('os2TextPreview').style.display='none';
-    ocrDocTitle=file.name.replace(/\.[^.]+$/,'');
-    ocrReadImage(dataUrl);
-  };
-  reader.readAsDataURL(file);
-}
-
-/* ===== עיבוד PDF בדפדפן: כל העמודים — חילוץ טקסט מדויק + המרה לתמונה ===== */
-async function ocrRenderPdfPage(page){
-  var viewport=page.getViewport({scale:2});
-  var canvas=document.createElement('canvas');
-  canvas.width=viewport.width;canvas.height=viewport.height;
-  await page.render({canvasContext:canvas.getContext('2d'),viewport:viewport}).promise;
-  var image=canvas.toDataURL('image/png');
-  // חילוץ שורות עם מיקום
-  var tc=await page.getTextContent();
-  var vh=viewport.height;
-  var linesMap={};
-  tc.items.forEach(function(it){
-    if(!it.str||!it.str.trim())return;
-    var tr=it.transform;
-    var x=tr[4]*2, yTop=vh-(tr[5]*2)-(it.height*2);
-    var key=Math.round(yTop/6);
-    if(!linesMap[key])linesMap[key]={text:'',x0:x,y0:yTop,x1:x+it.width*2,y1:yTop+(it.height*2||16)};
-    var L=linesMap[key];
-    L.text+=it.str+' ';L.x0=Math.min(L.x0,x);L.x1=Math.max(L.x1,x+it.width*2);
-    L.y0=Math.min(L.y0,yTop);L.y1=Math.max(L.y1,yTop+(it.height*2||16));
-  });
-  var keys=Object.keys(linesMap).sort(function(a,b){return linesMap[a].y0-linesMap[b].y0;});
-  var lines=keys.map(function(k){var l=linesMap[k];return {text:l.text.trim(),x0:l.x0,y0:l.y0,x1:l.x1,y1:l.y1};});
-  return {image:image, lines:lines, text:lines.map(function(l){return l.text;}).join('\n')};
-}
-
-async function ocrProcessPDF(file){
-  if(!window.pdfjsLib){toast('מנוע ה-PDF עדיין נטען — נסי שוב בעוד רגע');return;}
-  ocrDocTitle=file.name.replace(/\.[^.]+$/,'');
-  document.getElementById('os2DocName').textContent=file.name;
-  showLoading('פותח PDF...');
-  try{
-    var buf=await file.arrayBuffer();
-    var pdf=await window.pdfjsLib.getDocument({data:buf}).promise;
-    var n=pdf.numPages;
-    ocrPages=[];ocrFields=[];var allText=[];var textTotal=0;
-
-    for(var p=1;p<=n;p++){
-      showLoading('מעבד עמוד '+p+' מתוך '+n+'...');
-      var page=await pdf.getPage(p);
-      var rendered=await ocrRenderPdfPage(page);
-      var pageIdx=ocrPages.length;
-      ocrPages.push({image:rendered.image, lines:rendered.lines});
-      textTotal+=rendered.text.replace(/\s/g,'').length;
-      // זיהוי שדות לעמוד זה, מתויג לעמוד
-      var pageFields=ocrDetectFields(rendered.text);
-      pageFields.forEach(function(f){f._page=pageIdx;});
-      ocrFields=ocrFields.concat(pageFields);
-      allText.push(rendered.text);
-    }
-
-    // תצוגה מקדימה במסך האישור — עמוד ראשון
-    ocrImageData=ocrPages[0]?ocrPages[0].image:'';
-    ocrLines=ocrPages[0]?ocrPages[0].lines:[];
-    document.getElementById('os2Img').src=ocrImageData;
-    document.getElementById('os2Img').style.display='block';
-    document.getElementById('os2TextPreview').style.display='none';
-    ocrRawText=allText.join('\n');
-
-    hideLoading();
-
-    if(textTotal>20){
-      // PDF טקסטואלי — חילוץ מדויק מכל העמודים
-      toast('נמצאו '+ocrFields.length+' שדות ב-'+n+' עמודים');
-      ocrRenderReview();ocrGoScreen(2);
-    }else{
-      // PDF סרוק — נריץ OCR על כל עמוד
-      await ocrReadPdfScanned();
-    }
-  }catch(err){
-    hideLoading();console.error(err);
-    toast('שגיאה בקריאת ה-PDF — נסי קובץ אחר או הדבקת טקסט');
-  }
-}
-
-/* PDF סרוק: OCR על כל עמוד */
-async function ocrReadPdfScanned(){
-  if(typeof Tesseract==='undefined'){toast('מנוע הקריאה לא נטען');return;}
-  ocrFields=[];
-  var worker=await Tesseract.createWorker(['heb','eng'],1,{logger:function(m){if(m.status==='recognizing text')showLoading('קורא עמוד... '+Math.round((m.progress||0)*100)+'%');}});
-  for(var i=0;i<ocrPages.length;i++){
-    showLoading('קורא עמוד '+(i+1)+' מתוך '+ocrPages.length+'...');
-    var out=await worker.recognize(ocrPages[i].image,{},{text:true,blocks:true});
-    ocrPages[i].lines=ocrExtractLines(out&&out.data);
-    var txt=(out&&out.data&&out.data.text)||'';
-    var pf=ocrDetectFields(txt);pf.forEach(function(f){f._page=i;});
-    ocrFields=ocrFields.concat(pf);
-  }
-  await worker.terminate();
-  ocrLines=ocrPages[0]?ocrPages[0].lines:[];
-  hideLoading();
-  toast('נמצאו '+ocrFields.length+' שדות ב-'+ocrPages.length+' עמודים');
-  ocrRenderReview();ocrGoScreen(2);
-}
-
-/* חילוץ שורות עם תיבות-תחום מנתוני הקריאה (תומך גם ב-lines וגם ב-words) */
-function ocrExtractLines(data){
-  if(!data)return [];
-  if(data.lines&&data.lines.length){
-    return data.lines.map(function(l){return {text:(l.text||'').trim(),x0:l.bbox.x0,y0:l.bbox.y0,x1:l.bbox.x1,y1:l.bbox.y1};})
-      .filter(function(l){return (l.x1-l.x0)>0&&(l.y1-l.y0)>0;});
-  }
-  // נפילה לאחור: קיבוץ מילים לשורות לפי קו-בסיס דומה
-  if(data.words&&data.words.length){
-    var rows=[];
-    data.words.forEach(function(w){
-      var b=w.bbox;var cy=(b.y0+b.y1)/2;
-      var row=rows.find(function(r){return Math.abs(r.cy-cy)<((b.y1-b.y0)*0.7);});
-      if(!row){row={cy:cy,x0:b.x0,y0:b.y0,x1:b.x1,y1:b.y1,text:w.text};rows.push(row);}
-      else{row.x0=Math.min(row.x0,b.x0);row.y0=Math.min(row.y0,b.y0);row.x1=Math.max(row.x1,b.x1);row.y1=Math.max(row.y1,b.y1);row.text+=' '+w.text;}
-    });
-    return rows.sort(function(a,b){return a.y0-b.y0;});
-  }
-  return [];
-}
-
-async function ocrReadImage(dataUrl){
-  if(typeof Tesseract==='undefined'){
-    hideLoading();
-    toast('מנוע הקריאה לא נטען — בדקי חיבור לאינטרנט, או השתמשי בהדבקת טקסט');
-    return;
-  }
-  showLoading('טוען מנוע קריאה...');
-  try{
-    var worker=await Tesseract.createWorker(['heb','eng'],1,{
-      logger:function(m){
-        if(m.status==='recognizing text'){ showLoading('קורא את המסמך... '+Math.round((m.progress||0)*100)+'%'); }
-        else if(m.status==='loading language traineddata'||m.status==='initializing tesseract'){ showLoading('מכין את הקריאה...'); }
-      }
-    });
-    var out=await worker.recognize(dataUrl,{},{text:true,blocks:true});
-    await worker.terminate();
-    var text=(out&&out.data&&out.data.text)||'';
-    ocrRawText=text;
-    ocrLines=ocrExtractLines(out&&out.data);
-    ocrPages=[{image:ocrImageData, lines:ocrLines}];
-    var fields=ocrDetectFields(text);
-    fields.forEach(function(f){f._page=0;});
-    hideLoading();
-    if(!fields.length){
-      toast('לא זוהו שדות בתמונה — נסי תמונה ברורה יותר או הדבקת טקסט');
-      ocrFields=[];
-    }else{
-      ocrFields=fields;
-      toast('נמצאו '+fields.length+' שדות');
-    }
-    ocrRenderReview();ocrGoScreen(2);
-  }catch(err){
-    hideLoading();console.error(err);
-    toast('שגיאה בקריאת התמונה — נסי שוב או השתמשי בהדבקת טקסט');
-  }
-}
-
-/* ===== דרך ב': הדבקת טקסט — זיהוי ישיר בדפדפן, מדויק ולא דורש כלום ===== */
-function ocrAnalyzeText(){
-  var text=document.getElementById('pasteText').value.trim();
-  if(!text){toast('יש להדביק טקסט');return;}
-  var title=document.getElementById('ocrDocTitle').value.trim()||'מסמך';
-  ocrDocTitle=title;ocrRawText=text;
-  document.getElementById('os2DocName').textContent=title;
-  document.getElementById('os2Img').style.display='none';
-  var tp=document.getElementById('os2TextPreview');tp.style.display='block';tp.textContent=text;
-  var fields=ocrDetectFields(text);
-  if(!fields.length){toast('לא זוהו שדות — ודאי שיש קווי מילוי או מילות מפתח בטקסט');}
-  else{toast('נמצאו '+fields.length+' שדות');}
-  ocrFields=fields;
-  ocrRenderReview();ocrGoScreen(2);
-}
-
-/* ===== מנוע הזיהוי המשותף — מוצא את כל השדות בטקסט ===== */
-// תווי "קו מילוי" אפשריים (קו תחתי, מקפים ארוכים, נקודות מובילות, tatweel)
-var OCR_BLANK_SRC='[_\\u2017\\u0640\\u2014\\u2013]{2,}|\\.{4,}';
-function ocrBlankRe(){return new RegExp(OCR_BLANK_SRC,'g');}
-
-function ocrInferType(label){
-  var l=(label||'');
-  if(/חתימ/.test(l))return'signature';
-  if(/דוא['"]?ל|דואר ?אלקטרוני|אלקטרוני|מייל|אימייל|e-?mail/i.test(l))return'email';
-  if(/טלפון|נייד|פלאפון|טל['׳]?\b|מס['׳]? ?טל/.test(l))return'tel';
-  if(/ת\.?ז\.?|ת['"]ז|תעודת ?זהות|מספר ?זהות|ז\.?ה\.?ו\.?ת/.test(l))return'text';
-  if(/דמי ?שכירות|סכום|שכר|מחיר|עלות|תשלום|פיקדון|פקדון|ערבות|ש['"]ח|₪/.test(l))return'number';
-  if(/מספר ?חשבון|חשבון ?בנק|סניף|בנק|ח-?ן/.test(l))return'number';
-  if(/תאריך|ביום|בתאריך|לידה|מועד/.test(l))return'date';
-  return'text';
-}
-
-function ocrMatchDB(label){
-  var l=(label||'').toLowerCase();
-  var match='';
-  SYNEL_DB_FIELDS.forEach(function(dbf){
-    if(!match && (l.indexOf(dbf.labelHe.toLowerCase())>=0 || l.indexOf(dbf.dbField.toLowerCase())>=0)) match=dbf.dbField;
-  });
-  return match;
-}
-
-function ocrCleanLabel(s){
-  if(!s)return'';
-  s=s.replace(ocrBlankRe(),' ');                   // הסר קווי מילוי
-  s=s.replace(/[.,;:()\[\]"'״׳\-–—]+/g,' ');         // הסר פיסוק
-  s=s.replace(/\s+/g,' ').trim();
-  var words=s.split(' ').filter(function(w){return w && !/^\d+$/.test(w);}); // בלי מספרים בודדים
-  if(words.length>5) words=words.slice(-5);          // ב-RTL ההקשר הקרוב לקו הוא בסוף
-  var out=words.join(' ').trim();
-  return (out.length<2)?'':out;                      // תווית קצרה מדי = חסרת משמעות
-}
-
-function ocrDetectFields(rawText){
-  var text=(rawText||'').replace(/\r/g,'');
-  var lines=text.split('\n');
-  var fields=[], idc=0;
-
-  // אסטרטגיה 1: כל קו-מילוי בשורה = שדה, עם תווית מההקשר שלפניו
-  lines.forEach(function(line,lineIdx){
-    if(!line || !line.trim())return;
-    var re=ocrBlankRe(), m, last=0, perLine=0;
-    while((m=re.exec(line))!==null){
-      if(m[0].length===0){re.lastIndex++;continue;}
-      var label=ocrCleanLabel(line.slice(last,m.index));
-      if(!label){ // אין תווית לפני הקו — נסה אחרי הקו
-        label=ocrCleanLabel(line.slice(m.index+m[0].length).split(ocrBlankRe())[0]||'');
-      }
-      if(!label) label='שדה '+(fields.length+1);
-      var fld=ocrMakeField(idc++,label);fld._line=lineIdx;
-      fields.push(fld);
-      last=m.index+m[0].length; perLine++;
-      if(perLine>=6)break; // הגנה מפני רעש בשורה אחת
-    }
-    if(fields.length>=60)return; // תקרה כללית
-  });
-
-  // אסטרטגיה 2: אם כמעט לא נמצאו קווים (OCR שבלע אותם) — סרוק מילות מפתח, לפי שורות
-  if(fields.length<3){
-    var KW=[
-      [/שם ?מלא|שם ?ה?(שוכר|משכיר|עובד)/, 'שם מלא'],
-      [/תעודת ?זהות|ת\.?ז\.?|ת['"]ז/, 'תעודת זהות'],
-      [/תאריך ?לידה/, 'תאריך לידה'],
-      [/כתובת|מרחוב|רחוב/, 'כתובת'],
-      [/טלפון|נייד/, 'טלפון'],
-      [/דוא['"]?ל|מייל|אימייל|דואר ?אלקטרוני/, 'אימייל'],
-      [/תאריך|ביום/, 'תאריך'],
-      [/בחודש|חודש/, 'חודש'],
-      [/בשנת|שנה/, 'שנה'],
-      [/דמי ?שכירות|סכום|שכר|תשלום|פיקדון|ערבות/, 'סכום'],
-      [/מספר ?חשבון|חשבון ?בנק|בנק/, 'מספר חשבון בנק'],
-      [/חתימת? ?ה?משכיר/, 'חתימת המשכיר'],
-      [/חתימת? ?ה?שוכר/, 'חתימת השוכר'],
-      [/חתימה|חתימת/, 'חתימה']
-    ];
-    var seen={};
-    fields.forEach(function(f){seen[f.label]=true;});
-    lines.forEach(function(line,lineIdx){
-      if(!line||!line.trim())return;
-      KW.forEach(function(k){
-        if(k[0].test(line) && !seen[k[1]]){ seen[k[1]]=true; var fld=ocrMakeField(idc++,k[1]);fld._line=lineIdx;fields.push(fld); }
-      });
-    });
-  }
-
-  return fields;
-}
-
-function ocrMakeField(i,label){
-  return {id:'f'+i,label:label,type:ocrInferType(label),required:true,placeholder:'',dbField:ocrMatchDB(label)};
-}
-
-function getTypeLabel(t){return{text:'טקסט',number:'מספר',email:'מייל',tel:'טלפון',date:'תאריך',signature:'חתימה',select:'בחירה'}[t]||t;}
-
-var ocrDragFrom=null;
-function ocrMoveField(from,to){
-  if(to<0||to>=ocrFields.length)return;
-  var m=ocrFields.splice(from,1)[0];ocrFields.splice(to,0,m);ocrRenderReview();
-}
-function ocrMiniBtn(html,title){
-  var b=document.createElement('button');b.innerHTML=html;b.title=title||'';
-  b.style.cssText='width:24px;height:24px;border:1px solid #E5E7EB;border-radius:6px;background:white;cursor:pointer;font-size:12px;line-height:1;color:#6B7280;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:inherit;';
-  return b;
-}
-function ocrLabeledSelect(label,opts,cur,onCh){
-  var wrap=document.createElement('div');wrap.style.cssText='display:flex;gap:5px;align-items:center;margin-top:5px;';
-  var lb=document.createElement('span');lb.style.cssText='font-size:10px;color:#6B7280;flex-shrink:0;min-width:42px;';lb.textContent=label;
-  var sel=document.createElement('select');sel.style.cssText='flex:1;padding:4px 6px;font-size:11px;border:1px solid #E5E7EB;border-radius:6px;font-family:inherit;outline:none;background:white;';
-  opts.forEach(function(o){var op=document.createElement('option');op.value=o.v;op.textContent=o.l;if(o.v===cur)op.selected=true;sel.appendChild(op);});
-  sel.onchange=function(){onCh(this.value);};
-  wrap.appendChild(lb);wrap.appendChild(sel);return wrap;
-}
-
-function ocrRenderReview(){
-  var fr=document.getElementById('ocrFieldsReview');fr.innerHTML='';
-  ocrFields.forEach(function(f,i){
-    if(typeof f.filler==='undefined')f.filler='E_';
-    var card=document.createElement('div');card.className='frc';card.setAttribute('draggable','true');
-
-    // ── drag reorder ──
-    card.ondragstart=function(e){ocrDragFrom=i;e.dataTransfer.effectAllowed='move';card.style.opacity='.4';};
-    card.ondragend=function(){card.style.opacity='';};
-    card.ondragover=function(e){e.preventDefault();card.style.borderColor='#4F46E5';};
-    card.ondragleave=function(){card.style.borderColor='';};
-    card.ondrop=function(e){e.preventDefault();card.style.borderColor='';if(ocrDragFrom!==null&&ocrDragFrom!==i)ocrMoveField(ocrDragFrom,i);ocrDragFrom=null;};
-
-    // ── header: drag handle, arrows, type, required badge, duplicate, delete ──
-    var head=document.createElement('div');head.className='frc-head';
-    var drag=document.createElement('span');drag.className='frc-drag';drag.innerHTML='&#x2837;';drag.style.cursor='grab';
-    var up=ocrMiniBtn('&#9650;','הזז למעלה');(function(idx){up.onclick=function(){ocrMoveField(idx,idx-1);};})(i);
-    var down=ocrMiniBtn('&#9660;','הזז למטה');(function(idx){down.onclick=function(){ocrMoveField(idx,idx+1);};})(i);
-    var typeTag=document.createElement('span');typeTag.className='frc-type';typeTag.textContent=getTypeLabel(f.type);
-    var reqTag=document.createElement('span');
-    reqTag.innerHTML=f.required?'<span class="frc-req">חובה</span>':'<span style="font-size:10px;padding:1px 7px;border-radius:10px;background:#F0FDF4;color:#065F46;">רשות</span>';
-    var dup=ocrMiniBtn('&#10697;','שכפל שדה');
-    (function(idx){dup.onclick=function(){var c=JSON.parse(JSON.stringify(ocrFields[idx]));c.id='new'+Date.now();c.label=(c.label||'שדה')+' (עותק)';ocrFields.splice(idx+1,0,c);ocrRenderReview();};})(i);
-    var del=document.createElement('button');del.className='frc-del';del.textContent='x';
-    (function(idx){del.onclick=function(){ocrFields.splice(idx,1);ocrRenderReview();};})(i);
-    head.appendChild(drag);head.appendChild(up);head.appendChild(down);
-    head.appendChild(typeTag);head.appendChild(reqTag.firstChild);
-    var spacer=document.createElement('span');spacer.style.flex='1';head.appendChild(spacer);
-    head.appendChild(dup);head.appendChild(del);
-    card.appendChild(head);
-
-    var body=document.createElement('div');body.className='frc-body';
-    // Label
-    var li=document.createElement('input');li.value=f.label||'';li.placeholder='תווית שדה';
-    (function(idx){li.oninput=function(){ocrFields[idx].label=this.value;typeTag.textContent=getTypeLabel(ocrFields[idx].type);};})(i);
-    body.appendChild(li);
-    // Type + Required
-    var row=document.createElement('div');row.className='frc-row';
-    var ts=document.createElement('select');
-    ['text','number','email','tel','date','signature','select'].forEach(function(t){var o=document.createElement('option');o.value=t;o.textContent=getTypeLabel(t);if(t===f.type)o.selected=true;ts.appendChild(o);});
-    (function(idx){ts.onchange=function(){ocrFields[idx].type=this.value;typeTag.textContent=getTypeLabel(this.value);ocrRenderReview();};})(i);
-    var req=document.createElement('select');
-    [{v:'true',l:'חובה'},{v:'false',l:'רשות'}].forEach(function(o){var op=document.createElement('option');op.value=o.v;op.textContent=o.l;if((f.required&&o.v==='true')||(!f.required&&o.v==='false'))op.selected=true;req.appendChild(op);});
-    (function(idx){req.onchange=function(){ocrFields[idx].required=this.value==='true';ocrRenderReview();};})(i);
-    row.appendChild(ts);row.appendChild(req);
-    body.appendChild(row);
-    // Placeholder
-    var ph=document.createElement('input');ph.value=f.placeholder||'';ph.placeholder='טקסט עזר (placeholder)';ph.style.marginTop='5px';
-    (function(idx){ph.oninput=function(){ocrFields[idx].placeholder=this.value;};})(i);
-    body.appendChild(ph);
-    // Filler
-    body.appendChild(ocrLabeledSelect('ממלא:',[{v:'E_',l:'עובד (E_)'},{v:'M_',l:'מנהל (M_)'},{v:'S_',l:'מנהל על (S_)'},{v:'',l:'כולם'}],f.filler,(function(idx){return function(v){ocrFields[idx].filler=v;};})(i)));
-
-    // ── advanced (collapsible): validation, DB, formula, dropdown options ──
-    var advWrap=document.createElement('div');advWrap.style.marginTop='6px';
-    var advToggle=document.createElement('button');
-    advToggle.style.cssText='font-size:11px;color:#4F46E5;background:none;border:none;cursor:pointer;font-family:inherit;padding:2px 0;';
-    var advBody=document.createElement('div');advBody.style.display=f._advOpen?'block':'none';
-    advToggle.textContent=(f._advOpen?'▾':'▸')+' מתקדם';
-    (function(field){advToggle.onclick=function(){field._advOpen=!field._advOpen;advBody.style.display=field._advOpen?'block':'none';advToggle.textContent=(field._advOpen?'▾':'▸')+' מתקדם';};})(f);
-
-    // validation
-    advBody.appendChild(ocrLabeledSelect('בדיקה:',[{v:'',l:'לפי סוג (אוטומטי)'},{v:'id',l:'ת"ז ישראלית'},{v:'email',l:'אימייל'},{v:'tel',l:'טלפון'},{v:'number',l:'מספר'},{v:'date',l:'תאריך'},{v:'passport',l:'דרכון'}],f.validation||'',(function(idx){return function(v){ocrFields[idx].validation=v;};})(i)));
-    // DB
-    var dbSel=buildDBSelect(f.dbField||'',(function(idx){return function(chosen,meta){
-      ocrFields[idx].dbField=chosen;
-      if(meta&&!ocrFields[idx].label){ocrFields[idx].label=meta.labelHe;li.value=meta.labelHe;}
-      if(meta&&meta.type){ocrFields[idx].type=meta.type;}
-    };})(i));
-    var dbWrap=document.createElement('div');dbWrap.style.marginTop='5px';dbWrap.appendChild(dbSel);
-    advBody.appendChild(dbWrap);
-    // formula
-    var fml=document.createElement('input');fml.value=f.formula||'';fml.placeholder='נוסחה, למשל: {שכר} * 0.06';fml.style.marginTop='5px';
-    (function(idx){fml.oninput=function(){ocrFields[idx].formula=this.value;};})(i);
-    advBody.appendChild(fml);
-    // dropdown options (only for select)
-    if(f.type==='select'){
-      var optWrap=document.createElement('div');optWrap.style.cssText='margin-top:6px;padding:7px;background:#FAFAFA;border:1px solid #E5E7EB;border-radius:8px;';
-      var optTtl=document.createElement('div');optTtl.style.cssText='font-size:10px;color:#6B7280;margin-bottom:4px;';optTtl.textContent='אפשרויות הרשימה:';
-      optWrap.appendChild(optTtl);
-      if(!Array.isArray(f.options))f.options=[];
-      f.options.forEach(function(opt,oi){
-        var orow=document.createElement('div');orow.style.cssText='display:flex;gap:4px;margin-bottom:4px;';
-        var oin=document.createElement('input');oin.value=opt;oin.style.cssText='flex:1;padding:3px 6px;font-size:11px;border:1px solid #E5E7EB;border-radius:5px;font-family:inherit;';
-        (function(idx,ooi){oin.oninput=function(){ocrFields[idx].options[ooi]=this.value;};})(i,oi);
-        var orm=ocrMiniBtn('&times;','הסר אפשרות');(function(idx,ooi){orm.onclick=function(){ocrFields[idx].options.splice(ooi,1);ocrRenderReview();};})(i,oi);
-        orow.appendChild(oin);orow.appendChild(orm);optWrap.appendChild(orow);
-      });
-      var addOpt=document.createElement('button');addOpt.style.cssText='font-size:11px;color:#4F46E5;background:none;border:none;cursor:pointer;font-family:inherit;padding:2px 0;';
-      addOpt.textContent='+ הוסף אפשרות';
-      (function(idx){addOpt.onclick=function(){if(!Array.isArray(ocrFields[idx].options))ocrFields[idx].options=[];ocrFields[idx].options.push('אפשרות '+(ocrFields[idx].options.length+1));ocrRenderReview();};})(i);
-      optWrap.appendChild(addOpt);
-      advBody.appendChild(optWrap);
-    }
-
-    advWrap.appendChild(advToggle);advWrap.appendChild(advBody);
-    body.appendChild(advWrap);
-    card.appendChild(body);fr.appendChild(card);
-  });
-  // Add field button
-  var addBtn=document.createElement('button');addBtn.style.cssText='width:100%;padding:7px;font-size:12px;border:1.5px dashed #C7D2FE;border-radius:8px;background:none;color:#4F46E5;cursor:pointer;font-family:inherit;margin-top:4px;';
-  addBtn.textContent='+ הוסף שדה';
-  addBtn.onclick=function(){ocrFields.push({id:'new'+Date.now(),label:'שדה חדש',type:'text',required:false,placeholder:'',dbField:'',filler:'E_'});ocrRenderReview();};
-  fr.appendChild(addBtn);
-  // live count
-  var cnt=document.getElementById('os2Count');
-  if(cnt)cnt.textContent=ocrFields.length+' שדות';
-}
-
-function ocrConfirm(){
-  ocrPreferTextView=false; // זרימה רגילה — תצוגת תמונה אם קיימת
-  showLoading('בונה טופס דיגיטלי...');
-  setTimeout(function(){
-    ocrBuildDoc();hideLoading();ocrGoScreen(3);
-    document.getElementById('os3Count').textContent=ocrFields.length+' שדות';
-    toast('הטופס מוכן!');
-    // Init autosave
-    if(typeof SynelAutosave !== 'undefined'){
-      SynelAutosave.addStatusBadge();
-      SynelAutosave.init(
-        ocrDocTitle||'form',
-        function(){ return {docTitle:ocrDocTitle, rawText:ocrRawText, fields:ocrFields.map(function(f){
-          var inp=document.getElementById('inp_'+f.id);
-          return Object.assign({},f,{value:inp?inp.value:''});
-        })}; },
-        'autosave_status'
-      );
-      // Check for draft
-      if(SynelAutosave.hasDraft()){
-        SynelAutosave.showRestorePrompt(
-          function(data){
-            if(data.fields) data.fields.forEach(function(f){
-              var inp=document.getElementById('inp_'+f.id);
-              if(inp&&f.value){inp.value=f.value;inp.classList.add('filled');if(inp.oninput)inp.oninput();}
-            });
-            toast('הטיוטה שוחזרה');
-          },
-          function(){ /* start fresh */ }
-        );
-      }
-    }
-  },500);
-}
-
-function ocrBuildDoc(){
-  var s3f=document.getElementById('os3Fields');s3f.innerHTML='';
-  ocrFields.forEach(function(f){
-    var item=document.createElement('div');item.className='s3-fi';item.id='fi_'+f.id;
-    var dbBadge=f.dbField?'<span style="font-size:9px;padding:1px 5px;border-radius:8px;background:#EEF2FF;color:#4338CA;margin-right:3px;">'+f.dbField+'</span>':'';
-    var fillerColors={'E_':'#ECFDF5','M_':'#FEF3C7','S_':'#FEE2E2'};
-    var fillerLabels={'E_':'עובד','M_':'מנהל','S_':'מנהל-על'};
-    var fillerBadge=f.filler?'<span style="font-size:9px;padding:1px 5px;border-radius:8px;background:'+( fillerColors[f.filler]||'#F3F4F6')+';margin-right:3px;">'+( fillerLabels[f.filler]||f.filler)+'</span>':'';
-    item.innerHTML='<span style="flex:1;font-size:12px;">'+f.label+(f.required?' *':'')+'</span>'+fillerBadge+dbBadge+'<span style="font-size:10px;color:var(--text3);" id="fis_'+f.id+'">ריק</span>';
-    item.onclick=function(){var inp=document.getElementById('inp_'+f.id)||document.getElementById('sig_'+f.id);if(inp){inp.scrollIntoView({behavior:'smooth',block:'center'});if(inp.focus)inp.focus();}};
-    s3f.appendChild(item);
-  });
-
-  var paper=document.getElementById('os3Paper');paper.innerHTML='';
-
-  // כפתור מעבר תצוגה (מופיע רק אם יש תמונה זמינה)
-  if(ocrImageData){
-    var toggle=document.createElement('button');
-    toggle.style.cssText='display:block;margin:0 0 12px auto;font-size:12px;padding:6px 14px;border-radius:20px;border:1px solid #C7D2FE;background:white;color:#4F46E5;cursor:pointer;font-family:inherit;';
-    toggle.textContent=ocrPreferTextView?'⤢ עבור לתצוגת מסמך מקורי':'☰ עבור לתצוגת טקסט נקייה';
-    toggle.onclick=function(){ocrPreferTextView=!ocrPreferTextView;ocrBuildDoc();};
-    paper.appendChild(toggle);
-  }
-
-  // לוגו ארגון בראש הטופס.
-  // במצב תמונה עם "בכל העמודים" — לא מציגים כאן, אלא מעל כל עמוד בנפרד (ב-ocrBuildImageOverlay)
-  var imageMode = ocrImageData && !ocrPreferTextView;
-  if(ocrLogoData && !(imageMode && ocrLogoAllPages)){
-    var logoWrap=document.createElement('div');
-    logoWrap.className='doc-logo';
-    logoWrap.style.cssText='text-align:center;margin-bottom:14px;';
-    var logoImg=document.createElement('img');
-    logoImg.src=ocrLogoData;
-    logoImg.alt='לוגו ארגון';
-    logoImg.style.cssText='max-height:60px;max-width:220px;object-fit:contain;';
-    logoWrap.appendChild(logoImg);
-    paper.appendChild(logoWrap);
-  }
-
-  var title=document.createElement('h1');title.textContent=ocrDocTitle||'מסמך';paper.appendChild(title);
-
-  // מצב תמונה: התמונה המקורית + תיבות מילוי מעליה
-  // (אלא אם ביקשנו תצוגת טקסט נקייה — למשל בהצגת טופס שמור)
-  if(imageMode){
-    ocrBuildImageOverlay(paper);
-    return;
-  }
-
-  if(ocrRawText){
-    var lines=ocrRawText.replace(/\r/g,'').split('\n');
-    var container=document.createElement('div');
-    var placed={};
-    // שדות מקובצים לפי שורת המקור
-    var byLine={};
-    ocrFields.forEach(function(f){
-      var ln=(typeof f._line==='number')?f._line:-1;
-      if(!byLine[ln])byLine[ln]=[];
-      byLine[ln].push(f);
-    });
-
-    lines.forEach(function(line,idx){
-      var lineDiv=document.createElement('div');lineDiv.style.cssText='margin:2px 0;line-height:2.1;';
-      var fieldsHere=byLine[idx]?byLine[idx].slice():[];
-      var re=ocrBlankRe(), m, last=0, anyMarker=false;
-      // שיבוץ במקום הקווים אם נשארו
-      while((m=re.exec(line))!==null){
-        if(m[0].length===0){re.lastIndex++;continue;}
-        anyMarker=true;
-        var before=line.slice(last,m.index);
-        if(before)lineDiv.appendChild(document.createTextNode(before));
-        var f=fieldsHere.shift();
-        if(f){placed[f.id]=true;lineDiv.appendChild(createOcrField(f));}
-        else{var u=document.createElement('span');u.textContent='\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0';u.style.borderBottom='1px solid #999';lineDiv.appendChild(u);}
-        last=m.index+m[0].length;
-      }
-      var rest=line.slice(last);
-      if(rest)lineDiv.appendChild(document.createTextNode(rest));
-      // אם הקווים נעלמו בקריאה — נשבץ את שדות השורה בסוף השורה
-      if(!anyMarker && fieldsHere.length){
-        fieldsHere.forEach(function(f){
-          placed[f.id]=true;
-          lineDiv.appendChild(document.createTextNode('\u00A0'));
-          lineDiv.appendChild(createOcrField(f));
-        });
-      }
-      container.appendChild(lineDiv);
-    });
-
-    // שדות שלא שובצו (נוספו ידנית / בלי שורה) — בסוף, כרשימה
-    var leftovers=ocrFields.filter(function(f){return !placed[f.id];});
-    if(leftovers.length){
-      var sep=document.createElement('div');sep.style.cssText='margin-top:16px;padding-top:10px;border-top:1px dashed #ccc;';
-      leftovers.forEach(function(f){
-        var fg=document.createElement('div');fg.style.cssText='margin-bottom:12px;';
-        var lbl=document.createElement('div');lbl.style.cssText='font-size:11pt;color:#6B7280;margin-bottom:4px;';
-        lbl.textContent=f.label+(f.required?' *':'');
-        fg.appendChild(lbl);fg.appendChild(createOcrField(f));sep.appendChild(fg);
-      });
-      container.appendChild(sep);
-    }
-    paper.appendChild(container);
-  } else {
-    ocrFields.forEach(function(f){
-      var fg=document.createElement('div');fg.style.cssText='margin-bottom:14px;';
-      var lbl=document.createElement('div');lbl.style.cssText='font-size:11pt;color:#6B7280;margin-bottom:4px;';
-      lbl.textContent=f.label+(f.dbField?' ['+f.dbField+']':'')+(f.required?' *':'');
-      fg.appendChild(lbl);fg.appendChild(createOcrField(f));
-      paper.appendChild(fg);
-    });
-  }
-
-  // Signature
-  var hasSig=document.getElementById('ocrHasSig')&&document.getElementById('ocrHasSig').checked;
-  var hasRC=document.getElementById('ocrHasRC')&&document.getElementById('ocrHasRC').checked;
-  if(hasRC){
-    var rc=document.createElement('div');rc.style.cssText='border:1.5px solid #2D7A4F;border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;margin-top:16px;';
-    rc.innerHTML='<div style="width:26px;height:26px;border-radius:50%;background:#2D7A4F;display:flex;align-items:center;justify-content:center;color:white;">v</div><div style="font-size:13px;font-weight:500;color:#2D7A4F;">קראתי והבנתי את המסמך</div>';
-    rc.onclick=function(){this.style.background='#F0FDF4';};
-    paper.appendChild(rc);
-  }
-  if(hasSig){
-    var sb=document.createElement('div');sb.style.cssText='background:#F8F8F6;border-radius:12px;padding:14px;margin-top:12px;';
-    sb.innerHTML='<div style="font-size:14px;font-weight:700;margin-bottom:3px;">חתימה דיגיטלית</div><div style="font-size:11px;color:#9CA3AF;margin-bottom:8px;">חתמ/י באצבע</div>';
-    var canvas=document.createElement('canvas');canvas.width=600;canvas.height=100;canvas.id='ocrSigCanvas';
-    canvas.style.cssText='width:100%;border:1.5px solid #4F46E5;border-radius:8px;display:block;background:white;cursor:crosshair;';
-    sb.appendChild(canvas);
-    var clr=document.createElement('button');clr.style.cssText='margin-top:6px;padding:5px 14px;font-size:11px;border:1px solid #E5E7EB;border-radius:6px;background:white;cursor:pointer;font-family:inherit;';
-    clr.textContent='ניקוי';
-    sb.appendChild(clr);paper.appendChild(sb);
-    setTimeout(function(){
-      var cv=document.getElementById('ocrSigCanvas');if(!cv)return;
-      var ctx=cv.getContext('2d');ctx.strokeStyle='#1a1a1a';ctx.lineWidth=2;ctx.lineCap='round';
-      var drawing=false;
-      function pos(e){var r=cv.getBoundingClientRect();var src=e.touches?e.touches[0]:e;return{x:(src.clientX-r.left)*(cv.width/r.width),y:(src.clientY-r.top)*(cv.height/r.height)};}
-      cv.onmousedown=cv.ontouchstart=function(e){e.preventDefault();drawing=true;var p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);};
-      cv.onmousemove=cv.ontouchmove=function(e){e.preventDefault();if(!drawing)return;var p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();};
-      cv.onmouseup=cv.ontouchend=function(){drawing=false;};
-      clr.onclick=function(){ctx.clearRect(0,0,cv.width,cv.height);};
-    },100);
-  }
-}
-
-function createOcrField(f){
-  if(f.type==='signature'){
-    var wrap=document.createElement('div');wrap.style.cssText='margin:4px 0;';
-    var canvas=document.createElement('canvas');canvas.width=400;canvas.height=80;canvas.id='sig_'+f.id;
-    canvas.style.cssText='width:100%;border:1.5px solid #4F46E5;border-radius:6px;display:block;background:white;cursor:crosshair;';
-    wrap.appendChild(canvas);
-    setTimeout(function(){
-      var cv=document.getElementById('sig_'+f.id);if(!cv)return;
-      var ctx=cv.getContext('2d');ctx.strokeStyle='#1a1a1a';ctx.lineWidth=2;ctx.lineCap='round';
-      var drawing=false;
-      function pos(e){var r=cv.getBoundingClientRect();var src=e.touches?e.touches[0]:e;return{x:(src.clientX-r.left)*(cv.width/r.width),y:(src.clientY-r.top)*(cv.height/r.height)};}
-      cv.onmousedown=cv.ontouchstart=function(e){e.preventDefault();drawing=true;var p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);};
-      cv.onmousemove=cv.ontouchmove=function(e){e.preventDefault();if(!drawing)return;var p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();};
-      cv.onmouseup=cv.ontouchend=function(){drawing=false;
-        var fi=document.getElementById('fi_'+f.id);var fis=document.getElementById('fis_'+f.id);
-        if(fi)fi.classList.add('filled');if(fis)fis.textContent='v';updateProgress();
-      };
-    },100);
-    return wrap;
-  }
-  // Dropdown (select)
-  if(f.type==='select'){
-    var sel=document.createElement('select');sel.className='inline-field';sel.id='inp_'+f.id;
-    sel.style.cssText='padding:4px 8px;font-size:inherit;border:1px solid #C7D2FE;border-radius:6px;font-family:inherit;background:white;';
-    var ph0=document.createElement('option');ph0.value='';ph0.textContent=f.placeholder||'— בחר —';sel.appendChild(ph0);
-    (f.options||[]).forEach(function(opt){var o=document.createElement('option');o.value=opt;o.textContent=opt;sel.appendChild(o);});
-    (function(fid){sel.onchange=function(){var fi=document.getElementById('fi_'+fid);var fis=document.getElementById('fis_'+fid);
-      if(this.value){this.classList.add('filled');if(fi)fi.classList.add('filled');if(fis)fis.textContent='v';}
-      else{this.classList.remove('filled');if(fi)fi.classList.remove('filled');if(fis)fis.textContent='ריק';}
-      updateProgress();ocrRecalcFormulas();};})(f.id);
-    return sel;
-  }
-  // Formula (computed, read-only)
-  if(f.formula){
-    var fin=document.createElement('input');fin.type='text';fin.className='inline-field';fin.id='inp_'+f.id;
-    fin.readOnly=true;fin.setAttribute('data-formula',f.formula);fin.placeholder='מחושב';
-    fin.style.cssText='width:120px;background:#F8F8F6;';
-    return fin;
-  }
-  var inp=document.createElement('input');
-  inp.type=f.type==='date'?'date':f.type==='number'?'number':'text';
-  inp.className='inline-field';inp.id='inp_'+f.id;inp.placeholder=f.placeholder||f.label;
-  inp.style.width=(f.type==='date'?120:Math.max((f.label||'').length*9+20,80))+'px';
-  (function(fid, ftype, freq, fdbField, fval){
-    inp.oninput=function(){
-      var fi=document.getElementById('fi_'+fid);var fis=document.getElementById('fis_'+fid);
-      if(this.value.trim()){this.classList.add('filled');if(fi)fi.classList.add('filled');if(fis)fis.textContent='v';}
-      else{this.classList.remove('filled');if(fi)fi.classList.remove('filled');if(fis)fis.textContent='ריק';}
-      updateProgress();ocrRecalcFormulas();
+  /* ==========================================================================
+   * 1) המודל הקנוני — מבנה FormSpec ריק תקני
+   * ======================================================================== */
+  function create(opts) {
+    opts = opts || {};
+    return {
+      version: SCHEMA_VERSION,
+      meta: {
+        id: uid('form'),
+        title: opts.title || '',
+        createdAt: nowISO(),
+        updatedAt: nowISO(),
+        logo: { dataUrl: '', allPages: true },   // מיתוג ארגון
+        brand: { color: '' }                       // נקודת חיבור ל-synel-brand
+      },
+      source: {
+        type: opts.sourceType || 'text',          // 'pdf' | 'image' | 'text' | 'saved'
+        pages: []                                  // [{ index, image, text, width, height }]
+      },
+      fields: [],                                  // ראה makeField()
+      assignment: { process: null, audience: null, owner: null },
+      settings: { signature: true, readConfirm: false }
     };
-    if(typeof SynelValidation !== 'undefined'){
-      // ולידציה נבחרת ידנית גוברת על זיהוי אוטומטי
-      var vType = fval || SynelValidation.detectType(fdbField, ftype);
-      SynelValidation.attachLive(inp, vType, freq, fval?'':fdbField);
-    }
-  })(f.id, f.type, f.required, f.dbField, f.validation);
-  return inp;
-}
-
-/* ===== מצב תמונה: שכבת מילוי מעל התמונה המקורית ===== */
-function ocrMatchLineForField(f,usedCount){
-  // התאמת שדה לשורת-תמונה: לפי תווית, אחרת לפי אינדקס השורה
-  if(!ocrLines.length)return null;
-  var lbl=(f.label||'').replace(/[^\u0590-\u05FF a-zA-Z0-9]/g,'').trim();
-  if(lbl){
-    var hit=ocrLines.find(function(l){return l.text&&l.text.replace(/[^\u0590-\u05FF a-zA-Z0-9]/g,'').indexOf(lbl.split(' ')[0])>=0;});
-    if(hit)return hit;
   }
-  if(typeof f._line==='number'&&ocrLines[f._line])return ocrLines[f._line];
-  return ocrLines[Math.min(usedCount,ocrLines.length-1)];
-}
 
-function ocrBuildImageOverlay(paper){
-  var hint=document.createElement('div');
-  hint.style.cssText='font-size:11px;color:#6B7280;background:#EEF2FF;border:1px solid #C7D2FE;border-radius:8px;padding:7px 10px;margin-bottom:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;';
-  var pageInfo=(ocrPages.length>1)?(' · '+ocrPages.length+' עמודים'):'';
-  hint.innerHTML='<span style="flex:1;">💡 התיבות מוקמו אוטומטית'+pageInfo+'. גררי כל תיבה למקום, שני גודל מהפינה, והקלידי בתוכה.</span>';
-  var tidyBtn=document.createElement('button');
-  tidyBtn.textContent='סדר תיבות בטור';
-  tidyBtn.style.cssText='font-size:11px;padding:5px 12px;border-radius:20px;border:1px solid #C7D2FE;background:white;color:#4F46E5;cursor:pointer;font-family:inherit;white-space:nowrap;';
-  tidyBtn.onclick=ocrTidyColumn;
-  hint.appendChild(tidyBtn);
-  paper.appendChild(hint);
+  /* שדה בודד — מבנה אחיד לכל המקורות */
+  function makeField(o) {
+    o = o || {};
+    return {
+      id: o.id || uid('f'),
+      page: (typeof o.page === 'number') ? o.page : 0,   // לאיזה עמוד שייך
+      label: o.label || '',
+      type: o.type || 'text',     // text|date|number|email|select|checkbox|signature|textarea
+      required: !!o.required,
+      placeholder: o.placeholder || '',
+      filledBy: o.filledBy || 'employee',   // 'employee' | 'manager'
+      options: o.options || [],             // ל-select
+      validation: o.validation || null,     // { pattern, message }
+      dbField: o.dbField || null,           // שיוך לשדה ב-Harmony DB
+      formula: o.formula || null,
+      box: o.box || null                    // { x, y, w, h } — מיקום על העמוד (במצב תמונה)
+    };
+  }
 
-  // אם אין מבנה עמודים (גיבוי) — נשתמש בעמוד יחיד מ-ocrImageData
-  var pages=(ocrPages&&ocrPages.length)?ocrPages:[{image:ocrImageData,lines:ocrLines}];
+  function makePage(o) {
+    o = o || {};
+    return {
+      index: (typeof o.index === 'number') ? o.index : 0,
+      image: o.image || null,     // Data URL — קיים במצב תמונה/PDF, null בטקסט
+      text: o.text || '',
+      width: o.width || 0,
+      height: o.height || 0
+    };
+  }
 
-  pages.forEach(function(pg,pageIdx){
-    // לוגו מעל כל עמוד (מצב "בכל העמודים")
-    if(ocrLogoData && ocrLogoAllPages){
-      var lw=document.createElement('div');lw.className='doc-logo doc-logo-page';
-      lw.style.cssText='text-align:center;margin:'+(pageIdx===0?'0 0 10px':'22px 0 10px')+';';
-      if(pageIdx>0) lw.style.pageBreakBefore='always';
-      var li=document.createElement('img');li.src=ocrLogoData;li.alt='לוגו ארגון';
-      li.style.cssText='max-height:50px;max-width:200px;object-fit:contain;';
-      lw.appendChild(li);paper.appendChild(lw);
-    }
-    if(ocrPages.length>1){
-      var pl=document.createElement('div');pl.style.cssText='font-size:11px;color:#9CA3AF;margin:14px 0 4px;';
-      pl.textContent='עמוד '+(pageIdx+1)+' מתוך '+pages.length;
-      paper.appendChild(pl);
-    }
-    var stage=document.createElement('div');stage.className='ocrStage';stage.id='ocrStage'+pageIdx;
-    if(pageIdx===0)stage.setAttribute('data-primary','1');
-    stage.style.cssText='position:relative;display:block;width:100%;margin-bottom:14px;';
-    var img=document.createElement('img');img.src=pg.image;
-    img.style.cssText='width:100%;display:block;border:1px solid #E5E7EB;border-radius:6px;';
-    stage.appendChild(img);
-    paper.appendChild(stage);
+  /* ==========================================================================
+   * 2) זיהוי שדות מטקסט — heuristics משותף לכל המקורות הטקסטואליים
+   *    (כל מתאם שמייצר טקסט משתמש באותו זיהוי — אין כפילות לוגיקה)
+   * ======================================================================== */
+  function detectFieldsFromText(text, pageIndex) {
+    var fields = [];
+    var lines = String(text || '').split(/\r?\n/);
+    lines.forEach(function (raw) {
+      var line = raw.trim();
+      if (!line) return;
 
-    var pageFields=ocrFields.filter(function(f){return (f._page||0)===pageIdx;});
-    var pageLines=pg.lines||[];
+      // שורה עם תווית שמסתיימת בנקודתיים, או עם קו תחתון/נקודות למילוי
+      var hasColon = /[:：]\s*$/.test(line) || /[:：]\s*_{2,}|[:：]\s*\.{3,}/.test(line);
+      var hasBlank = /_{3,}|\.{4,}/.test(line);
+      var hasCheckbox = /[□☐]/.test(line);
+      if (!hasColon && !hasBlank && !hasCheckbox) return;
 
-    img.onload=(function(stageEl,imgEl,flds,lns){return function(){
-      var natW=imgEl.naturalWidth||1000;
-      var dispW=imgEl.clientWidth||stageEl.clientWidth;
-      var scale=dispW/natW;
-      var perLineCount={};
-      flds.forEach(function(f,i){
-        var box=document.createElement('div');box.className='ocr-ov';box.style.position='absolute';
-        var line=ocrMatchLineIn(f,i,lns);
-        var bx,by,bw,bh;
-        if(line){
-          var key=Math.round(line.y0);
-          perLineCount[key]=(perLineCount[key]||0);
-          var idxInLine=perLineCount[key];perLineCount[key]++;
-          var sameLine=flds.filter(function(g,gi){var gl=ocrMatchLineIn(g,gi,lns);return gl&&Math.round(gl.y0)===key;}).length||1;
-          var segW=((line.x1-line.x0)*scale)/sameLine;
-          bh=Math.min(Math.max((line.y1-line.y0)*scale,20),32);
-          bw=Math.min(Math.max(segW-10,70),150);
-          bx=(line.x0*scale)+(idxInLine*segW);
-          by=line.y0*scale-1;
-        }else{
-          bx=dispW*0.08; by=40+i*34; bw=140; bh=24;
+      var label = line.replace(/[:：]\s*$/, '')
+                      .replace(/_{2,}|\.{3,}/g, '')
+                      .replace(/[□☐]/g, '')
+                      .trim();
+      if (!label || label.length > 60) return;
+
+      fields.push(makeField({
+        page: pageIndex || 0,
+        label: label,
+        type: inferType(label, hasCheckbox),
+        required: /\*|חובה/.test(line)
+      }));
+    });
+    return fields;
+  }
+
+  // ניחוש סוג השדה לפי התווית — מהספציפי לכללי
+  function inferType(label, isCheckbox) {
+    if (isCheckbox) return 'checkbox';
+    var l = label.toLowerCase();
+    if (/דוא"ל|דואל|אימייל|מייל|email|@/.test(l)) return 'email';
+    if (/^עיר|ישוב|יישוב|עיר\s?מגורים|מ?עיר/.test(l)) return 'city';
+    if (/רחוב|כתובת/.test(l)) return 'street';
+    if (/ת\.?\s?ז|תעודת\s?זהות|ת״ז|מספר\s?זהות/.test(l)) return 'id';
+    if (/ביום|^יום|מס'?\s?יום/.test(l)) return 'day';
+    if (/בחודש|^חודש/.test(l)) return 'month';
+    if (/בשנת|בשנה|^שנה|^שנת/.test(l)) return 'year';
+    if (/תאריך|לידה|מ-?תאריך|עד\s?תאריך|date/.test(l)) return 'date';
+    if (/מס'|מס׳|מספר|טלפון|נייד|סכום|תשלום|דמי/.test(l)) return 'number';
+    if (/חתימה|חתום|signature/.test(l)) return 'signature';
+    if (/הערות|פירוט|תיאור|הסבר/.test(l)) return 'textarea';
+    return 'text';
+  }
+
+  /* זיהוי שדות עם מיקום (box) מתוך מילות OCR — לכל תווית ממוקמת תיבה
+     במקום הריק שאחריה (בעברית: משמאל לתווית עד תחילת השורה).
+     words: [{ text, bbox:{x0,y0,x1,y1} }]  (פלט Tesseract) */
+  function detectFieldsFromWords(words, imgW, imgH, pageIndex) {
+    if (!words || !words.length || !imgW || !imgH) return [];
+    var items = words.map(function (w) {
+      var b = w.bbox || {};
+      return { text: String(w.text || '').trim(), x0: b.x0, y0: b.y0, x1: b.x1, y1: b.y1 };
+    }).filter(function (w) { return w.text && typeof w.x0 === 'number'; });
+
+    // קיבוץ לשורות לפי קו האמצע האנכי
+    items.sort(function (a, b) { return (a.y0 - b.y0) || (b.x1 - a.x1); });
+    var lines = [], cur = [], lastY = null;
+    items.forEach(function (it) {
+      var cy = (it.y0 + it.y1) / 2, h = (it.y1 - it.y0) || 10;
+      if (lastY !== null && Math.abs(cy - lastY) > h * 0.7) { lines.push(cur); cur = []; }
+      cur.push(it); lastY = cy;
+    });
+    if (cur.length) lines.push(cur);
+
+    var fields = [];
+    lines.forEach(function (line) {
+      var sorted = line.slice().sort(function (a, b) { return a.x0 - b.x0; });
+      var lineH = Math.max.apply(null, sorted.map(function (t) { return t.y1 - t.y0; })) || imgH * 0.02;
+      var lineY = Math.min.apply(null, sorted.map(function (t) { return t.y0; }));
+      var boxH = Math.min(lineH, imgH * 0.03);   // גובה תיבה לא חורג מגובה השורה
+
+      // (א) תווית קצרה שמסתיימת בנקודתיים → תיבה צרה משמאלה
+      for (var i = 0; i < sorted.length; i++) {
+        var w = sorted[i];
+        if (/[:：]$/.test(w.text) && !/^\d+(\.\d+)*[.:]?$/.test(w.text)) {
+          var label = w.text.replace(/[:：]$/, '').trim();
+          if (label.length >= 2 && label.length <= 24) {
+            var widthPx = Math.min(w.x0 - sorted[0].x0, imgW * 0.22);
+            if (widthPx < imgW * 0.06) widthPx = imgW * 0.14;
+            pushField(label, w.x0 - widthPx, widthPx);
+          }
         }
-        box.style.left=bx+'px';box.style.top=by+'px';box.style.width=bw+'px';box.style.height=bh+'px';
-        box.setAttribute('data-fid',f.id);
-
-        if(f.type==='signature'){
-          box.classList.add('ocr-ov-sig');box.title=f.label;
-          box.innerHTML='<span style="font-size:10px;color:#2D7A4F;pointer-events:none;white-space:nowrap;">✍ '+(f.label||'חתימה')+'</span>';
-        }else{
-          var inp=document.createElement('input');
-          inp.type=f.type==='date'?'date':f.type==='number'?'number':'text';
-          inp.id='inp_'+f.id;inp.placeholder=f.label||'';inp.title=f.label||'';
-          inp.style.cssText='width:100%;height:100%;border:none;background:transparent;font-family:inherit;font-size:12px;padding:0 3px;outline:none;';
-          (function(fid){inp.oninput=function(){var fi=document.getElementById('fi_'+fid);var fis=document.getElementById('fis_'+fid);
-            if(this.value.trim()){if(fi)fi.classList.add('filled');if(fis)fis.textContent='v';}else{if(fi)fi.classList.remove('filled');if(fis)fis.textContent='ריק';}
-            updateProgress();ocrRecalcFormulas();};})(f.id);
-          inp.onmousedown=function(e){e.stopPropagation();};
-          box.appendChild(inp);
-          if(typeof SynelValidation!=='undefined'){var vt=f.validation||SynelValidation.detectType(f.dbField,f.type);SynelValidation.attachLive(inp,vt,f.required,f.validation?'':f.dbField);}
+      }
+      // (ב) רק רווח ארוך מאוד (קו מילוי ברור) — לא רווחים טבעיים בפסקה
+      for (var k = 0; k < sorted.length - 1; k++) {
+        var gap = sorted[k + 1].x0 - sorted[k].x1;
+        if (gap > imgW * 0.07 && gap < imgW * 0.62) {       // קו למילוי — לא רווח טבעי, לא חצי-עמוד
+          var lbl = (sorted[k + 1].text || 'שדה').replace(/[:：]$/, '').trim();
+          if (!lbl || lbl.length > 24 || /^\d+(\.\d+)*[.:]?$/.test(lbl)) lbl = 'שדה';
+          pushField(lbl, sorted[k].x1, gap);
         }
-        ocrMakeDraggable(box,f);
-        stageEl.appendChild(box);
+      }
+
+      function pushField(label, leftPx, widthPx) {
+        var nx = +(leftPx / imgW * 100).toFixed(2);
+        var ny = +(lineY / imgH * 100).toFixed(2);
+        var nw = widthPx / imgW * 100;
+        var nh = boxH / imgH * 100;
+        // דחיית כל חפיפה עם תיבה קיימת (מלבנים חופפים)
+        var overlap = fields.some(function (f) {
+          if (!f.box) return false;
+          return nx < f.box.x + f.box.w && nx + nw > f.box.x &&
+                 ny < f.box.y + f.box.h + 0.5 && ny + nh + 0.5 > f.box.y;
+        });
+        if (overlap) return;
+        fields.push(makeField({
+          page: pageIndex || 0, label: label, type: inferType(label, false),
+          box: { x: nx, y: ny, w: +nw.toFixed(2), h: +nh.toFixed(2) }
+        }));
+      }
+    });
+    return fields.slice(0, 60);
+  }
+
+  /* ==========================================================================
+   * 3) שכבת המתאמים — כל מקור קלט -> אותו FormSpec בדיוק
+   * ======================================================================== */
+  var adapters = {
+
+    /* טקסט מודבק */
+    fromText: function (text, opts) {
+      opts = opts || {};
+      var spec = create({ title: opts.title || 'מסמך', sourceType: 'text' });
+      spec.source.pages = [ makePage({ index: 0, text: text, image: null }) ];
+      spec.fields = detectFieldsFromText(text, 0);
+      return spec;
+    },
+
+    /* תמונה בודדת (סריקה / צילום). words אופציונלי — מילות OCR עם מיקום */
+    fromImage: function (dataUrl, opts) {
+      opts = opts || {};
+      var spec = create({ title: opts.title || 'מסמך', sourceType: 'image' });
+      spec.source.pages = [ makePage({
+        index: 0, image: dataUrl,
+        text: opts.text || '', width: opts.width || 0, height: opts.height || 0
+      }) ];
+      if (opts.words && opts.width && opts.height) {
+        // יש מילים עם מיקום → תיבות ממוקמות על התמונה
+        spec.fields = detectFieldsFromWords(opts.words, opts.width, opts.height, 0);
+      } else if (opts.text) {
+        // רק טקסט → זיהוי ללא מיקום
+        spec.fields = detectFieldsFromText(opts.text, 0);
+      }
+      return spec;
+    },
+
+    /* PDF רב-עמודי. pdfPages = [{ image, text, width, height }] */
+    fromPDF: function (pdfPages, opts) {
+      opts = opts || {};
+      var spec = create({ title: opts.title || 'מסמך', sourceType: 'pdf' });
+      spec.source.pages = (pdfPages || []).map(function (p, idx) {
+        return makePage({ index: idx, image: p.image || null, text: p.text || '',
+                          width: p.width || 0, height: p.height || 0 });
       });
-    };})(stage,img,pageFields,pageLines);
-  });
-}
+      // זיהוי שדות מכל עמוד, עם שמירת מספר העמוד הנכון
+      spec.source.pages.forEach(function (pg) {
+        spec.fields = spec.fields.concat(detectFieldsFromText(pg.text, pg.index));
+      });
+      return spec;
+    },
 
-/* התאמת שדה לשורה בתוך רשימת שורות נתונה (לעמוד מסוים) */
-function ocrMatchLineIn(f,usedCount,lines){
-  if(!lines||!lines.length)return null;
-  var lbl=(f.label||'').replace(/[^\u0590-\u05FF a-zA-Z0-9]/g,'').trim();
-  if(lbl){
-    var first=lbl.split(' ')[0];
-    var hit=lines.find(function(l){return l.text&&l.text.replace(/[^\u0590-\u05FF a-zA-Z0-9]/g,'').indexOf(first)>=0;});
-    if(hit)return hit;
+    /* טופס שמור בפורמט הישן -> ממיר ל-FormSpec החדש (הגירה ללא אובדן) */
+    fromSaved: function (rec) {
+      rec = rec || {};
+      var spec = create({ title: rec.docTitle || rec.name || 'מסמך', sourceType: 'saved' });
+      var pages = (rec.pages && rec.pages.length)
+        ? rec.pages
+        : (rec.imageData ? [{ image: rec.imageData, text: rec.rawText || '' }] : [{ text: rec.rawText || '' }]);
+      spec.source.pages = pages.map(function (p, idx) {
+        return makePage({ index: idx, image: p.image || null, text: p.text || '' });
+      });
+      spec.fields = (rec.fields || []).map(function (f) {
+        return makeField({
+          id: f.id, page: f._page || 0, label: f.label, type: f.type,
+          required: f.required, placeholder: f.placeholder, filledBy: f.filledBy,
+          options: f.options, validation: f.validation, dbField: f.dbField, box: f.box
+        });
+      });
+      if (rec.logoData) spec.meta.logo.dataUrl = rec.logoData;
+      if (typeof rec.logoAllPages !== 'undefined') spec.meta.logo.allPages = !!rec.logoAllPages;
+      if (rec.assign) spec.assignment = Object.assign(spec.assignment, rec.assign);
+      return spec;
+    }
+  };
+
+  /* ==========================================================================
+   * 4) ייצוא ל-Harmony — אותו מבנה, ללא תרגום
+   * ======================================================================== */
+  function toHarmonyJSON(spec) {
+    touch(spec);
+    return JSON.stringify({
+      schemaVersion: spec.version,
+      formId: spec.meta.id,
+      title: spec.meta.title,
+      branding: { logo: spec.meta.logo.dataUrl || null, logoAllPages: spec.meta.logo.allPages },
+      assignment: spec.assignment,
+      settings: spec.settings,
+      pages: spec.source.pages.map(function (p) { return { index: p.index, hasImage: !!p.image }; }),
+      fields: spec.fields.map(function (f) {
+        return { id: f.id, page: f.page, label: f.label, type: f.type,
+                 required: f.required, filledBy: f.filledBy, dbField: f.dbField, options: f.options };
+      })
+    }, null, 2);
   }
-  if(typeof f._line==='number'&&lines[f._line])return lines[f._line];
-  return lines[Math.min(usedCount,lines.length-1)];
-}
 
-function ocrTidyColumn(){
-  var stages=document.querySelectorAll('.ocrStage');
-  if(!stages.length)return;
-  stages.forEach(function(stage){
-    var boxes=stage.querySelectorAll('.ocr-ov');
-    var top=12;
-    boxes.forEach(function(b){
-      b.style.left=(stage.clientWidth-170)+'px';
-      b.style.top=top+'px';
-      b.style.width='150px';
-      b.style.height='26px';
-      top+=34;
+  /* ==========================================================================
+   * 5) ולידציה — מאשרת שכל FormSpec (מכל מקור) תקני לפי אותם כללים
+   * ======================================================================== */
+  function validate(spec) {
+    var errors = [];
+    if (!spec || typeof spec !== 'object') return { valid: false, errors: ['spec חסר'] };
+    if (spec.version !== SCHEMA_VERSION) errors.push('גרסת schema לא תואמת');
+    if (!spec.meta || !spec.meta.id) errors.push('meta.id חסר');
+    if (!spec.source || !Array.isArray(spec.source.pages)) errors.push('source.pages חייב להיות מערך');
+    if (!Array.isArray(spec.fields)) errors.push('fields חייב להיות מערך');
+    var VALID = ['text','date','number','email','select','checkbox','signature','textarea','id','day','month','year','city','street'];
+    (spec.fields || []).forEach(function (f, i) {
+      if (!f.id) errors.push('שדה #' + i + ': id חסר');
+      if (VALID.indexOf(f.type) === -1) errors.push('שדה "' + (f.label||i) + '": סוג לא חוקי (' + f.type + ')');
+      if (typeof f.page !== 'number') errors.push('שדה "' + (f.label||i) + '": page חסר');
     });
-  });
-  toast('התיבות סודרו בטור — גררי כל אחת למקומה');
-}
-
-function ocrMakeDraggable(box,f){
-  // ידית שינוי גודל
-  var rz=document.createElement('div');rz.className='ocr-ov-rz';
-  rz.style.cssText='position:absolute;left:-1px;bottom:-1px;width:12px;height:12px;background:#4F46E5;border-radius:50%;cursor:nwse-resize;';
-  box.appendChild(rz);
-  var startX,startY,ox,oy,ow,oh,mode;
-  function down(e,m){e.preventDefault();e.stopPropagation();mode=m;var p=e.touches?e.touches[0]:e;startX=p.clientX;startY=p.clientY;
-    ox=parseFloat(box.style.left);oy=parseFloat(box.style.top);ow=parseFloat(box.style.width);oh=parseFloat(box.style.height);
-    document.addEventListener('mousemove',move);document.addEventListener('mouseup',up);
-    document.addEventListener('touchmove',move,{passive:false});document.addEventListener('touchend',up);}
-  function move(e){if(!mode)return;e.preventDefault();var p=e.touches?e.touches[0]:e;var dx=p.clientX-startX,dy=p.clientY-startY;
-    if(mode==='move'){box.style.left=(ox+dx)+'px';box.style.top=(oy+dy)+'px';}
-    else{box.style.width=Math.max(40,ow-dx)+'px';box.style.height=Math.max(18,oh+dy)+'px';box.style.left=(ox+dx)+'px';}}
-  function up(){mode=null;document.removeEventListener('mousemove',move);document.removeEventListener('mouseup',up);
-    document.removeEventListener('touchmove',move);document.removeEventListener('touchend',up);}
-  box.addEventListener('mousedown',function(e){if(e.target===rz)return;down(e,'move');});
-  box.addEventListener('touchstart',function(e){if(e.target===rz)return;down(e,'move');},{passive:false});
-  rz.addEventListener('mousedown',function(e){down(e,'resize');});
-  rz.addEventListener('touchstart',function(e){down(e,'resize');},{passive:false});
-}
-
-
-function ocrRecalcFormulas(){
-  ocrFields.forEach(function(f){
-    if(!f.formula)return;
-    var el=document.getElementById('inp_'+f.id);if(!el)return;
-    var expr=f.formula;
-    ocrFields.forEach(function(g){
-      var gv=document.getElementById('inp_'+g.id);
-      var val=gv?parseFloat(gv.value):NaN;if(isNaN(val))val=0;
-      if(g.label)expr=expr.split('{'+g.label+'}').join('('+val+')');
-      if(g.dbField)expr=expr.split('{'+g.dbField+'}').join('('+val+')');
-    });
-    // בטיחות: רק ספרות ואופרטורים נשארו
-    if(/^[0-9.+\-*/() ]*$/.test(expr)){
-      try{var r=Function('return ('+expr+')')();
-        el.value=(isFinite(r)?Math.round(r*100)/100:'');
-        var fi=document.getElementById('fi_'+f.id);var fis=document.getElementById('fis_'+f.id);
-        if(el.value!==''){if(fi)fi.classList.add('filled');if(fis)fis.textContent='v';}
-      }catch(e){}
-    }
-  });
-}
-
-function updateProgress(){
-  var filled=ocrFields.filter(function(f){var el=document.getElementById('inp_'+f.id)||document.getElementById('sig_'+f.id);return el&&(el.tagName==='CANVAS'?true:el.value&&el.value.trim());}).length;
-  document.getElementById('os3Count').textContent=filled+'/'+ocrFields.length+' מולאו';
-}
-
-function ocrSubmit(){
-  // Use SynelValidation if available
-  if(typeof SynelValidation !== 'undefined'){
-    var result = SynelValidation.validateForm(ocrFields);
-    if(!result.valid){
-      toast('חסרים/שגויים: '+result.errors.slice(0,3).map(function(e){return e.field.label;}).join(', '));
-      return;
-    }
-  } else {
-    var missing=ocrFields.filter(function(f){return f.required&&(!document.getElementById('inp_'+f.id)||!document.getElementById('inp_'+f.id).value.trim());});
-    if(missing.length){toast('חסרים: '+missing.slice(0,3).map(function(f){return f.label;}).join(', '));return;}
+    return { valid: errors.length === 0, errors: errors };
   }
-  document.getElementById('os3SubmitBtn').textContent='הוגש!';document.getElementById('os3SubmitBtn').style.background='#2D7A4F';
-  if(typeof SynelAutosave !== 'undefined') SynelAutosave.clear();
-  toast('הטופס הוגש בהצלחה!');
-}
 
-function ocrSavePDF(){
-  // כותרת תחתונה שחוזרת בכל עמוד מודפס
-  var old=document.getElementById('pdfFooter');if(old)old.remove();
-  var foot=document.createElement('div');foot.id='pdfFooter';foot.className='pdf-footer';
-  foot.textContent=(ocrDocTitle||'מסמך');
-  document.body.appendChild(foot);
-  // לוגו שחוזר בכל עמוד — עוטפים את תוכן הטופס בטבלה עם thead (חוזר בכל עמוד מודפס)
-  var paper=document.getElementById('os3Paper');
-  var imageMode = ocrImageData && !ocrPreferTextView;
-  document.body.classList.remove('logo-all-pages');
-  ocrUnwrapLogoTable(); // ניקוי אם נשאר ממקודם
-  if(ocrLogoAllPages && ocrLogoData && paper){
-    document.body.classList.add('logo-all-pages'); // משחרר את הגובה כדי שהתוכן יתפצל
-    // במצב תמונה הלוגו כבר מצויר מעל כל עמוד — אין צורך בעטיפת thead
-    if(!imageMode){
-      var table=document.createElement('table');table.id='printLogoTable';
-      var thead=document.createElement('thead');var thr=document.createElement('tr');var thtd=document.createElement('td');
-      var img=document.createElement('img');img.src=ocrLogoData;img.className='repeat-logo-img';img.alt='לוגו ארגון';
-      thtd.appendChild(img);thr.appendChild(thtd);thead.appendChild(thr);
-      var tbody=document.createElement('tbody');var tr=document.createElement('tr');var td=document.createElement('td');
-      while(paper.firstChild){ td.appendChild(paper.firstChild); }
-      tr.appendChild(td);tbody.appendChild(tr);
-      table.appendChild(thead);table.appendChild(tbody);
-      paper.appendChild(table);
+  function touch(spec) { if (spec && spec.meta) spec.meta.updatedAt = nowISO(); return spec; }
+
+  /* ==========================================================================
+   * API
+   * ======================================================================== */
+  var SynelFormSpec = {
+    SCHEMA_VERSION: SCHEMA_VERSION,
+    create: create,
+    makeField: makeField,
+    makePage: makePage,
+    detectFieldsFromText: detectFieldsFromText,
+    detectFieldsFromWords: detectFieldsFromWords,
+    inferType: inferType,
+    fromText: adapters.fromText,
+    fromImage: adapters.fromImage,
+    fromPDF: adapters.fromPDF,
+    fromSaved: adapters.fromSaved,
+    toHarmonyJSON: toHarmonyJSON,
+    validate: validate,
+    touch: touch
+  };
+
+  if (typeof module !== 'undefined' && module.exports) module.exports = SynelFormSpec;
+  else global.SynelFormSpec = SynelFormSpec;
+
+})(typeof window !== 'undefined' ? window : this);
+</script>
+<script>
+(function(){
+  if(window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+  var SAMPLE="חוזה שכירות — דוגמה\n\nשם השוכר: ______________\nתאריך לידה: __/__/____\nמספר ת.ז: ______________\nכתובת: ______________\nדואל ליצירת קשר: ______________\nהערות נוספות: ______________\nחתימת השוכר: ______________";
+  var current='text';
+  var uploadedImage=null;     // Data URL
+  var uploadedImageText='';   // טקסט OCR
+  var uploadedImageWords=null;// מילים עם מיקום
+  var uploadedLines=[];       // קווים תחתונים שזוהו בתמונה
+  var uploadedImgW=0, uploadedImgH=0;
+  var uploadedPdfPages=null;  // [{image,text}]
+  var currentSpec=null, selIdx=-1, suppressAdd=false;
+
+  var inputArea=document.getElementById('inputArea');
+  var outArea=document.getElementById('outArea');
+  var inLbl=document.getElementById('inLbl');
+  var outLbl=document.getElementById('outLbl');
+  var runBtn=document.getElementById('runBtn');
+
+  function renderInput(){
+    uploadedImage=null;uploadedPdfPages=null;uploadedImageText='';
+    if(current==='text'){
+      inputArea.innerHTML='<textarea id="ta"></textarea>';
+      document.getElementById('ta').value=SAMPLE;
+      inLbl.textContent='fromText()';
+    } else if(current==='image'){
+      inputArea.innerHTML=dropHTML('תמונה או סריקה','PNG · JPG · WEBP','image/*')+'<div id="prev" class="preview"></div>';
+      inLbl.textContent='fromImage()';
+      wireDrop('image/');
+    } else {
+      inputArea.innerHTML=dropHTML('קובץ PDF','עד כמה עמודים','application/pdf')+'<div id="prev" class="preview"></div>';
+      inLbl.textContent='fromPDF()';
+      wireDrop('application/pdf');
     }
   }
-  document.body.classList.add('printing-pdf');
-  var prev=document.title;document.title=(ocrDocTitle||'מסמך');
-  setTimeout(function(){
-    window.print();
-    document.body.classList.remove('printing-pdf');
-    document.body.classList.remove('logo-all-pages');
-    document.title=prev;
-    var f=document.getElementById('pdfFooter');if(f)f.remove();
-    ocrUnwrapLogoTable(); // החזרת התוכן למצבו המקורי
-  },150);
-  toast('בחלון ההדפסה: בחר/י יעד "PDF", וסמן/י "כותרות עליונות ותחתונות" למספור עמודים');
-}
 
-/* מחזיר את תוכן הטופס ממבנה הטבלה הזמני חזרה ל-os3Paper */
-function ocrUnwrapLogoTable(){
-  var paper=document.getElementById('os3Paper');
-  var t=document.getElementById('printLogoTable');
-  if(t && paper){
-    var inner=t.querySelector('tbody > tr > td');
-    if(inner){ while(inner.firstChild){ paper.appendChild(inner.firstChild); } }
-    t.remove();
+  function dropHTML(big,sm,accept){
+    return '<div class="drop" id="drop"><div class="ic">⬆</div><div class="big">'+big+'</div>'+
+      '<div class="sm">גררי לכאן או לחצי לבחירה · '+sm+'</div>'+
+      '<input type="file" id="file" accept="'+accept+'" style="display:none"></div>';
   }
-}
 
-function ocrCapturePositions(){
-  // קולט מיקומי תיבות מהתמונה (בקואורדינטות המקור), אם קיימות
-  var pos={};
-  var stages=document.querySelectorAll('.ocrStage');
-  stages.forEach(function(stage){
-    var img=stage.querySelector('img');if(!img)return;
-    var pageIdx=parseInt((stage.id||'ocrStage0').replace('ocrStage',''))||0;
-    var scale=(img.clientWidth||1)/(img.naturalWidth||1);
-    stage.querySelectorAll('.ocr-ov').forEach(function(b){
-      var fid=b.getAttribute('data-fid');if(!fid)return;
-      pos[fid]={page:pageIdx,
-        x:Math.round(parseFloat(b.style.left)/scale),
-        y:Math.round(parseFloat(b.style.top)/scale),
-        w:Math.round(parseFloat(b.style.width)/scale),
-        h:Math.round(parseFloat(b.style.height)/scale)};
-    });
-  });
-  return pos;
-}
+  function wireDrop(kind){
+    var drop=document.getElementById('drop');
+    var file=document.getElementById('file');
+    drop.onclick=function(){file.click();};
+    drop.ondragover=function(e){e.preventDefault();drop.classList.add('over');};
+    drop.ondragleave=function(){drop.classList.remove('over');};
+    drop.ondrop=function(e){e.preventDefault();drop.classList.remove('over');if(e.dataTransfer.files[0])handleFile(e.dataTransfer.files[0],kind);};
+    file.onchange=function(e){if(e.target.files[0])handleFile(e.target.files[0],kind);};
+  }
 
-function exportJSON(){
-  var positions=ocrCapturePositions();
-  var fields=ocrFields.map(function(f){
-    var inp=document.getElementById('inp_'+f.id);
-    var copy=JSON.parse(JSON.stringify(f));
-    copy.value=inp?inp.value:'';
-    if(positions[f.id])copy.position=positions[f.id];
-    return copy;
-  });
-  var assign=(typeof SynelAssign!=='undefined')?SynelAssign.get():{process:'',owner:'',ownerLabel:'',populations:[],populationLabels:[]};
-  SynelExport.download({
-    formType:'upload-ocr',
-    fields:fields,
-    source:{ kind: ocrImageData?(ocrPages.length>1?'pdf':'image'):'text', pageCount: ocrPages.length||1, rawText: ocrRawText||'' },
-    meta:{
-      name: ocrDocTitle||'מסמך',
-      docTitle: ocrDocTitle,
-      process: assign.process,
-      owner: assign.ownerLabel||assign.owner,
-      population: (assign.populationLabels||[]).join(', '),
-      hasSignature: !!(document.getElementById('ocrHasSig')||{}).checked,
-      hasReadConfirm: !!(document.getElementById('ocrHasRC')||{}).checked,
-      logo: ocrLogoData||'',
-      logoAllPages: !!ocrLogoAllPages
+  function setStatus(msg,spin){
+    var prev=document.getElementById('prev');
+    prev.innerHTML='<div class="status">'+(spin?'<span class="spin"></span>':'')+msg+'</div>'+(prev.dataset.keep||'');
+  }
+
+  async function handleFile(f,kind){
+    if(kind==='application/pdf'){
+      if(!/pdf$/i.test(f.name) && f.type!=='application/pdf'){alert('יש להעלות PDF');return;}
+      await processPDF(f);
+    } else {
+      if(!f.type.startsWith('image/')){alert('יש להעלות תמונה');return;}
+      await processImage(f);
     }
-  });
-}
+  }
 
-function ocrSaveNamed(){
-  var name=prompt('שם הטופס:',ocrDocTitle||'מסמך חדש');
-  if(!name)return;
-  var assign=(typeof SynelAssign!=='undefined')?SynelAssign.get():null;
-  var rec={name:name,docTitle:ocrDocTitle,rawText:ocrRawText,fields:ocrFields,
-    imageData:ocrImageData,pages:ocrPages,assign:assign,logoData:ocrLogoData,logoAllPages:ocrLogoAllPages,savedAt:new Date().toISOString()};
-  try{
-    localStorage.setItem('ocr_'+name,JSON.stringify(rec));
-    toast('נשמר: "'+name+'"');
-  }catch(e){
-    // מכסת אחסון — ננסה בלי תמונות (כבדות)
+  function readAsDataURL(f){return new Promise(function(res){var r=new FileReader();r.onload=function(){res(r.result);};r.readAsDataURL(f);});}
+  function readAsArrayBuffer(f){return new Promise(function(res){var r=new FileReader();r.onload=function(){res(r.result);};r.readAsArrayBuffer(f);});}
+
+  async function processImage(f){
+    uploadedImage=await readAsDataURL(f);
+    await new Promise(function(res){var im=new Image();im.onload=function(){uploadedImgW=im.naturalWidth;uploadedImgH=im.naturalHeight;res();};im.onerror=function(){res();};im.src=uploadedImage;});
+    var prev=document.getElementById('prev');
+    prev.dataset.keep='<img src="'+uploadedImage+'">';
+    setStatus('מזהה קווים למילוי וטקסט (OCR)…',true);
     try{
-      rec.imageData='';rec.pages=[];
-      localStorage.setItem('ocr_'+name,JSON.stringify(rec));
-      toast('נשמר: "'+name+'" (בלי תמונה — היתה כבדה מדי)');
-    }catch(e2){toast('שמירה נכשלה — האחסון מלא');}
+      uploadedLines=await detectUnderlines(uploadedImage);
+    }catch(e){ uploadedLines=[]; }
+    try{
+      var res=await Tesseract.recognize(uploadedImage,'heb');
+      uploadedImageText=(res&&res.data&&res.data.text)?res.data.text:'';
+      uploadedImageWords=(res&&res.data&&res.data.words)?res.data.words:null;
+      setStatus(uploadedLines.length+' קווים למילוי זוהו. לחצי "צור FormSpec".',false);
+    }catch(err){
+      uploadedImageText='';uploadedImageWords=null;
+      setStatus(uploadedLines.length+' קווים זוהו (OCR לא זמין). לחצי "צור FormSpec".',false);
+    }
   }
-}
 
-/* פתיחת טופס שמור לתצוגה (מהשמורים בדף הבית) */
-function ocrOpenSaved(key){
-  try{
-    var d=JSON.parse(localStorage.getItem(key));if(!d)return;
-    ocrDocTitle=d.docTitle||d.name||'';
-    ocrRawText=d.rawText||'';
-    ocrFields=d.fields||[];
-    ocrImageData=d.imageData||'';
-    ocrLogoData=d.logoData||'';
-    ocrLogoAllPages=!!d.logoAllPages;
-    ocrPages=d.pages||(ocrImageData?[{image:ocrImageData,lines:[]}]:[]);
-    if(d.assign && typeof SynelAssign!=='undefined')SynelAssign.set(d.assign);
-    ocrPreferTextView=true; // תצוגה נקייה כברירת מחדל
-    ocrRenderLogoBox();
-    ocrBuildDoc();ocrGoScreen(3);
-  }catch(e){toast('שגיאה בפתיחת הטופס');}
-}
-(function(){
-  function chk(){var m=location.search.match(/[?&]open=([^&]+)/);if(m){ocrOpenSaved(decodeURIComponent(m[1]));}}
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',chk);else chk();
-})();
-
-function showLoading(msg){document.getElementById('loadingMsg').textContent=msg||'מעבד...';document.getElementById('loadingOverlay').classList.add('show');}
-function hideLoading(){document.getElementById('loadingOverlay').classList.remove('show');}
-var tt=null;
-function toast(msg){var t=document.getElementById('toastEl');t.textContent=msg;t.classList.add('show');clearTimeout(tt);tt=setTimeout(function(){t.classList.remove('show');},3000);}
-
-/* אתחול: כפתור השיוך האחיד (זמני — Harmony בהמשך) */
-(function(){
-  function init(){
-    var slot=document.getElementById('ocrAssignSlot');
-    if(!slot)return;
-    if(typeof SynelAssign!=='undefined'){slot.appendChild(SynelAssign.button());}
-    else{slot.innerHTML='<span style="font-size:11px;color:#DC2626;">רכיב השיוך לא נטען — ודאי ש-synel-assign.js ו-synel-org.js בתיקייה</span>';}
+  // זיהוי קווים תחתונים (מקומות למילוי) מתוך פיקסלי התמונה
+  function detectUnderlines(dataUrl){
+    return new Promise(function(resolve){
+      var img=new Image();
+      img.onload=function(){
+        var W=img.naturalWidth, H=img.naturalHeight;
+        var scale=Math.min(1,1400/W), cw=Math.round(W*scale), ch=Math.round(H*scale);
+        var c=document.createElement('canvas'); c.width=cw; c.height=ch;
+        var ctx=c.getContext('2d'); ctx.drawImage(img,0,0,cw,ch);
+        var d; try{ d=ctx.getImageData(0,0,cw,ch).data; }catch(e){ resolve([]); return; }
+        var minLen=cw*0.025, raw=[];   // (1) סף נמוך יותר — תופס גם קווים קצרים
+        function dark(x,y){ var i=(y*cw+x)*4; return (d[i]+d[i+1]+d[i+2])/3<120; }
+        function bright(x,y){ var i=(y*cw+x)*4; return (d[i]+d[i+1]+d[i+2])/3>=150; }
+        function thickAt(x,y){ var t=0; for(var dy=0;dy<6;dy++){ if(dark(x,y+dy))t++; else break; } return t; }
+        for(var y=5;y<ch-8;y++){
+          var run=-1;
+          for(var x=0;x<cw;x++){
+            if(dark(x,y)){ if(run<0)run=x; }
+            else { if(run>=0){ if(x-run>=minLen) checkLine(run,x,y); run=-1; } }
+          }
+          if(run>=0&&cw-run>=minLen) checkLine(run,cw,y);
+        }
+        function checkLine(x0,x1,y){
+          var step=Math.max(1,Math.floor((x1-x0)/18));
+          // (2) קו דק (1-2px) — לא בלוק/כותרת מודגשת
+          var thickSum=0,samples=0;
+          for(var tx=x0;tx<x1;tx+=step){ thickSum+=thickAt(tx,y); samples++; }
+          var avgThick=thickSum/Math.max(1,samples);
+          if(avgThick>3) return;                         // עבה מדי — קו דקורטיבי/מסגרת
+          // (2) האזור שמעל הקו (איפה שכותבים) צריך להיות ריק — לא טקסט/כותרת
+          var clearAbove=0,total=0;
+          for(var sx=x0;sx<x1;sx+=step){ total++; if(bright(sx,y-5)&&bright(sx,y-9)&&bright(sx,y-13))clearAbove++; }
+          if(total>2 && clearAbove/total>0.85) raw.push({x:x0,y:y,w:x1-x0});
+        }
+        // (3) מיזוג רק קווים שכמעט נוגעים (פער < 1.5%) — קווים נפרדים נשארים נפרדים
+        raw.sort(function(a,b){return a.y-b.y||a.x-b.x;});
+        var merged=[];
+        raw.forEach(function(l){
+          var m=null;
+          for(var k=0;k<merged.length;k++){ var e=merged[k];
+            var touch = l.x < e.x+e.w+cw*0.015 && l.x+l.w > e.x-cw*0.015;   // כמעט נוגעים
+            if(Math.abs(e.y-l.y)<ch*0.01 && touch){ m=e; break; } }
+          if(m){ var nx=Math.min(m.x,l.x), nr=Math.max(m.x+m.w,l.x+l.w); m.x=nx; m.w=nr-nx; m.y=Math.max(m.y,l.y); }
+          else merged.push({x:l.x,y:l.y,w:l.w});
+        });
+        resolve(merged.map(function(l){return {x:l.x/cw*100, y:l.y/ch*100, w:l.w/cw*100};}));
+      };
+      img.onerror=function(){resolve([]);};
+      img.src=dataUrl;
+    });
   }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+
+  // בניית שדות מהקווים: מיקום מהקו, תווית מהמילה שמימין לקו, סוג מהתווית
+  function buildFieldsFromLines(lines, words, imgW, imgH){
+    var W=(words||[]).map(function(w){var b=w.bbox||{};return {t:String(w.text||'').trim(),x0:b.x0,y0:b.y0,x1:b.x1,y1:b.y1};})
+                     .filter(function(w){return w.t&&typeof w.x0==='number';});
+    return lines.map(function(ln){
+      // התווית = המילה הקרובה ביותר מימין לקו (x גדול מסוף הקו), באותו גובה
+      var lineYpx=ln.y/100*imgH, lineRightPx=(ln.x+ln.w)/100*imgW;
+      var cand=W.filter(function(w){ var cy=(w.y0+w.y1)/2; return Math.abs(cy-lineYpx)<imgH*0.018 && w.x0>=lineRightPx-imgW*0.02; })
+                .sort(function(a,b){return a.x0-b.x0;});
+      var label=cand.length?cand[0].t.replace(/[:：]$/,'').trim():'שדה';
+      return SynelFormSpec.makeField({ label:label, type:SynelFormSpec.inferType(label,false),
+        box:{ x:ln.x, y:Math.max(0, ln.y-2.4), w:ln.w, h:2.2 } });
+    });
+  }
+
+  async function processPDF(f){
+    var prev=document.getElementById('prev');prev.dataset.keep='';
+    setStatus('קורא PDF…',true);
+    try{
+      var buf=await readAsArrayBuffer(f);
+      var pdf=await pdfjsLib.getDocument({data:buf}).promise;
+      var pages=[];
+      for(var i=1;i<=pdf.numPages;i++){
+        setStatus('מעבד עמוד '+i+' מתוך '+pdf.numPages+'…',true);
+        var page=await pdf.getPage(i);
+        var tc=await page.getTextContent();
+        var lastY=null,text='';
+        tc.items.forEach(function(it){
+          var y=it.transform[5];
+          if(lastY!==null && Math.abs(y-lastY)>3) text+='\n'; else if(text) text+=' ';
+          text+=it.str; lastY=y;
+        });
+        var vp=page.getViewport({scale:1.3});
+        var c=document.createElement('canvas');c.width=vp.width;c.height=vp.height;
+        await page.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;
+        pages.push({image:c.toDataURL('image/jpeg',0.7),text:text});
+      }
+      uploadedPdfPages=pages;
+      prev.dataset.keep=pages.map(function(p){return '<img src="'+p.image+'">';}).join('');
+      setStatus(pdf.numPages+' עמודים עובדו. לחצי "צור FormSpec".',false);
+    }catch(err){
+      setStatus('שגיאה בקריאת ה-PDF: '+err.message,false);
+    }
+  }
+
+  function buildSpec(){
+    if(current==='text'){
+      return SynelFormSpec.fromText(document.getElementById('ta').value,{title:'מסמך'});
+    } else if(current==='image'){
+      if(!uploadedImage){alert('העלי תמונה תחילה');return null;}
+      var spec=SynelFormSpec.fromImage(uploadedImage,{title:'מסמך',width:uploadedImgW,height:uploadedImgH});
+      // שדות לפי הקווים שזוהו בתמונה (מקום למילוי), עם תווית מ-OCR
+      if(uploadedLines&&uploadedLines.length){
+        spec.fields=buildFieldsFromLines(uploadedLines,uploadedImageWords,uploadedImgW,uploadedImgH);
+      } else if(uploadedImageWords){
+        spec.fields=SynelFormSpec.detectFieldsFromWords(uploadedImageWords,uploadedImgW,uploadedImgH,0);
+      }
+      return spec;
+    } else {
+      if(!uploadedPdfPages){alert('העלי PDF תחילה');return null;}
+      return SynelFormSpec.fromPDF(uploadedPdfPages,{title:'מסמך'});
+    }
+  }
+
+  function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+
+  function renderOutput(spec){
+    if(!spec)return;
+    var v=SynelFormSpec.validate(spec);
+    var pages=spec.source.pages.length;
+    var html='<div class="meta-row">'+
+      '<span class="chip">type <b>'+spec.source.type+'</b></span>'+
+      '<span class="chip">עמודים <b>'+pages+'</b></span>'+
+      '<span class="chip">שדות <b>'+spec.fields.length+'</b></span>'+
+      '<span class="chip">v<b>'+spec.version+'</b></span></div>';
+    html+='<div class="fields-h">שדות שזוהו</div>';
+    if(!spec.fields.length){
+      html+='<div class="status">לא זוהו שדות בטקסט. (במסמך סרוק — תלוי באיכות ה-OCR.)</div>';
+    }
+    spec.fields.forEach(function(f){
+      html+='<div class="field"><span class="ty">'+f.type+'</span>'+
+        '<span class="lb">'+esc(f.label)+(f.required?' <span class="rq">*</span>':'')+'</span>'+
+        (pages>1?'<span class="pg">עמ\' '+(f.page+1)+'</span>':'')+
+        (f.box?'<span class="pg">▦ box</span>':'')+'</div>';
+    });
+    html+='<div class="valid'+(v.valid?'':' warn')+'">'+(v.valid?'✓ FormSpec תקין — עבר ולידציה':'✗ '+v.errors.join(', '))+'</div>';
+    outArea.innerHTML=html;
+    outLbl.textContent=spec.meta.id;
+    document.getElementById('jsonWrap').style.display='block';
+    document.getElementById('jsonOut').textContent=SynelFormSpec.toHarmonyJSON(spec);
+    document.getElementById('fpRes').textContent=Object.keys(spec).length+' מפתחות · זהה';
+    renderOverlay(spec);
+  }
+
+  /* תצוגת ה-overlay — המסמך עם תיבות השדה עליו + פאנל הגדרה */
+  function renderOverlay(spec){
+    currentSpec=spec; selIdx=-1;
+    var ov=document.getElementById('overlayView');
+    var hasImage = spec.source.type==='image' && spec.source.pages[0] && spec.source.pages[0].image;
+    if(!hasImage){ ov.style.display='none'; return; }
+    ov.style.display='block';
+    var withBox = spec.fields.filter(function(f){return f.box;}).length;
+    document.getElementById('ovCount').textContent = withBox ? (withBox+' שדות זוהו') : 'לא זוהו שדות — לחצי על המסמך להוספה ידנית';
+    var doc=document.getElementById('ovDoc');
+    doc.classList.remove('built');
+    doc.innerHTML='<img src="'+spec.source.pages[0].image+'">';
+    spec.fields.forEach(function(f,i){
+      if(!f.box)return;
+      var b=document.createElement('div'); b.className='fbox'+(i===selIdx?' sel':''); b.setAttribute('data-i',i);
+      b.style.left=f.box.x+'%'; b.style.top=f.box.y+'%';
+      b.style.width=Math.max(f.box.w,5)+'%'; b.style.height=Math.max(f.box.h,1.6)+'%';
+      b.innerHTML='<span class="tag">'+f.type+'</span><span class="del-box" title="מחק">✕</span>';
+      // מחיקה ישירה מהתיבה
+      b.querySelector('.del-box').onclick=function(e){ e.stopPropagation(); currentSpec.fields.splice(i,1); selIdx=-1; renderOverlay(currentSpec); };
+      // גרירה להזזה (mousedown על התיבה)
+      b.onmousedown=function(e){
+        if(e.target.classList.contains('del-box')) return;
+        if(doc.classList.contains('built')) return;
+        e.preventDefault(); e.stopPropagation();
+        selectField(i);
+        var rect=doc.getBoundingClientRect();
+        var sx=e.clientX, sy=e.clientY, ox=f.box.x, oy=f.box.y, moved=false;
+        function mv(ev){
+          var dx=(ev.clientX-sx)/rect.width*100, dy=(ev.clientY-sy)/rect.height*100;
+          if(Math.abs(dx)>0.4||Math.abs(dy)>0.4) moved=true;
+          f.box.x=Math.max(0,Math.min(100-f.box.w, ox+dx));
+          f.box.y=Math.max(0, oy+dy);
+          b.style.left=f.box.x+'%'; b.style.top=f.box.y+'%';
+        }
+        function up(){ document.removeEventListener('mousemove',mv); document.removeEventListener('mouseup',up); if(moved) suppressAdd=true; }
+        document.addEventListener('mousemove',mv); document.addEventListener('mouseup',up);
+      };
+      doc.appendChild(b);
+    });
+    document.getElementById('ovBuild').textContent='צור טופס — הכנס תיבות למסמך';
+    // מגירת סוגי שדה לגרירה
+    var drawer=document.getElementById('ovDrawer');
+    drawer.innerHTML='<div class="dh">גררי סוג שדה אל המסמך:</div>';
+    ['text','date','day','month','year','number','id','email','city','street','select','checkbox','signature','textarea'].forEach(function(t){
+      var chip=document.createElement('div');chip.className='type-chip';chip.textContent=t;chip.draggable=true;
+      chip.ondragstart=function(e){e.dataTransfer.setData('text/plain',t);};
+      drawer.appendChild(chip);
+    });
+    // drop של סוג שדה על המסמך
+    doc.ondragover=function(e){e.preventDefault();doc.classList.add('drag-over');};
+    doc.ondragleave=function(){doc.classList.remove('drag-over');};
+    doc.ondrop=function(e){
+      e.preventDefault();doc.classList.remove('drag-over');
+      if(doc.classList.contains('built'))return;
+      var t=e.dataTransfer.getData('text/plain')||'text';
+      var rect=doc.getBoundingClientRect();
+      var xPct=(e.clientX-rect.left)/rect.width*100, yPct=(e.clientY-rect.top)/rect.height*100;
+      var W=12,H=1.9;
+      var nf=SynelFormSpec.makeField({label:t==='signature'?'חתימה':'שדה',type:t,
+        box:{x:Math.max(0,Math.min(100-W,xPct-W/2)),y:Math.max(0,yPct-H/2),w:W,h:H}});
+      addFieldSorted(nf);
+    };
+    // לחיצה על מקום ריק — מוסיפה תיבה בדיוק במקום הלחיצה
+    doc.onclick=function(e){
+      if(e.target.closest('.fbox')) return;
+      if(doc.classList.contains('built')) return;
+      if(suppressAdd){ suppressAdd=false; return; }
+      var rect=doc.getBoundingClientRect();
+      var xPct=(e.clientX-rect.left)/rect.width*100;
+      var yPct=(e.clientY-rect.top)/rect.height*100;
+      var W=12,H=1.9;
+      var nf=SynelFormSpec.makeField({label:'שדה חדש', type:'text',
+        box:{x:Math.max(0,Math.min(100-W,xPct-W/2)), y:Math.max(0,yPct-H/2), w:W, h:H}});
+      addFieldSorted(nf);
+    };
+    renderOvList();
+    syncAssignFromSpec(spec);
+    renderLogoUI();
+    renderLogoOnDoc();
+  }
+
+  function renderOvList(){
+    var list=document.getElementById('ovList'); list.innerHTML='';
+    var types=['text','date','day','month','year','number','id','email','city','street','select','checkbox','signature','textarea'];
+    var dbs=['','employee.firstName','employee.lastName','employee.id','employee.email','employee.phone','employee.address'];
+    currentSpec.fields.forEach(function(f,i){
+      if(!f.box)return;
+      var item=document.createElement('div'); item.className='ov-item'+(i===selIdx?' sel':''); item.setAttribute('data-i',i);
+      var typeOpts=types.map(function(t){return '<option'+(t===f.type?' selected':'')+'>'+t+'</option>';}).join('');
+      var dbOpts=dbs.map(function(d){return '<option value="'+d+'"'+(d===(f.dbField||'')?' selected':'')+'>'+(d||'— ללא DB —')+'</option>';}).join('');
+      item.innerHTML='<div class="lbl"><span class="num">'+(i+1)+'</span>'+esc(f.label)+
+          '<button class="del-f" title="מחק שדה" style="margin-right:auto;background:none;border:none;color:#C0392B;cursor:pointer;font-size:15px;line-height:1;">✕</button></div>'+
+        '<div class="ov-controls">'+
+          '<select class="ty-sel">'+typeOpts+'</select>'+
+          '<select class="db-sel">'+dbOpts+'</select>'+
+          '<label><input type="checkbox" class="rq-chk"'+(f.required?' checked':'')+'>חובה</label>'+
+        '</div>';
+      item.onclick=function(e){ if(e.target.tagName!=='SELECT'&&e.target.tagName!=='INPUT'&&!e.target.classList.contains('del-f')) selectField(i); };
+      item.querySelector('.ty-sel').onchange=function(){ f.type=this.value; var t=document.querySelector('.fbox[data-i="'+i+'"] .tag'); if(t)t.textContent=f.type; };
+      item.querySelector('.db-sel').onchange=function(){ f.dbField=this.value||null; };
+      item.querySelector('.rq-chk').onchange=function(){ f.required=this.checked; };
+      item.querySelector('.del-f').onclick=function(ev){ ev.stopPropagation(); currentSpec.fields.splice(i,1); selIdx=-1; renderOverlay(currentSpec); };
+      list.appendChild(item);
+    });
+  }
+
+  function selectField(i){
+    selIdx=i;
+    document.querySelectorAll('.fbox').forEach(function(b){ b.classList.toggle('sel', +b.getAttribute('data-i')===i); });
+    document.querySelectorAll('.ov-item').forEach(function(it){ it.classList.toggle('sel', +it.getAttribute('data-i')===i); });
+    var item=document.querySelector('.ov-item[data-i="'+i+'"]'); if(item)item.scrollIntoView({block:'nearest'});
+  }
+
+  // מיון השדות לפי מיקומם במסמך — מלמעלה למטה, ובאותה שורה מימין לשמאל (RTL)
+  function sortFieldsByPosition(spec){
+    spec.fields.sort(function(a,b){
+      if(!a.box||!b.box) return 0;
+      if(Math.abs(a.box.y-b.box.y)>1.5) return a.box.y-b.box.y;  // שורה שונה
+      return b.box.x-a.box.x;                                     // אותה שורה — ימין→שמאל
+    });
+  }
+  // הוספת שדה במקומו לפי הסדר, ובחירתו
+  function addFieldSorted(nf){
+    currentSpec.fields.push(nf);
+    sortFieldsByPosition(currentSpec);
+    renderOverlay(currentSpec);
+    selectField(currentSpec.fields.indexOf(nf));
+  }
+
+  // מאגר ערים ורחובות לדמו (במוצר יתחבר ל-API הממשלתי data.gov.il)
+  var CITIES={
+    'פתח תקווה':['ההסתדרות','חיים עוזר','רוטשילד','ההגנה','בר כוכבא','חובבי ציון','מוטה גור','ז׳בוטינסקי'],
+    'תל אביב-יפו':['אבן גבירול','דיזנגוף','אלנבי','רוטשילד','בן יהודה','הירקון','ארלוזורוב','יהודה הלוי'],
+    'ירושלים':['יפו','אגריפס','בן יהודה','קינג ג׳ורג׳','עמק רפאים','הנביאים','שלומציון המלכה'],
+    'חיפה':['הרצל','הנשיא','מוריה','הגפן','אלנבי','יפה נוף','שדרות הכרמל'],
+    'ראשון לציון':['רוטשילד','הרצל','ז׳בוטינסקי','הכרמל','משה דיין','ההגנה'],
+    'באר שבע':['רגר','הרצל','אברהם אבינו','רינגלבלום','הנשיאים'],
+    'נתניה':['הרצל','שמואל הנציב','דיזנגוף','גיבורי ישראל','וייצמן'],
+    'רמת גן':['ביאליק','ז׳בוטינסקי','הרא״ה','אבא הלל סילבר','הרצל'],
+    'הרצליה':['סוקולוב','בן גוריון','ויצמן','אבא אבן','שדרות חן'],
+    'כפר סבא':['ויצמן','הרצל','טשרניחובסקי','רוטשילד','ביאליק']
+  };
+  var streetSelects=[];
+
+  function refreshStreets(){
+    streetSelects.forEach(function(o){
+      var city=o.cityGetter();
+      var streets=(city&&CITIES[city])?CITIES[city]:[];
+      var cur=o.sel.value;
+      o.sel.innerHTML='<option value="">בחרי רחוב…</option>'+streets.map(function(s){return '<option'+(s===cur?' selected':'')+'>'+s+'</option>';}).join('');
+      o.sel.disabled=!streets.length;
+    });
+  }
+
+  function buildCityStreetSelects(doc){
+    streetSelects=[];
+    var lastCitySel=null;
+    currentSpec.fields.forEach(function(f,i){
+      if(f.type!=='city'&&f.type!=='street')return;
+      var box=doc.querySelector('.fbox[data-i="'+i+'"]'); if(!box)return;
+      box.innerHTML='';
+      var sel=document.createElement('select');
+      sel.style.cssText='width:100%;height:100%;min-height:24px;border:none;background:#fff;font-family:inherit;font-size:13px;border-radius:3px;padding:0 4px;cursor:pointer;';
+      if(f.type==='city'){
+        sel.innerHTML='<option value="">בחרי עיר…</option>'+Object.keys(CITIES).map(function(c){return '<option>'+c+'</option>';}).join('');
+        sel.value=f.value||'';
+        sel.onchange=function(){ f.value=this.value; refreshStreets(); };
+        lastCitySel=sel;
+      }else{
+        sel.innerHTML='<option value="">בחרי רחוב…</option>';
+        sel.onchange=function(){ f.value=this.value; };
+        (function(citySel){
+          streetSelects.push({ sel:sel, cityGetter:function(){ return citySel?citySel.value:''; } });
+        })(lastCitySel);
+      }
+      box.appendChild(sel);
+    });
+    refreshStreets();
+  }
+
+  document.getElementById('ovBuild').onclick=function(){
+    var doc=document.getElementById('ovDoc');
+    doc.classList.add('built');
+    this.textContent='✓ הטופס נוצר — התיבות במקומן';
+    buildCityStreetSelects(doc);
+    if(currentSpec) document.getElementById('jsonOut').textContent=SynelFormSpec.toHarmonyJSON(currentSpec);
+  };
+
+  document.querySelectorAll('.src-btn').forEach(function(b){
+    b.onclick=function(){
+      document.querySelectorAll('.src-btn').forEach(function(x){x.classList.remove('on');});
+      b.classList.add('on');current=b.dataset.src;renderInput();
+      outArea.innerHTML='<div class="empty">העלי קובץ והפעילי את המתאם.</div>';
+      document.getElementById('jsonWrap').style.display='none';
+      document.getElementById('overlayView').style.display='none';
+    };
+  });
+
+  runBtn.onclick=function(){
+    var spec=buildSpec();
+    if(spec){
+      renderOutput(spec);
+      if(spec.source.type==='image'){
+        var ov=document.getElementById('overlayView');
+        if(ov && ov.style.display!=='none') try{ ov.scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){}
+      }
+    }
+  };
+
+  /* ===== שיוך · לוגו · שמירה · שמורים ===== */
+  var memStore={};
+  var storage={
+    save:function(spec){ try{localStorage.setItem('fsdemo_'+spec.meta.id,JSON.stringify(spec));}catch(e){} memStore[spec.meta.id]=JSON.parse(JSON.stringify(spec)); },
+    list:function(){ var out=[],seen={};
+      try{ for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i); if(k&&k.indexOf('fsdemo_')===0){try{var s=JSON.parse(localStorage.getItem(k));out.push(s);seen[s.meta.id]=1;}catch(e){}}} }catch(e){}
+      Object.keys(memStore).forEach(function(id){ if(!seen[id]) out.push(memStore[id]); });
+      return out; },
+    remove:function(id){ try{localStorage.removeItem('fsdemo_'+id);}catch(e){} delete memStore[id]; }
+  };
+
+  function syncAssignFromSpec(spec){
+    document.getElementById('asgProcess').value=spec.assignment.process||'';
+    document.getElementById('asgAudience').value=spec.assignment.audience||'';
+    document.getElementById('asgOwner').value=spec.assignment.owner||'';
+  }
+  document.getElementById('asgProcess').onchange=function(){ if(currentSpec)currentSpec.assignment.process=this.value||null; };
+  document.getElementById('asgAudience').onchange=function(){ if(currentSpec)currentSpec.assignment.audience=this.value||null; };
+  document.getElementById('asgOwner').onchange=function(){ if(currentSpec)currentSpec.assignment.owner=this.value||null; };
+
+  function renderLogoUI(){
+    var up=document.getElementById('logoUp');
+    var url=currentSpec&&currentSpec.meta&&currentSpec.meta.logo.dataUrl;
+    up.innerHTML = url
+      ? '<img src="'+url+'"><button type="button" id="logoBtn">החלפה</button><input type="file" id="logoFile" accept="image/*" style="display:none">'
+      : '<button type="button" id="logoBtn">העלי לוגו</button><input type="file" id="logoFile" accept="image/*" style="display:none">';
+    document.getElementById('logoBtn').onclick=function(){ document.getElementById('logoFile').click(); };
+    document.getElementById('logoFile').onchange=onLogoFile;
+  }
+  function onLogoFile(e){
+    var f=e.target.files[0]; if(!f)return;
+    var r=new FileReader(); r.onload=function(){ if(currentSpec){ currentSpec.meta.logo.dataUrl=r.result; } renderLogoUI(); renderLogoOnDoc(); };
+    r.readAsDataURL(f);
+  }
+  function renderLogoOnDoc(){
+    var doc=document.getElementById('ovDoc'); var old=doc.querySelector('.doc-logo-ov'); if(old)old.remove();
+    var url=currentSpec&&currentSpec.meta&&currentSpec.meta.logo.dataUrl; if(!url)return;
+    var d=document.createElement('div'); d.className='doc-logo-ov'; d.innerHTML='<img src="'+url+'">'; doc.appendChild(d);
+  }
+
+  function doSave(){
+    if(!currentSpec){ alert('צרי טופס תחילה'); return; }
+    var name=document.getElementById('saveName').value.trim()||currentSpec.meta.title||'טופס';
+    currentSpec.meta.title=name;
+    currentSpec.assignment.process=document.getElementById('asgProcess').value||null;
+    currentSpec.assignment.audience=document.getElementById('asgAudience').value||null;
+    currentSpec.assignment.owner=document.getElementById('asgOwner').value||null;
+    storage.save(currentSpec); renderSaved();
+    var btn=document.getElementById('saveBtn'); btn.textContent='✓ נשמר'; setTimeout(function(){btn.textContent='שמור טופס';},1500);
+    // אחרי שמירה — מציגים מיד איך הטופס נראה כדיגיטלי
+    openDigital(currentSpec);
+  }
+  document.getElementById('saveBtn').onclick=doSave;
+
+  function renderSaved(){
+    var list=document.getElementById('savedList'); var items=storage.list();
+    if(!items.length){ list.innerHTML='<div class="saved-empty">אין עדיין טפסים שמורים. צרי טופס ולחצי "שמור טופס".</div>'; return; }
+    list.innerHTML='';
+    items.forEach(function(s){
+      var d=document.createElement('div'); d.className='saved-item';
+      d.innerHTML='<div class="si-info"><div class="si-name">'+esc(s.meta.title||'טופס')+'</div>'+
+        '<div class="si-meta">'+s.fields.length+' שדות · '+s.source.type+(s.assignment&&s.assignment.process?' · '+esc(s.assignment.process):'')+'</div></div>'+
+        '<button class="si-digi si-open" style="border-color:#1E1B4B;color:#1E1B4B;">תצוגה דיגיטלית</button><button class="si-open">פתח לעריכה</button><button class="si-del">מחק</button>';
+      d.querySelector('.si-digi').onclick=function(){ openDigital(JSON.parse(JSON.stringify(s))); };
+      d.querySelector('.si-open:not(.si-digi)').onclick=function(){ openSaved(s); };
+      d.querySelector('.si-del').onclick=function(){ if(confirm('למחוק את "'+(s.meta.title||'טופס')+'"?')){ storage.remove(s.meta.id); renderSaved(); } };
+      list.appendChild(d);
+    });
+  }
+  function openSaved(s){
+    var spec=JSON.parse(JSON.stringify(s));
+    renderOutput(spec);
+    document.getElementById('saveName').value=spec.meta.title||'';
+    var ov=document.getElementById('overlayView');
+    if(ov.style.display!=='none') try{ ov.scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){}
+  }
+
+  renderSaved();
+
+  /* ===== רינדור טופס דיגיטלי מתוך ה-FormSpec (render-from-spec) ===== */
+  var HE_TYPE={text:'טקסט',textarea:'טקסט ארוך',date:'תאריך',day:'יום',month:'חודש',year:'שנה',number:'מספר',id:'ת״ז',email:'דוא״ל',city:'עיר',street:'רחוב',signature:'חתימה',checkbox:'אישור',select:'בחירה'};
+  function digiField(f){
+    var lbl=esc(f.label||HE_TYPE[f.type]||'שדה')+(f.required?' <span class="req">*</span>':'');
+    var ph=esc(f.placeholder||'');
+    function wrap(inner){ return '<div class="digi-field"><label>'+lbl+'</label>'+inner+'</div>'; }
+    switch(f.type){
+      case 'textarea': return wrap('<textarea placeholder="'+ph+'"></textarea>');
+      case 'date': return wrap('<input type="date">');
+      case 'email': return wrap('<input type="email" placeholder="name@example.com">');
+      case 'number': return wrap('<input type="text" inputmode="numeric" placeholder="'+ph+'">');
+      case 'id': return wrap('<input type="text" inputmode="numeric" maxlength="9" placeholder="9 ספרות">');
+      case 'day': return wrap(numSelect(1,31,'יום'));
+      case 'month': return wrap(numSelect(1,12,'חודש'));
+      case 'year': return wrap(yearSelect());
+      case 'city': return wrap(citySelectHTML());
+      case 'street': return wrap('<select class="digi-street" disabled><option value="">בחרי עיר תחילה…</option></select>');
+      case 'checkbox': return '<div class="digi-field chk"><input type="checkbox" id="c_'+f.id+'"><label for="c_'+f.id+'">'+lbl+'</label></div>';
+      case 'signature': return wrap('<div class="digi-sign">לחתימה — חתמי כאן</div>');
+      case 'select': return wrap('<select><option value="">בחרי…</option>'+(f.options||[]).map(function(o){return '<option>'+esc(o)+'</option>';}).join('')+'</select>');
+      default: return wrap('<input type="text" placeholder="'+ph+'">');
+    }
+  }
+  function numSelect(a,b,ph){ var o='<option value="">'+ph+'</option>'; for(var i=a;i<=b;i++)o+='<option>'+i+'</option>'; return '<select>'+o+'</select>'; }
+  function yearSelect(){ var o='<option value="">שנה</option>',y=new Date().getFullYear(); for(var i=y;i>=1940;i--)o+='<option>'+i+'</option>'; return '<select>'+o+'</select>'; }
+  function citySelectHTML(){ return '<select class="digi-city"><option value="">בחרי עיר…</option>'+Object.keys(CITIES).map(function(c){return '<option>'+esc(c)+'</option>';}).join('')+'</select>'; }
+
+  // שדה קומפקטי לשיבוץ על תמונת המסמך
+  function inputOnDoc(f){
+    switch(f.type){
+      case 'date': return '<input type="date">';
+      case 'email': return '<input type="email">';
+      case 'number': case 'id': return '<input type="text" inputmode="numeric">';
+      case 'day': return numSelect(1,31,'יום');
+      case 'month': return numSelect(1,12,'חודש');
+      case 'year': return yearSelect();
+      case 'city': return citySelectHTML();
+      case 'street': return '<select class="digi-street" disabled><option value="">בחרי עיר…</option></select>';
+      case 'checkbox': return '<input type="checkbox" style="width:auto;height:auto;">';
+      case 'select': return '<select><option value="">בחרי…</option>'+(f.options||[]).map(function(o){return '<option>'+esc(o)+'</option>';}).join('')+'</select>';
+      default: return '<input type="text" placeholder="'+esc(f.label||'')+'">';
+    }
+  }
+
+  function openDigital(spec){
+    if(!spec){ alert('צרי טופס תחילה'); return; }
+    var form=document.getElementById('digiForm');
+    var sub=[spec.assignment.process,spec.assignment.audience].filter(Boolean).join(' · ');
+    var hasImg = spec.source.type==='image' && spec.source.pages[0] && spec.source.pages[0].image;
+    var logo = spec.meta.logo&&spec.meta.logo.dataUrl;
+
+    var html='<div class="digi-head">'+
+      (logo?'<div class="dlogo"><img src="'+logo+'"></div>':'')+
+      '<button class="dclose" id="digiClose">✕</button>'+
+      '<h2>'+esc(spec.meta.title||'טופס')+'</h2>'+(sub?'<div class="dsub">'+esc(sub)+'</div>':'')+'</div>';
+
+    if(hasImg){
+      // המסמך המקורי בצורה דיגיטלית — תמונה + שדות קלט במקומם
+      form.classList.add('wide');
+      html+='<div class="digi-doc-wrap"><div class="digi-doc" id="digiDoc">'+
+            '<img src="'+spec.source.pages[0].image+'">';
+      spec.fields.forEach(function(f){
+        if(!f.box) return;
+        var st='left:'+f.box.x+'%;top:'+f.box.y+'%;width:'+Math.max(f.box.w,6)+'%;height:'+Math.max(f.box.h,2)+'%;';
+        html+='<div class="dfield" style="'+st+'">'+inputOnDoc(f)+'</div>';
+      });
+      html+='</div></div>'+
+            '<div style="padding:0 28px 24px"><button class="digi-submit">שליחת הטופס</button></div>';
+    } else {
+      // אין תמונת מקור (טקסט/PDF) — טופס שדות נקי
+      form.classList.remove('wide');
+      var sorted=spec.fields.slice();
+      sorted.sort(function(a,b){ if(!a.box||!b.box)return 0; if(Math.abs(a.box.y-b.box.y)>1.5)return a.box.y-b.box.y; return b.box.x-a.box.x; });
+      html+='<div class="digi-body">';
+      if(!sorted.length){ html+='<div class="digi-empty">אין שדות בטופס. הוסיפי שדות וצרי טופס.</div>'; }
+      else { sorted.forEach(function(f){ html+=digiField(f); }); html+='<button class="digi-submit">שליחת הטופס</button>'; }
+      html+='</div>';
+    }
+
+    form.innerHTML=html;
+    document.getElementById('digiOverlay').classList.add('show');
+    document.getElementById('digiClose').onclick=function(){ document.getElementById('digiOverlay').classList.remove('show'); };
+    // קישור עיר→רחוב
+    var cities=form.querySelectorAll('.digi-city'), streets=form.querySelectorAll('.digi-street');
+    function refresh(city){ streets.forEach(function(s){ var arr=(city&&CITIES[city])?CITIES[city]:[]; s.innerHTML='<option value="">'+(arr.length?'בחרי רחוב…':'בחרי עיר…')+'</option>'+arr.map(function(x){return '<option>'+esc(x)+'</option>';}).join(''); s.disabled=!arr.length; }); }
+    cities.forEach(function(c){ c.onchange=function(){ refresh(this.value); }; });
+    var submit=form.querySelector('.digi-submit'); if(submit)submit.onclick=function(){ alert('הטופס נשלח (הדגמה)'); };
+  }
+  document.getElementById('digiBtn').onclick=function(){ openDigital(currentSpec); };
+  document.getElementById('digiOverlay').onclick=function(e){ if(e.target===this) this.classList.remove('show'); };
+
+  /* ===== זיהוי משולב: AI מזהה שדות, OCR ממקם אותם בדיוק ===== */
+  var AI_PROMPT='Identify every fillable field in this Hebrew form/contract image — the blank lines and spaces a person fills in. For each field return "label" (the EXACT Hebrew label text as it appears next to the blank, so it can be located in the document text) and "type" (exactly one of: text, date, day, month, year, number, id, email, city, street, signature, textarea, checkbox). List fields in reading order, top to bottom. Return ONLY valid JSON, no markdown fences, no extra text: {"fields":[{"label":"שם השוכר","type":"text"}]}';
+
+  function normHe(s){ return String(s||'').replace(/["\u05f4\u05f3\u0027.:,()\-]/g,'').replace(/\s+/g,' ').trim(); }
+
+  // מציב שדות שזוהו ע"י AI לפי מיקום התוויות במילות ה-OCR
+  function placeAIFields(aiFields, words, lines, imgW, imgH){
+    var W=(words||[]).map(function(w){var b=w.bbox||{};return {t:normHe(w.text),x0:b.x0,y0:b.y0,x1:b.x1,y1:b.y1};})
+                     .filter(function(w){return w.t&&typeof w.x0==='number';});
+    function findAnchor(labelWords){
+      for(var li=labelWords.length-1; li>=0; li--){       // המילה השמאלית של התווית — הכי קרובה לקו
+        var lw=labelWords[li]; if(lw.length<2) continue;
+        for(var i=0;i<W.length;i++){
+          if(W[i].t===lw || W[i].t.indexOf(lw)>=0 || lw.indexOf(W[i].t)>=0) return W[i];
+        }
+      }
+      return null;
+    }
+    var out=[];
+    aiFields.forEach(function(f, idx){
+      var lw=normHe(f.label).split(' ').filter(Boolean);
+      var anchor=lw.length?findAnchor(lw):null;
+      var box=null;
+      // עדיפות ראשונה: הצמדה לקו שזוהה בתמונה, ליד התווית
+      if(lines && lines.length && anchor){
+        var ay=anchor.y0/imgH*100, ax=anchor.x0/imgW*100;
+        var best=null, bestD=99;
+        lines.forEach(function(ln){
+          var dy=Math.abs(ln.y-ay); if(dy>3.5) return;            // קו באותו גובה בערך
+          if(ln.x>ax+1) return;                                    // הקו משמאל לתווית (RTL)
+          var d=dy + Math.abs((ln.x+ln.w)-ax)*0.1;
+          if(d<bestD){ bestD=d; best=ln; }
+        });
+        if(best) box={ x:best.x, y:Math.max(0,best.y-2.4), w:best.w, h:2.2 };
+      }
+      // נפילה אחורה: מיקום משמאל לתווית לפי OCR
+      if(!box && anchor && W.length){
+        var lineH=(anchor.y1-anchor.y0)||imgH*0.02;
+        var sameLine=W.filter(function(w){return Math.abs((w.y0+w.y1)/2-(anchor.y0+anchor.y1)/2)<lineH*0.7;});
+        var leftWords=sameLine.filter(function(w){return w.x1<=anchor.x0+2;}).sort(function(a,b){return b.x1-a.x1;});
+        var boxRight=anchor.x0;
+        var boxLeft=leftWords.length?leftWords[0].x1:Math.max(0,anchor.x0-imgW*0.20);
+        var boxW=boxRight-boxLeft;
+        if(boxW<imgW*0.06){ boxW=imgW*0.16; boxLeft=Math.max(0,boxRight-boxW); }
+        box={ x:+(boxLeft/imgW*100).toFixed(2), y:+(anchor.y0/imgH*100).toFixed(2),
+              w:+(boxW/imgW*100).toFixed(2), h:+(lineH/imgH*100).toFixed(2) };
+      }
+      if(!box) box={ x:55, y:Math.min(95, 8+idx*3.2), w:18, h:2.2 };  // לא נמצא — פיזור, ניתן לגרור
+      out.push(SynelFormSpec.makeField({label:f.label, type:f.type||'text', box:box}));
+    });
+    return out;
+  }
+
+  async function aiDetect(){
+    if(!currentSpec||!currentSpec.source.pages[0]||!currentSpec.source.pages[0].image){ alert('העלי תמונה תחילה'); return; }
+    var btn=document.getElementById('aiBtn'); var orig=btn.textContent;
+    btn.textContent='🔍 Claude מנתח את המסמך…'; btn.disabled=true;
+    try{
+      var dataUrl=currentSpec.source.pages[0].image;
+      var base64=dataUrl.split(',')[1];
+      var media=dataUrl.substring(5, dataUrl.indexOf(';'));
+      var res=await fetch("https://api.anthropic.com/v1/messages",{
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+          model:"claude-sonnet-4-6", max_tokens:2048,
+          messages:[{role:"user",content:[
+            {type:"image",source:{type:"base64",media_type:media,data:base64}},
+            {type:"text",text:AI_PROMPT}
+          ]}]
+        })
+      });
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      var data=await res.json();
+      var text=(data.content||[]).filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join('');
+      var parsed=JSON.parse(text.replace(/```json|```/g,'').trim());
+      var aiFields=parsed.fields||[];
+      // OCR למיקום מדויק — Claude אומר "מה", המילים אומרות "איפה"
+      var placed=placeAIFields(aiFields, uploadedImageWords, uploadedLines, uploadedImgW||1000, uploadedImgH||1400);
+      if(placed.length){
+        currentSpec.fields=placed;
+        sortFieldsByPosition(currentSpec);
+        renderOverlay(currentSpec);
+        var located=placed.filter(function(f){return f.box && f.box.x!==55;}).length;
+        btn.textContent='✓ '+placed.length+' שדות · '+located+' מוקמו לפי המסמך';
+      } else { btn.textContent='לא זוהו שדות — נסי שוב'; }
+      setTimeout(function(){ btn.textContent=orig; btn.disabled=false; },2600);
+    }catch(err){
+      btn.disabled=false; btn.textContent=orig;
+      alert('זיהוי ה-AI פועל כשהדמו רץ בתוך Claude (תצוגת Artifact), שם יש גישה ל-API.\n\nבפתיחה מקומית או ב-GitHub Pages אין גישה ל-API ללא מפתח — שם משתמשים בזיהוי הרגיל ובהוספה ידנית.\n\n(פרט טכני: '+err.message+')');
+    }
+  }
+  document.getElementById('aiBtn').onclick=aiDetect;
+
+  renderInput();
+  renderOutput(buildSpec()); // טקסט-דוגמה בהתחלה
 })();
 </script>
-<script src="synel-help.js"></script>
 </body>
 </html>
