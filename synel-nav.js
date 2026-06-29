@@ -285,10 +285,131 @@ var SynelNav = {
   _watchSignatures: function () {
     var self = this;
     var host = document.querySelector('.phone-content') || document.getElementById('pvContent') || document.querySelector('.phone-wrap') || document.querySelector('.phone') || document.body;
-    this._enhanceSignatures();
+    this._enhanceSignatures(); this._enhanceDocs();
     if (host && !this._sigObserver) {
-      this._sigObserver = new MutationObserver(function () { self._enhanceSignatures(); });
+      this._sigObserver = new MutationObserver(function () { self._enhanceSignatures(); self._enhanceDocs(); });
       this._sigObserver.observe(host, { childList: true, subtree: true });
+    }
+  },
+
+  _docContent: function (name) {
+    name = name || '';
+    var C = {};
+    C['חוזה'] = {
+      title: 'חוזה העסקה',
+      html: '<h3>הסכם העסקה אישי</h3>'
+        + '<p>הסכם זה נערך ונחתם בין החברה ("המעסיק") לבין העובד/ת, ומסדיר את תנאי ההעסקה.</p>'
+        + '<h4>1. תפקיד והיקף משרה</h4><p>העובד/ת יועסק/תועסק בתפקיד שהוגדר, במשרה מלאה, בכפוף לנהלי החברה. שעות העבודה יהיו בהתאם למקובל ולחוק שעות עבודה ומנוחה.</p>'
+        + '<h4>2. שכר ותנאים נלווים</h4><p>השכר ישולם מדי חודש, בכפוף לניכויי חובה על פי דין. לעובד/ת יופרשו הפרשות לפנסיה ולפיצויים בהתאם לחוק ולהסכם.</p>'
+        + '<h4>3. תקופת ניסיון</h4><p>שלושת החודשים הראשונים ייחשבו כתקופת ניסיון, שבמהלכה ניתן לסיים את ההעסקה בהתראה מקוצרת.</p>'
+        + '<h4>4. סודיות</h4><p>העובד/ת מתחייב/ת לשמור על סודיות מלאה ביחס לכל מידע עסקי, טכנולוגי או אישי שייחשף במהלך העבודה, גם לאחר סיומה.</p>'
+        + '<h4>5. קניין רוחני</h4><p>כל תוצר, פיתוח או רעיון שייווצרו במסגרת העבודה יהיו קניינה הבלעדי של החברה.</p>'
+        + '<h4>6. סיום העסקה</h4><p>כל צד רשאי לסיים את ההעסקה במתן הודעה מוקדמת בכתב, בהתאם לוותק ולחוק הודעה מוקדמת.</p>'
+        + '<p style="margin-top:18px;color:#6B7280;">בחתימתך אתה/את מאשר/ת שקראת והבנת את כל סעיפי ההסכם והנך מסכים/ה לתנאיו.</p>'
+    };
+    C['סעיף 14'] = {
+      title: 'הסדר לפי סעיף 14 לחוק פיצויי פיטורים',
+      html: '<h3>אישור הסדר לפי סעיף 14</h3>'
+        + '<p>מסמך זה מסדיר את תחולת סעיף 14 לחוק פיצויי פיטורים, התשכ"ג–1963, על יחסי העבודה.</p>'
+        + '<h4>מהות ההסדר</h4><p>הפרשות המעסיק לרכיב פיצויים בקופת הפנסיה/ביטוח המנהלים יבואו במקום תשלום פיצויי פיטורים, בכפוף לתנאי האישור הכללי של שר העבודה.</p>'
+        + '<h4>משמעות עבורך</h4><p>הכספים שהופרשו לרכיב הפיצויים יישארו בבעלותך גם אם תתפטר/י, ולא רק בעת פיטורים. ההסדר חל ממועד תחילת ההפרשות ואילך.</p>'
+        + '<h4>תחולה</h4><p>ההסדר חל על מלוא השכר המבוטח ומרגע תחילת העבודה, אלא אם צוין אחרת.</p>'
+        + '<p style="margin-top:18px;color:#6B7280;">חתימתך מהווה אישור להחלת הסדר סעיף 14 על תנאי העסקתך.</p>'
+    };
+    C['161'] = {
+      title: 'טופס 161 — הודעת מעביד על פרישה מעבודה',
+      html: '<h3>טופס 161 — גמר חשבון</h3>'
+        + '<p>טופס זה מדווח לרשות המסים על סיום העסקה ועל המענקים והתשלומים הנלווים, לצורך חישוב המס וההטבות.</p>'
+        + '<h4>פרטי סיום ההעסקה</h4><p>מפורטים בו תאריך תחילת וסיום העבודה, סיבת הפרישה, והוותק המצטבר.</p>'
+        + '<h4>רכיבי גמר החשבון</h4><p>פיצויי פיטורים, פדיון ימי חופשה, דמי הבראה, והשלמות שכר — בהתאם לזכאותך ולחוק.</p>'
+        + '<h4>בחירת מסלול מס</h4><p>ניתן לבחור בין משיכת הפיצויים (חייבת במס בהתאם לתקרה) לבין רצף פיצויים או רצף קצבה הדוחים את אירוע המס.</p>'
+        + '<p style="margin-top:18px;color:#6B7280;">מומלץ להיוועץ ביועץ מס לפני בחירת המסלול. חתימתך מאשרת את נכונות הנתונים.</p>'
+    };
+    for (var k in C) { if (C.hasOwnProperty(k) && name.indexOf(k) >= 0) return C[k]; }
+    return { title: 'מסמך לעיון', html: '<h3>מסמך</h3><p>זהו מסמך לעיון. יש לגלול עד סופו לפני אישור.</p><p>תוכן המסמך יוצג כאן.</p>' };
+  },
+
+  _docBuild: function () {
+    if (this._docBuilt) return;
+    var self = this;
+    if (!document.getElementById('sdocStyle')) {
+      var st = document.createElement('style'); st.id = 'sdocStyle';
+      st.textContent =
+        '.sdoc-overlay{position:fixed;inset:0;background:rgba(17,17,17,.55);z-index:9100;display:none;align-items:center;justify-content:center;padding:16px;}'
+        + '.sdoc-overlay.show{display:flex;}'
+        + '.sdoc-panel{background:#fff;border-radius:16px;width:100%;max-width:680px;height:80vh;max-height:760px;box-shadow:0 24px 60px rgba(0,0,0,.25);display:flex;flex-direction:column;overflow:hidden;}'
+        + '.sdoc-head{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;border-bottom:1px solid #E5E7EB;flex-shrink:0;}'
+        + '.sdoc-title{font-size:16px;font-weight:700;color:#1a1a1a;}'
+        + '.sdoc-x{border:none;background:none;font-size:18px;color:#9CA3AF;cursor:pointer;line-height:1;}'
+        + '.sdoc-body{padding:20px 22px;overflow-y:auto;flex:1;line-height:1.7;color:#374151;font-size:14px;text-align:right;}'
+        + '.sdoc-body h3{font-size:18px;color:#1a1a1a;margin:0 0 12px;}'
+        + '.sdoc-body h4{font-size:14px;color:#111827;margin:16px 0 4px;}'
+        + '.sdoc-body p{margin:0 0 10px;}'
+        + '.sdoc-foot{padding:14px 18px;border-top:1px solid #E5E7EB;flex-shrink:0;}'
+        + '.sdoc-done{width:100%;padding:13px;border:none;border-radius:50px;background:#4F46E5;color:#fff;cursor:pointer;font-family:inherit;font-size:15px;font-weight:600;}'
+        + '.sdoc-done:disabled{opacity:.4;cursor:not-allowed;}'
+        + '.sdoc-note{font-size:11px;color:#9CA3AF;text-align:center;margin-top:8px;}'
+        + '@media(max-width:600px){.sdoc-panel{max-width:100%;height:100%;border-radius:0;}}';
+      document.head.appendChild(st);
+    }
+    var wrap = document.createElement('div'); wrap.id = 'synelDocModal'; wrap.setAttribute('dir', 'rtl');
+    wrap.innerHTML =
+      '<div class="sdoc-overlay" id="sdocOverlay">'
+      + '<div class="sdoc-panel">'
+      + '<div class="sdoc-head"><div class="sdoc-title" id="sdocTitle">מסמך</div><button class="sdoc-x" id="sdocClose">✕</button></div>'
+      + '<div class="sdoc-body" id="sdocBody"></div>'
+      + '<div class="sdoc-foot"><button class="sdoc-done" id="sdocDone" disabled>סיימתי לקרוא ✓</button><div class="sdoc-note" id="sdocNote">גלול/י עד סוף המסמך כדי להמשיך</div></div>'
+      + '</div></div>';
+    document.body.appendChild(wrap);
+    this._docOverlay = document.getElementById('sdocOverlay');
+    var body = document.getElementById('sdocBody');
+    var done = document.getElementById('sdocDone');
+    document.getElementById('sdocClose').onclick = function () { self._docOverlay.classList.remove('show'); if (self._docCb) self._docCb(false); };
+    body.addEventListener('scroll', function () {
+      if (body.scrollTop + body.clientHeight >= body.scrollHeight - 8) {
+        done.disabled = false; document.getElementById('sdocNote').textContent = 'הגעת לסוף המסמך';
+      }
+    });
+    done.onclick = function () { self._docOverlay.classList.remove('show'); var cb = self._docCb; self._docCb = null; if (cb) cb(true); };
+    this._docBuilt = true;
+  },
+
+  _docOpen: function (name, onDone) {
+    this._docBuild();
+    var d = this._docContent(name);
+    document.getElementById('sdocTitle').textContent = d.title;
+    var body = document.getElementById('sdocBody');
+    body.innerHTML = d.html;
+    var done = document.getElementById('sdocDone');
+    // if content is short (no scroll needed) enable immediately
+    this._docCb = onDone;
+    this._docOverlay.classList.add('show');
+    var self = this;
+    setTimeout(function () {
+      if (body.scrollHeight <= body.clientHeight + 8) { done.disabled = false; document.getElementById('sdocNote').textContent = 'ניתן להמשיך'; }
+      else { done.disabled = true; document.getElementById('sdocNote').textContent = 'גלול/י עד סוף המסמך כדי להמשיך'; body.scrollTop = 0; }
+    }, 30);
+  },
+
+  _enhanceDocs: function () {
+    var self = this;
+    var btns = document.querySelectorAll('.phone-wrap .pv-doc-btn, .phone .pv-doc-btn');
+    for (var i = 0; i < btns.length; i++) {
+      (function (btn) {
+        if (btn.getAttribute('data-sdoc')) return;
+        btn.setAttribute('data-sdoc', '1');
+        btn.addEventListener('click', function (ev) {
+          ev.preventDefault(); if (ev.stopImmediatePropagation) ev.stopImmediatePropagation();
+          var nm = (document.getElementById('fName') || {}).value || '';
+          self._docOpen(nm, function (done) {
+            if (!done) return;
+            btn.classList.add('opened');
+            try { btn.textContent = '✓ המסמך נפתח'; } catch (e) {}
+            var rc = document.querySelector('.pv-confirm'); if (rc) rc.classList.add('enabled');
+            var sd = document.querySelector('.pv-scroll-done'); if (sd) sd.classList.add('show');
+          });
+        }, true);
+      })(btns[i]);
     }
   },
 
