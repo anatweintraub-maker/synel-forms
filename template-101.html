@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>טופס 101 — קליטת עובד</title>
+<title>טופס 101 — קליטת עובד · v11</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{--bg:#F5F5F0;--surface:#fff;--border:#E5E7EB;--text:#1a1a1a;--text2:#6B7280;--text3:#9CA3AF;--accent:#4F46E5;--green:#2D7A4F;--orange:#E8603C;--red:#DC2626;--r:12px;}
@@ -110,6 +110,92 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;direction:rtl;background:var(
 .ep-footer{padding:12px 16px;border-top:1px solid #E5E7EB;display:flex;flex-direction:column;gap:6px;}
 .ebtn{width:100%;padding:8px;font-size:12px;border-radius:8px;border:1px solid #E5E7EB;background:#fff;cursor:pointer;font-family:inherit;font-weight:500;}
 .ebtn.primary{background:#4F46E5;color:white;border-color:#4F46E5;}
+
+/* ===== OFFICIAL FORM 101 (ported) ===== */
+.form101-doc{background:#fff;border:1.5px solid #1a1a1a;border-radius:4px;padding:0;margin-bottom:14px;font-size:10px;direction:rtl;line-height:1.5;color:#1a1a1a;font-family:'Segoe UI',Arial,sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.08)}
+.f101-topbar{display:flex;align-items:stretch;border-bottom:1.5px solid #1a1a1a}
+.f101-formno{border-left:1px solid #1a1a1a;padding:6px 8px;font-size:11px;font-weight:700;text-align:center;display:flex;flex-direction:column;justify-content:center;min-width:62px}
+.f101-formno span{font-size:8px;font-weight:400;color:#555;margin-top:2px}
+.f101-titlewrap{flex:1;text-align:center;padding:5px 4px}
+.f101-title{font-size:18px;font-weight:800;letter-spacing:1px}
+.f101-title sup,.f101-subtitle sup{font-size:8px}
+.f101-subtitle{font-size:10px;font-weight:600;margin-top:1px}
+.f101-law{font-size:7.5px;color:#444;margin-top:2px}
+.f101-authority{border-right:1px solid #1a1a1a;padding:5px 7px;font-size:8px;font-weight:700;text-align:center;display:flex;flex-direction:column;justify-content:center;line-height:1.3;min-width:42px}
+.f101-taxyear{text-align:center;font-weight:700;font-size:12px;padding:4px;border-bottom:1px solid #1a1a1a;background:#f7f5f2}
+.f101-sec-head{font-weight:800;font-size:10.5px;background:#ece9e4;border-bottom:1px solid #1a1a1a;border-top:1px solid #1a1a1a;padding:3px 8px}
+.f101-sec-head span{font-weight:400;font-size:9px;color:#555}
+.f101-grid2{display:grid;grid-template-columns:1fr 1fr}
+.f101-cell{padding:4px 8px;border-bottom:1px solid #ccc;border-left:1px solid #eee}
+.f101-cell:nth-child(even){border-left:none}
+.f101-cell.f101-full{border-left:none}
+.f101-cell label{display:block;font-size:8px;color:#777;margin-bottom:1px}
+.f101-cell b{font-size:11px;font-weight:600}
+.f101-checkrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:5px 8px;border-bottom:1px solid #ccc}
+.f101-label{font-size:9px;color:#555;font-weight:600}
+.f101-chk{font-size:10px;position:relative;padding-right:16px}
+.f101-chk::before{content:'';position:absolute;right:0;top:50%;transform:translateY(-50%);width:11px;height:11px;border:1px solid #1a1a1a;border-radius:2px;background:#fff}
+.f101-chk.on{font-weight:700}
+.f101-chk.on::before{content:'✓';background:#1a1a1a;color:#fff;font-size:9px;line-height:11px;text-align:center}
+.f101-childtable{width:100%;border-collapse:collapse;font-size:9px}
+.f101-childtable th{background:#f2efea;border:1px solid #ccc;padding:3px;font-size:8.5px}
+.f101-childtable td{border:1px solid #ccc;padding:3px 5px;text-align:center}
+.f101-empty{padding:5px 8px;font-size:9px;color:#999;border-bottom:1px solid #ccc}
+.f101-declaration{padding:6px 8px;font-size:9px;color:#333;line-height:1.6}
+.f101-sigrow{display:flex;gap:0;border-top:1px solid #1a1a1a}
+.f101-sigcell{flex:1;padding:6px 8px;border-left:1px solid #ccc}
+.f101-sigcell:first-child{border-left:none}
+.f101-sig-label{font-size:8px;color:#777;margin-bottom:4px}
+.f101-sig-line{border-bottom:1px solid #1a1a1a;min-height:22px;font-size:11px;font-weight:600;padding-bottom:2px}
+.f101-sig-canvaswrap{border-bottom:1px solid #1a1a1a;height:42px;position:relative}
+.f101-sig-canvaswrap canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
+.f101-sig-ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;color:#bbb;pointer-events:none}
+.f101-docfoot{font-size:7.5px;color:#999;text-align:center;padding:4px;border-top:1px solid #1a1a1a;background:#fafafa}
+/* Fullscreen enlarged view */
+#f101-fullscreen{display:none;position:fixed;inset:0;z-index:1000;background:#f5f3ef;flex-direction:column}
+#f101-fullscreen.open{display:flex}
+.f101-fs-top{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:#fff;border-bottom:.5px solid #e0ddd8;flex-shrink:0}
+.f101-fs-top strong{font-size:15px;color:#1a1a1a}
+.f101-fs-close{background:#E8593C;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit}
+#f101-fs-body{flex:1;overflow:auto;padding:16px;-webkit-overflow-scrolling:touch}
+/* Enlarged document overrides – bigger fonts, single column */
+.form101-doc.f101-large{font-size:15px;border-width:2px;max-width:600px;margin:0 auto}
+.f101-large .f101-formno{font-size:15px;min-width:90px}
+.f101-large .f101-formno span{font-size:11px}
+.f101-large .f101-title{font-size:30px}
+.f101-large .f101-title sup,.f101-large .f101-subtitle sup{font-size:11px}
+.f101-large .f101-subtitle{font-size:15px}
+.f101-large .f101-law{font-size:11px}
+.f101-large .f101-authority{font-size:12px;min-width:64px}
+.f101-large .f101-taxyear{font-size:18px;padding:8px}
+.f101-large .f101-sec-head{font-size:16px;padding:7px 12px}
+.f101-large .f101-sec-head span{font-size:13px}
+.f101-large .f101-grid2{grid-template-columns:1fr}
+.f101-large .f101-cell{padding:8px 12px;border-left:none}
+.f101-large .f101-cell label{font-size:12px;margin-bottom:3px}
+.f101-large .f101-cell b{font-size:18px}
+.f101-large .f101-checkrow{gap:10px;padding:9px 12px}
+.f101-large .f101-label{font-size:14px}
+.f101-large .f101-chk{font-size:15px;padding-right:24px}
+.f101-large .f101-chk::before{width:17px;height:17px}
+.f101-large .f101-chk.on::before{font-size:13px;line-height:17px}
+.f101-large .f101-childtable{font-size:14px}
+.f101-large .f101-childtable th{font-size:13px;padding:6px}
+.f101-large .f101-childtable td{padding:6px 8px}
+.f101-large .f101-empty{font-size:14px;padding:9px 12px}
+.f101-large .f101-declaration{font-size:14px;padding:10px 12px}
+.f101-large .f101-sig-label{font-size:12px}
+.f101-large .f101-sig-line{font-size:18px;min-height:34px}
+.f101-large .f101-sig-canvaswrap{height:60px}
+.f101-large .f101-docfoot{font-size:11px;padding:7px}
+/* ===== פריסת דסקטופ אמיתית (≥1024px) — לא מובייל מוגדל ===== */
+
+.bottom-bar{display:flex;gap:8px;margin-top:10px;}
+.btn{flex:1;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;}
+.btn-primary{background:#4F46E5;color:#fff;}
+.btn-primary:disabled{background:#C7C9D9;cursor:not-allowed;}
+.btn-ghost{background:#F3F4F6;color:#374151;}
+
 </style>
 <script src="synel-db.js"></script>
 <script src="synel-validation.js"></script>
@@ -286,10 +372,10 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;direction:rtl;background:var(
     <div class="field-group"><label>כתובת אימייל</label><input id="email" type="email" placeholder="your@email.com"></div>
     <div class="field-group">
       <label>חבר/ה בקופת חולים?</label>
-      <select id="hmo"><option>-- בחר/י --</option><option>מכבי</option><option>כללית</option><option>מאוחדת</option><option>לאומית</option></select>
+      <select id="hmo" onchange="toggleHmo()"><option>-- בחר/י --</option><option>כן</option><option>לא</option></select>
     </div>
-    <div class="field-group">
-      <label>שם קופת חולים (אם חבר/ה)</label>
+    <div class="field-group" id="hmoNameGroup" style="display:none;">
+      <label>שם קופת חולים</label>
       <select id="hmoName"><option>-- בחר/י --</option><option>מכבי</option><option>כללית</option><option>מאוחדת</option><option>לאומית</option></select>
     </div>
     <div class="field-group">
@@ -367,7 +453,7 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;direction:rtl;background:var(
     <div class="sec-label" id="secFLabel">סעיף ו – פרטי חשבון בנק</div>
     <div class="field-group">
       <label>בנק</label>
-      <select id="bank">
+      <select id="bank" onchange="loadBranches()">
         <option>-- בחר/י בנק --</option>
         <option>בנק הפועלים</option><option>בנק לאומי</option><option>בנק דיסקונט</option>
         <option>בנק מזרחי טפחות</option><option>הבינלאומי</option><option>ירושלים</option>
@@ -429,7 +515,154 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;direction:rtl;background:var(
       <div class="upload-zone" onclick="toast('מדמה העלאה...')">📎 העלאת אישור תיאום מס</div>
     </div>
 
+  </div><!-- /s3 -->
+
+  <div class="screen" id="s4" style="padding-bottom:120px;">
+    <div class="form101-doc" id="form101-doc">
+
+      <!-- TOP STRIP: form numbers + title + authority -->
+      <div class="f101-topbar">
+        <div class="f101-formno">0101/130<br><span>דף 1 מתוך 2</span></div>
+        <div class="f101-titlewrap">
+          <div class="f101-title">כרטיס עובד<sup>(1)</sup></div>
+          <div class="f101-subtitle">ובקשה להקלה ולתיאום מס על ידי המעסיק<sup>(1)</sup></div>
+          <div class="f101-law">לפי תקנות מס הכנסה (ניכוי ממשכורת ומשכר עבודה), התשנ"ג – 1993</div>
+        </div>
+        <div class="f101-authority">רשות<br>המסים<br>בישראל</div>
+      </div>
+      <div class="f101-taxyear">שנת המס <span id="p101-taxyear">2026</span></div>
+
+      <!-- סעיף א -->
+      <div class="f101-sec-head">א. פרטי המעסיק <span>(למילוי ע"י המעסיק)</span></div>
+      <div class="f101-grid2">
+        <div class="f101-cell"><label>שם</label><b id="p101-emp-name">סינאל בע"מ</b></div>
+        <div class="f101-cell"><label>מספר תיק ניכויים</label><b>935157461</b></div>
+        <div class="f101-cell"><label>כתובת</label><b>תל אביב</b></div>
+        <div class="f101-cell"><label>מספר טלפון</label><b>03-1234567</b></div>
+      </div>
+
+      <!-- סעיף ב -->
+      <div class="f101-sec-head">ב. פרטי העובד/ת</div>
+      <div class="f101-grid2">
+        <div class="f101-cell"><label>שם משפחה ושם פרטי</label><b id="p101-name">שחר כהן</b></div>
+        <div class="f101-cell"><label>מספר זהות</label><b id="p101-id">037451829</b></div>
+        <div class="f101-cell"><label>תאריך לידה</label><b id="p101-dob">15/04/1992</b></div>
+        <div class="f101-cell"><label>מין</label><b id="p101-gender">נקבה</b></div>
+      </div>
+      <div class="f101-cell f101-full"><label>כתובת מגורים</label><b id="p101-addr">רחוב הברוש 12, רמת גן</b></div>
+      <div class="f101-grid2">
+        <div class="f101-cell"><label>דואר אלקטרוני</label><b id="p101-email" dir="ltr">—</b></div>
+        <div class="f101-cell"><label>טלפון</label><b id="p101-phone">—</b></div>
+      </div>
+      <div class="f101-checkrow">
+        <span class="f101-label">מצב משפחתי:</span>
+        <span class="f101-chk" data-opt="נשוי/ה" id="p101-ms-married">נשוי/ה</span>
+        <span class="f101-chk" data-opt="רווק/ה" id="p101-ms-single">רווק/ה</span>
+        <span class="f101-chk" data-opt="גרוש/ה" id="p101-ms-divorced">גרוש/ה</span>
+        <span class="f101-chk" data-opt="אלמן/ה" id="p101-ms-widow">אלמן/ה</span>
+      </div>
+      <div class="f101-checkrow">
+        <span class="f101-label">תושב ישראל:</span>
+        <span class="f101-chk on">כן</span><span class="f101-chk">לא</span>
+        <span class="f101-label" style="margin-right:14px">חבר בקופת חולים:</span>
+        <span class="f101-chk" id="p101-kupah-yes">כן <span id="p101-kupah-name"></span></span>
+        <span class="f101-chk" id="p101-kupah-no">לא</span>
+      </div>
+      <div class="f101-checkrow">
+        <span class="f101-label">חבר קיבוץ/מושב שיתופי:</span>
+        <span class="f101-chk" id="p101-kibbutz-yes">כן <span id="p101-kibbutz-name"></span></span>
+        <span class="f101-chk" id="p101-kibbutz-no">לא</span>
+      </div>
+
+      <!-- סעיף ג -->
+      <div class="f101-sec-head">ג. פרטים על ילדים שטרם מלאו להם 19 שנה</div>
+      <div id="p101-children-table"></div>
+
+      <!-- סעיף ד -->
+      <div class="f101-sec-head">ד. פרטים על הכנסותיי ממעסיק זה</div>
+      <div class="f101-checkrow">
+        <span class="f101-chk on" id="p101-income-type">משכורת חודש</span>
+        <span class="f101-label" style="margin-right:14px">תאריך תחילת עבודה:</span>
+        <b id="p101-start-date">01/06/2026</b>
+      </div>
+      <div class="f101-checkrow" id="p101-extra-emp-row" style="display:none">
+        <span class="f101-label">מעסיק נוסף:</span> <b id="p101-extra-emp">—</b>
+      </div>
+
+      <!-- סעיף ה -->
+      <div class="f101-sec-head">ה. פרטים על הכנסות אחרות</div>
+      <div class="f101-checkrow" id="p101-other-income">
+        <span class="f101-chk on">אין לי הכנסות אחרות לרבות מלגות</span>
+      </div>
+
+      <!-- סעיף ו -->
+      <div id="p101-spouse-section" style="display:none">
+        <div class="f101-sec-head">ו. פרטים על בן/בת הזוג</div>
+        <div class="f101-cell f101-full"><label>שם / מספר זהות</label><b id="p101-spouse">—</b></div>
+      </div>
+
+      <!-- סעיף ט -->
+      <div class="f101-sec-head">ט. הקלות מס וזיכויים</div>
+      <div class="f101-checkrow" id="p101-benefits">
+        <span class="f101-chk on">לא סומנו הקלות מס</span>
+      </div>
+
+      <!-- סעיף י -->
+      <div class="f101-sec-head">י. הצהרה</div>
+      <div class="f101-declaration">אני מצהיר/ה כי הפרטים שמסרתי בטופס זה הינם מלאים ונכונים. ידוע לי שהשמטת פרטים או מסירת פרטים לא נכונים הינה עבירה על פקודת מס הכנסה.</div>
+
+      <!-- SIGNATURE AREA -->
+      <div class="f101-sigrow">
+        <div class="f101-sigcell">
+          <div class="f101-sig-label">תאריך</div>
+          <div class="f101-sig-line" id="p101-date"></div>
+        </div>
+        <div class="f101-sigcell" style="flex:2">
+          <div class="f101-sig-label">חתימת העובד/ת</div>
+          <div class="f101-sig-canvaswrap">
+            <img id="sig-img-101" style="height:100%;display:none">
+            <div id="sig-doc-ph-101" class="f101-sig-ph">החתימה תופיע כאן</div>
+          </div>
+        </div>
+      </div>
+      <div class="f101-docfoot">קוד מסמך 156 · נוצר דיגיטלית במערכת סינאל</div>
+    </div>
+    <!-- ====== /OFFICIAL FORM 101 DOCUMENT ====== -->
+
+    <!-- אזור חתימה גדול -->
+    <div style="margin-bottom:12px">
+      <div style="font-size:13px;font-weight:600;color:#1a1a1a;margin-bottom:6px">חתימה דיגיטלית</div>
+      <div id="sig-preview-101" onclick="openSig101()" style="border:1.5px dashed #e0ddd8;border-radius:12px;min-height:130px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:#fafaf8;color:#aaa;font-size:13px;padding:10px;text-align:center">🔍 לחצ/י כאן להגדלת המסך ולחתימה</div>
+    </div>
+
+    <!-- Enlarge + clear sig buttons -->
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button onclick="openForm101Fullscreen()" style="flex:1;background:#fff3f0;border:1px solid #E8593C;border-radius:8px;padding:8px;font-size:12px;cursor:pointer;font-family:inherit;color:#E8593C;font-weight:500">🔍 הגדל טופס</button>
+      <button onclick="clearSig101()" style="flex:1;background:#f7f5f2;border:.5px solid #e0ddd8;border-radius:8px;padding:8px;font-size:12px;cursor:pointer;font-family:inherit">🗑 נקה חתימה</button>
+    </div>
+
+    <!-- Confirmation -->
+    <label style="display:flex;align-items:center;gap:10px;padding:12px;background:#f7f5f2;border-radius:10px;cursor:pointer;margin-bottom:16px">
+      <input type="checkbox" id="cb101" onchange="check101(this)" style="width:18px;height:18px">
+      <span style="font-size:13px">קראתי את הפרטים ואני מאשר/ת שהם נכונים</span>
+    </label>
   </div>
+
+  <div class="bottom-bar">
+    <button class="btn btn-primary" id="s10-btn" disabled onclick="submitForm101()">חתום/י ואשר/י ←</button>
+    <button class="btn btn-ghost" onclick="goScreen(3)">חזרה לעריכה</button>
+  </div>
+
+  <!-- FULL-SCREEN ENLARGED VIEW -->
+  <div id="f101-fullscreen">
+    <div class="f101-fs-top">
+      <strong>טופס 101 – תצוגה מוגדלת</strong>
+      <button onclick="closeForm101Fullscreen()" class="f101-fs-close">✕ סגירה</button>
+    </div>
+    <div id="f101-fs-body"></div>
+  </div>
+
+  </div><!-- /s4 -->
 
   <!-- FOOTER -->
   <div class="footer">
@@ -449,13 +682,14 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;direction:rtl;background:var(
 var currentScreen = 1;
 
 function updateProgress(){
-  var steps={1:'שלב 1 מתוך 3',2:'שלב 2 מתוך 3',3:'שלב 3 מתוך 3'};
-  var secs={1:'א–צילום ת"ז',2:'ב–צילום ספח',3:'מילוי פרטים'};
-  var pcts={1:'33%',2:'66%',3:'95%'};
+  var steps={1:'שלב 1 מתוך 3',2:'שלב 2 מתוך 3',3:'שלב 3 מתוך 3',4:'טופס 101'};
+  var secs={1:'א–צילום ת"ז',2:'ב–צילום ספח',3:'מילוי פרטים',4:'הטופס הרשמי + חתימה'};
+  var pcts={1:'33%',2:'66%',3:'95%',4:'100%'};
   document.getElementById('stepLabel').textContent=steps[currentScreen]||'';
   document.getElementById('secLabel').textContent=secs[currentScreen]||'';
   document.getElementById('progressFill').style.width=pcts[currentScreen]||'33%';
   document.getElementById('mainBtn').textContent=currentScreen<3?'המשך ←':'אישור והצגת טופס 101 ←';
+  var ft=document.querySelector('.footer'); if(ft) ft.style.display=(currentScreen===4)?'none':'';
 }
 
 function goScreen(n){
@@ -478,13 +712,25 @@ function captureAppendix(){
 
 function handleBtn(){
   if(currentScreen<3){goScreen(currentScreen+1);return;}
-  validate();
+  if(currentScreen===3){ if(validate()){ goScreen(4); setTimeout(showForm101Preview,60); } return; }
 }
 
+function loadBranches(){
+  var bank=document.getElementById('bank').value;
+  var br=document.getElementById('branch');
+  if(!br) return;
+  if(bank==='-- בחר/י בנק --'){ br.innerHTML='<option>-- בחר/י בנק תחילה --</option>'; return; }
+  var list=['סניף 101 — תל אביב','סניף 234 — ירושלים','סניף 567 — חיפה','סניף 412 — נתניה','סניף 890 — באר שבע','אחר'];
+  var html='<option>-- בחר/י סניף --</option>';
+  for(var i=0;i<list.length;i++){ html+='<option>'+list[i]+'</option>'; }
+  br.innerHTML=html;
+}
+function toggleHmo(){ var v=document.getElementById('hmo').value; var g=document.getElementById('hmoNameGroup'); if(g) g.style.display=(v==='כן')?'block':'none'; }
 function validate(){
   var missing=[];
   if(!document.getElementById('email').value)missing.push('כתובת אימייל');
   if(document.getElementById('hmo').value==='-- בחר/י --')missing.push('חבר/ה בקופת חולים');
+  if(document.getElementById('hmo').value==='כן' && document.getElementById('hmoName').value==='-- בחר/י --')missing.push('שם קופת חולים');
   if(document.getElementById('bank').value==='-- בחר/י בנק --')missing.push('בנק');
   if(!document.getElementById('accountNum').value)missing.push('מספר חשבון');
 
@@ -496,10 +742,8 @@ function validate(){
     vb.scrollIntoView({behavior:'smooth'});
   } else {
     vb.style.display='none';
-    document.getElementById('mainBtn').textContent='✓ נשלח!';
-    document.getElementById('mainBtn').style.background='#2D7A4F';
-    toast('✓ טופס 101 הוגש בהצלחה!');
   }
+  return missing.length===0;
 }
 
 function toggleMs(el){
@@ -725,5 +969,178 @@ function renderDBMappings(){
   function go(){try{var d=BUILTIN101[name]||null;if(!d){var raw=localStorage.getItem('f101_'+name);if(raw)d=JSON.parse(raw);}if(d&&typeof loadForm==='function')loadForm(d);}catch(e){}}
   if(document.readyState==='complete')setTimeout(go,400);else window.addEventListener('load',function(){setTimeout(go,400);});
 })();</script>
+
+<script>/* ===== OFFICIAL FORM 101 — functions (ported) ===== */
+function showForm101Preview() {
+  function val(id, def){ var el=document.getElementById(id); return (el && el.value && el.value.trim()) ? el.value.trim() : def; }
+  function txt(id, v){ var el=document.getElementById(id); if(el) el.textContent = v; }
+
+  // --- Collect employee data (section ב) ---
+  var name    = val('f-name', 'שחר כהן');
+  var id      = val('f-id', '037451829');
+  var dob     = val('f-dob', '15/04/1992');
+  var addr    = val('f-addr', 'רחוב הברוש 12, רמת גן');
+  var marital = val('f-marital', 'גרוש/ה');
+  var gender  = val('f-gender', 'נקבה');
+  var email   = val('f-email', '—');
+
+  // קופת חולים
+  var kupahVal = (document.getElementById('f-kupah')||{}).value;
+  var kupahName = kupahVal === 'yes' ? (document.querySelector('#f-kupah-name select')?.value || '') : '';
+
+  // קיבוץ/מושב
+  var kibbutzVal = (document.getElementById('f-kibbutz')||{}).value;
+  var kibbutzName = kibbutzVal === 'yes' ? val('f-kibbutz-name-input', '') : '';
+
+  // --- Populate section ב ---
+  txt('p101-name', name);
+  txt('p101-id', id);
+  txt('p101-dob', dob);
+  txt('p101-gender', gender);
+  txt('p101-addr', addr);
+  txt('p101-email', email);
+
+  // Marital status checkboxes
+  var msMap = {'נשוי/ה':'p101-ms-married','רווק/ה':'p101-ms-single','גרוש/ה':'p101-ms-divorced','אלמן/ה':'p101-ms-widow'};
+  Object.keys(msMap).forEach(function(k){ var el=document.getElementById(msMap[k]); if(el) el.classList.remove('on'); });
+  if(msMap[marital]){ var sel=document.getElementById(msMap[marital]); if(sel) sel.classList.add('on'); }
+
+  // Kupat cholim
+  var kY=document.getElementById('p101-kupah-yes'), kN=document.getElementById('p101-kupah-no');
+  if(kupahVal==='yes'){ kY.classList.add('on'); kN.classList.remove('on'); document.getElementById('p101-kupah-name').textContent = kupahName?('– '+kupahName):''; }
+  else { kY.classList.remove('on'); kN.classList.add('on'); document.getElementById('p101-kupah-name').textContent=''; }
+
+  // Kibbutz
+  var bY=document.getElementById('p101-kibbutz-yes'), bN=document.getElementById('p101-kibbutz-no');
+  if(kibbutzVal==='yes'){ bY.classList.add('on'); bN.classList.remove('on'); document.getElementById('p101-kibbutz-name').textContent = kibbutzName?('– '+kibbutzName):''; }
+  else { bY.classList.remove('on'); bN.classList.add('on'); document.getElementById('p101-kibbutz-name').textContent=''; }
+
+  // --- Section ג: children ---
+  var rows = document.querySelectorAll('#children-list .child-row');
+  var html = '';
+  var kids = [];
+  rows.forEach(function(r){
+    var ins = r.querySelectorAll('input.field');
+    var cn = ins[0]?.value?.trim(), cid = ins[1]?.value?.trim(), cdob = ins[2]?.value?.trim();
+    if(cn || cid || cdob) kids.push({n:cn||'—', id:cid||'—', dob:cdob||'—'});
+  });
+  if(kids.length){
+    html = '<table class="f101-childtable"><tr><th>שם</th><th>מספר זהות</th><th>תאריך לידה</th></tr>';
+    kids.forEach(function(k){ html += '<tr><td>'+k.n+'</td><td>'+k.id+'</td><td>'+k.dob+'</td></tr>'; });
+    html += '</table>';
+  } else {
+    html = '<div class="f101-empty">לא דווח על ילדים מתחת לגיל 19</div>';
+  }
+  document.getElementById('p101-children-table').innerHTML = html;
+
+  // --- Section ה: other income (always-visible checklist) ---
+  var hSel = Array.prototype.slice.call(document.querySelectorAll('#h-options .h-chip.sel-green')).map(function(e){return e.textContent.trim();});
+  var hAmt = val('h-amount','');
+  if(hSel.length){
+    document.getElementById('p101-other-income').innerHTML =
+      hSel.map(function(s){return '<span class="f101-chk on">'+s+'</span>';}).join('') +
+      (hAmt ? ' <span class="f101-label">סכום חודשי משוער: ₪'+hAmt+'</span>' : '');
+  } else {
+    document.getElementById('p101-other-income').innerHTML = '<span class="f101-chk on">אין לי הכנסות אחרות לרבות מלגות</span>';
+  }
+
+  // --- Section ט: tax benefits (always-visible checklist) ---
+  var tSel = Array.prototype.slice.call(document.querySelectorAll('#t-options .t-chip.sel-green')).map(function(e){return e.textContent.trim();});
+  document.getElementById('p101-benefits').innerHTML = tSel.length
+    ? tSel.map(function(s){return '<span class="f101-chk on">'+s+'</span>';}).join('')
+    : '<span class="f101-chk on">לא סומנו הקלות מס</span>';
+
+  // --- Section ד: additional employer (if filled) ---
+  var extraName = val('d-emp-name','');
+  var extraInc  = val('d-emp-income','');
+  var extraRow  = document.getElementById('p101-extra-emp-row');
+  if(extraName || extraInc){
+    extraRow.style.display = 'flex';
+    document.getElementById('p101-extra-emp').textContent = (extraName||'—') + (extraInc?(' · הכנסה ₪'+extraInc):'');
+  } else {
+    extraRow.style.display = 'none';
+  }
+
+  // --- Date + tax year ---
+  var today = new Date();
+  txt('p101-date', today.toLocaleDateString('he-IL'));
+  txt('p101-taxyear', today.getFullYear().toString());
+
+  // --- Section ו: spouse (show if any spouse detail filled) ---
+  var spouseSec = document.getElementById('p101-spouse-section');
+  var spName = val('f-spouse-name','');
+  var spId   = val('f-spouse-id','');
+  if (spName || spId) {
+    spouseSec.style.display = 'block';
+    txt('p101-spouse', (spName||'—') + (spId ? (' · ת"ז ' + spId) : ''));
+  } else {
+    spouseSec.style.display = 'none';
+  }
+
+  // (כבר במסך s4)
+  setTimeout(initSig101, 100);
+}
+
+function initSig101() { /* החתימה עוברת דרך משטח SynelSignature המשותף — אין canvas מקומי */ }
+
+/* פתיחת משטח החתימה המשותף לטופס 101 (הגדלת מסך + חתימה מלאה), כמו בפנסיה */
+function openSig101(){
+  if(typeof SynelSignature==='undefined'){alert('מודול החתימה לא נטען');return;}
+  SynelSignature.open({title:'חתימה על טופס 101', signer:''}, function(result){
+    if(!result) return;
+    window._sig101=true;
+    var p=document.getElementById('sig-preview-101');
+    if(p){p.style.borderStyle='solid';p.style.borderColor='#1D9E75';p.style.background='#F0FDF4';p.innerHTML='<img src="'+result.image+'" alt="חתימה" style="max-height:116px;max-width:100%">';}
+    var img=document.getElementById('sig-img-101'); if(img){img.src=result.image;img.style.display='block';}
+    var dp=document.getElementById('sig-doc-ph-101'); if(dp)dp.style.display='none';
+    check101Readiness();
+  });
+}
+
+function clearSig101() {
+  window._sig101 = false;
+  var p=document.getElementById('sig-preview-101');
+  if(p){p.style.borderStyle='dashed';p.style.borderColor='#e0ddd8';p.style.background='#fafaf8';p.innerHTML='🔍 לחצ/י כאן להגדלת המסך ולחתימה';}
+  var img=document.getElementById('sig-img-101'); if(img){img.style.display='none';img.src='';}
+  var dp=document.getElementById('sig-doc-ph-101'); if(dp)dp.style.display='flex';
+  check101Readiness();
+}
+
+function openForm101Fullscreen() {
+  var doc = document.getElementById('form101-doc');
+  if (!doc) return;
+  var clone = doc.cloneNode(true);
+  clone.classList.add('f101-large');
+  // remove ids in the clone to avoid duplicates in the DOM
+  clone.querySelectorAll('[id]').forEach(function(el){ el.removeAttribute('id'); });
+  // replace the live signature canvas with a static image (or a note)
+  var wrap = clone.querySelector('.f101-sig-canvaswrap');
+  if (wrap) {
+    var src = document.getElementById('sig-img-101');
+    if (window._sig101 && src && src.src) {
+      var img = document.createElement('img');
+      img.src = src.src;
+      img.style.cssText = 'height:100%;display:block';
+      wrap.innerHTML = '';
+      wrap.appendChild(img);
+    } else {
+      wrap.innerHTML = '<div class="f101-sig-ph" style="position:static">החתימה מתבצעת בתצוגה הרגילה</div>';
+    }
+  }
+  var host = document.getElementById('f101-fs-body');
+  host.innerHTML = '';
+  host.appendChild(clone);
+  host.scrollTop = 0;
+  document.getElementById('f101-fullscreen').classList.add('open');
+}
+
+function closeForm101Fullscreen() {
+  document.getElementById('f101-fullscreen').classList.remove('open');
+}
+
+
+function check101(cb){ var b=document.getElementById('s10-btn'); if(b) b.disabled=!cb.checked; }
+function submitForm101(){ toast('✓ טופס 101 הוגש בהצלחה!'); var b=document.getElementById('s10-btn'); if(b){ b.textContent='✓ נשלח'; b.style.background='#2D7A4F'; } }
+</script>
 </body>
 </html>
