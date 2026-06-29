@@ -260,7 +260,6 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;direction:rtl;background:var(
   <div class="ep-footer">
     <button class="btn" onclick="saveForm()">💾 שמור</button>
     <button class="btn" onclick="saveAs()">📋 שמור בשם</button>
-    <button class="btn primary" style="width:100%;" onclick="exportForm()">🚀 פרסם</button>
     <button class="btn" style="width:100%;background:#1e1b4b;color:white;border-color:#1e1b4b;" onclick="exportJSON()">{ } ייצא JSON</button>
     <button class="btn" style="width:100%;font-size:11px;" onclick="openLoad()">📂 טפסים שמורים</button>
   </div>
@@ -651,12 +650,6 @@ function exportJSON(){
 function saveForm(){var d=getData();try{localStorage.setItem('info_'+d.name,JSON.stringify(d));}catch(e){}toast('✓ נשמר: "'+d.name+'"');}
 function saveAs(){document.getElementById('saveAsName').value=document.getElementById('fName').value+' — עותק';document.getElementById('saveAsModal').style.display='flex';setTimeout(function(){document.getElementById('saveAsName').select();},50);}
 function confirmSaveAs(){var n=document.getElementById('saveAsName').value.trim();if(!n)return;document.getElementById('fName').value=n;render();saveForm();document.getElementById('saveAsModal').style.display='none';toast('✓ נשמר בשם: "'+n+'"');}
-function exportForm(){
-  if(typeof saveForm==='function') saveForm();
-  var _nm=(document.getElementById('fName')||{}).value||'טופס';
-  if(typeof SynelPublish!=='undefined') SynelPublish.publish(_nm);
-  else toast('🚀 פורסם!');
-}
 function openLoad(){
   var sl=document.getElementById('savedList');sl.innerHTML='';
   var keys=[];try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.startsWith('info_'))keys.push(k);}}catch(e){}

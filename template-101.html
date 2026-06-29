@@ -214,7 +214,6 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;direction:rtl;background:var(
 <div class="ep-footer">
     <button class="ebtn" onclick="saveForm()">💾 שמור</button>
     <button class="ebtn" onclick="saveAs()">📋 שמור בשם</button>
-    <button class="ebtn primary" onclick="exportForm()">🚀 פרסם</button>
     <button class="ebtn" style="background:#1e1b4b;color:white;border-color:#1e1b4b;" onclick="exportJSON()">{ } ייצא JSON</button>
   </div>
 </div>
@@ -648,13 +647,6 @@ function exportJSON(){
   a.href=url;a.download='form-101.json';
   document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
   toast('JSON יוצא: form-101.json');
-}
-
-function exportForm(){
-  if(typeof saveForm==='function') saveForm();
-  var _nm=(document.getElementById('fName')||{}).value||'טופס';
-  if(typeof SynelPublish!=='undefined') SynelPublish.publish(_nm);
-  else toast('🚀 פורסם!');
 }
 
 // Init confirm area

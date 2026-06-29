@@ -437,7 +437,6 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;direction:rtl;background:var(
 <div class="ep-footer">
     <button class="btn" onclick="saveForm()">💾 שמור</button>
     <button class="btn" onclick="saveAs()">📋 שמור בשם</button>
-    <button class="btn primary" style="width:100%;" onclick="exportForm()">🚀 פרסם</button>
     <button class="btn" style="width:100%;background:#1e1b4b;color:white;border-color:#1e1b4b;" onclick="exportJSON()">{ } ייצא JSON</button>
     <button class="btn" style="width:100%;font-size:11px;" onclick="openLoad()">📂 טפסים שמורים</button>
   </div>
@@ -1387,8 +1386,6 @@ function exportJSON(){
   document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
   toast('JSON יוצא: '+json.meta.name+'.json');
 }
-
-function exportForm(){saveForm();toast('🚀 פורסם!');}
 function openLoad(){
   var sl=document.getElementById('savedList');sl.innerHTML='';
   var keys=[];try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.startsWith('pension_'))keys.push(k);}}catch(e){}
