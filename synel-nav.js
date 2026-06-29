@@ -1,3 +1,239 @@
+/* ===== רכיב חתימה דיגיטלית מוטמע (מוגן) — מבטיח שהמודאל זמין בכל הטפסים ===== */
+if (typeof window.SynelSignature === 'undefined') {
+(function(){
+/* SYNEL DIGITAL SIGNATURE
+   משטח חתימה דיגיטלית כבילה — משותף לכל הטפסים שדורשים חתימה.
+   Add to template: <script src="synel-signature.js"><\/script>
+
+   שימוש:
+     SynelSignature.open({ signer: 'שם החתום', title: 'חתימה על טופס פנסיה' }, function(result){
+       if(!result) return;            // המשתמש ביטל
+       result.image     // dataURL (PNG) של החתימה
+       result.points    // רצף נקודות דינמי [{x,y,t,p}] — בסיס לחתימה כבילה
+       result.strokes   // מספר משיכות
+       result.durationMs// משך החתימה
+       result.coverage  // אחוז ניצול שטח המשטח
+     });
+
+   הלכידה הדינמית (נקודות, זמנים, לחץ) היא מה שמבסס חתימה "כבילה".
+   התוקף המשפטי המלא תלוי גם ברמת החתימה (רגילה / מאובטחת / מאושרת עם תעודה)
+   ובספק החתימה — ראו נקודת האינטגרציה ב-onComplete.
+*/
+
+var SynelSignature = {
+
+  _built: false,
+  _cb: null,
+  _ctx: null,
+  _drawing: false,
+  _points: [],
+  _strokes: 0,
+  _t0: 0,
+  _minPoints: 25,   /* סף מינימלי ללכידה משמעותית */
+
+  /* בניית ה-DOM של המודאל פעם אחת והזרקה ל-body */
+  _build: function(){
+    if(this._built) return;
+    var self = this;
+    var wrap = document.createElement('div');
+    wrap.id = 'synelSigModal';
+    wrap.setAttribute('dir','rtl');
+    wrap.innerHTML =
+      '<div class="ssig-overlay" id="ssigOverlay">'+
+        '<div class="ssig-panel">'+
+          '<div class="ssig-head">'+
+            '<div><div class="ssig-title" id="ssigTitle">חתימה דיגיטלית</div>'+
+              '<div class="ssig-sub" id="ssigSub"></div></div>'+
+            '<button class="ssig-x" id="ssigClose" aria-label="סגירה">✕</button>'+
+          '</div>'+
+          '<div class="ssig-rotate" id="ssigRotate">לחוויה טובה יותר, סובב/י את המכשיר לרוחב</div>'+
+          '<div class="ssig-canvas-wrap">'+
+            '<canvas class="ssig-canvas" id="ssigCanvas"></canvas>'+
+            '<div class="ssig-baseline"></div>'+
+            '<div class="ssig-hint" id="ssigHint">חתמ/י כאן — מלא/י את רוחב המשטח</div>'+
+          '</div>'+
+          '<div class="ssig-meter"><div class="ssig-meter-fill" id="ssigMeter"></div></div>'+
+          '<div class="ssig-foot">'+
+            '<button class="ssig-clear" id="ssigClear">נקה</button>'+
+            '<button class="ssig-ok" id="ssigOk" disabled>אישור החתימה</button>'+
+          '</div>'+
+        '</div>'+
+      '</div>';
+    document.body.appendChild(wrap);
+    this._injectStyle();
+
+    this._canvas = document.getElementById('ssigCanvas');
+    this._ctx = this._canvas.getContext('2d');
+
+    document.getElementById('ssigClose').onclick = function(){ self._finish(null); };
+    document.getElementById('ssigClear').onclick = function(){ self.clear(); };
+    document.getElementById('ssigOk').onclick    = function(){ self._confirm(); };
+
+    var c = this._canvas;
+    c.addEventListener('pointerdown', function(e){ self._down(e); });
+    c.addEventListener('pointermove', function(e){ self._move(e); });
+    window.addEventListener('pointerup', function(e){ self._up(e); });
+    c.style.touchAction = 'none';
+
+    window.addEventListener('resize', function(){ if(self._open) self._resize(); });
+    this._built = true;
+  },
+
+  _injectStyle: function(){
+    if(document.getElementById('ssigStyle')) return;
+    var s = document.createElement('style');
+    s.id = 'ssigStyle';
+    s.textContent =
+      '.ssig-overlay{position:fixed;inset:0;background:rgba(17,17,17,.55);z-index:9000;display:none;align-items:center;justify-content:center;padding:16px;}'+
+      '.ssig-overlay.show{display:flex;}'+
+      '.ssig-panel{background:#fff;border-radius:16px;width:100%;max-width:720px;box-shadow:0 24px 60px rgba(0,0,0,.25);display:flex;flex-direction:column;overflow:hidden;}'+
+      '.ssig-head{display:flex;justify-content:space-between;align-items:flex-start;padding:16px 18px;border-bottom:1px solid #E5E7EB;}'+
+      '.ssig-title{font-size:16px;font-weight:700;color:#1a1a1a;}'+
+      '.ssig-sub{font-size:12px;color:#6B7280;margin-top:2px;}'+
+      '.ssig-x{border:none;background:none;font-size:18px;color:#9CA3AF;cursor:pointer;line-height:1;}'+
+      '.ssig-rotate{display:none;font-size:12px;color:#C2410C;background:#FFF7ED;padding:7px 14px;}'+
+      '.ssig-canvas-wrap{position:relative;padding:14px 18px;}'+
+      '.ssig-canvas{width:100%;height:260px;border:1.5px solid #E5E7EB;border-radius:12px;background:#FAFAFA;display:block;cursor:crosshair;touch-action:none;}'+
+      '.ssig-baseline{position:absolute;left:42px;right:42px;bottom:58px;border-bottom:1.5px dashed #D1D5DB;pointer-events:none;}'+
+      '.ssig-hint{position:absolute;inset:14px 18px;display:flex;align-items:center;justify-content:center;color:#9CA3AF;font-size:13px;pointer-events:none;}'+
+      '.ssig-meter{height:4px;background:#F3F4F6;margin:0 18px;border-radius:2px;overflow:hidden;}'+
+      '.ssig-meter-fill{height:100%;width:0;background:#2D7A4F;border-radius:2px;transition:width .15s;}'+
+      '.ssig-foot{display:flex;gap:10px;padding:14px 18px 18px;}'+
+      '.ssig-clear{flex:0 0 auto;padding:11px 18px;border:1px solid #E5E7EB;border-radius:50px;background:#fff;color:#6B7280;cursor:pointer;font-family:inherit;font-size:14px;}'+
+      '.ssig-ok{flex:1;padding:13px;border:none;border-radius:50px;background:#4F46E5;color:#fff;cursor:pointer;font-family:inherit;font-size:15px;font-weight:600;}'+
+      '.ssig-ok:disabled{opacity:.4;cursor:not-allowed;}'+
+      '@media (max-width:600px){'+
+        '.ssig-canvas{height:200px;}'+
+        '.ssig-rotate{display:block;}'+
+        '.ssig-panel{max-width:100%;height:100%;border-radius:0;justify-content:center;}'+
+        '.ssig-overlay{padding:0;}'+
+      '}';
+    document.head.appendChild(s);
+  },
+
+  /* פתיחת המודאל. onComplete(result|null) */
+  open: function(opts, onComplete){
+    this._build();
+    opts = opts || {};
+    this._cb = onComplete || function(){};
+    document.getElementById('ssigTitle').textContent = opts.title || 'חתימה דיגיטלית';
+    document.getElementById('ssigSub').textContent   = opts.signer ? ('החתום: '+opts.signer) : '';
+    document.getElementById('ssigOverlay').classList.add('show');
+    this._open = true;
+    this.clear();
+    var self = this;
+    setTimeout(function(){ self._resize(); }, 30);
+  },
+
+  /* התאמת רזולוציית הקנבס לגודל בפועל (חדות) */
+  _resize: function(){
+    var c = this._canvas;
+    var rect = c.getBoundingClientRect();
+    var dpr = window.devicePixelRatio || 1;
+    /* שמירת ציור קיים */
+    var prev = this._points.length ? c.toDataURL() : null;
+    c.width  = Math.max(1, Math.round(rect.width  * dpr));
+    c.height = Math.max(1, Math.round(rect.height * dpr));
+    this._ctx.setTransform(dpr,0,0,dpr,0,0);
+    this._ctx.lineWidth = 2.4;
+    this._ctx.lineCap = 'round';
+    this._ctx.lineJoin = 'round';
+    this._ctx.strokeStyle = '#1a1a1a';
+    if(prev){ var img=new Image(); var ctx=this._ctx, w=rect.width, h=rect.height;
+      img.onload=function(){ ctx.drawImage(img,0,0,w,h); }; img.src=prev; }
+  },
+
+  _pos: function(e){
+    var r = this._canvas.getBoundingClientRect();
+    return { x: e.clientX - r.left, y: e.clientY - r.top, p: (e.pressure!=null? e.pressure : 0.5) };
+  },
+
+  _down: function(e){
+    e.preventDefault();
+    this._drawing = true;
+    this._strokes++;
+    if(this._t0===0) this._t0 = Date.now();
+    var p = this._pos(e);
+    this._ctx.beginPath();
+    this._ctx.moveTo(p.x, p.y);
+    this._points.push({x:p.x, y:p.y, t:Date.now()-this._t0, p:p.p, s:this._strokes});
+    this._hideHint();
+  },
+  _move: function(e){
+    if(!this._drawing) return;
+    e.preventDefault();
+    var p = this._pos(e);
+    /* עובי קו מושפע מלחץ (אם נתמך) — חיזוק לדינמיקה */
+    this._ctx.lineWidth = 1.6 + (p.p||0.5)*2.2;
+    this._ctx.lineTo(p.x, p.y);
+    this._ctx.stroke();
+    this._points.push({x:p.x, y:p.y, t:Date.now()-this._t0, p:p.p, s:this._strokes});
+    this._updateMeter();
+  },
+  _up: function(){ this._drawing = false; },
+
+  _hideHint: function(){ var h=document.getElementById('ssigHint'); if(h)h.style.display='none'; },
+
+  /* מד "מילוי" — כמה החתימה מנצלת את המשטח. סף ל-OK. */
+  _coverage: function(){
+    if(this._points.length<2) return 0;
+    var minX=1e9,maxX=-1e9,minY=1e9,maxY=-1e9;
+    this._points.forEach(function(p){
+      if(p.x<minX)minX=p.x; if(p.x>maxX)maxX=p.x;
+      if(p.y<minY)minY=p.y; if(p.y>maxY)maxY=p.y;
+    });
+    var r = this._canvas.getBoundingClientRect();
+    var cov = ((maxX-minX)/Math.max(1,r.width)) * ((maxY-minY)/Math.max(1,r.height));
+    return Math.min(1, cov*2.2);
+  },
+  _ready: function(){
+    return this._points.length >= this._minPoints && this._coverage() >= 0.18;
+  },
+  _updateMeter: function(){
+    var pct = Math.min(1, this._points.length/this._minPoints);
+    var cov = this._coverage();
+    var score = Math.min(1, (pct*0.5 + cov*0.5));
+    document.getElementById('ssigMeter').style.width = Math.round(score*100)+'%';
+    document.getElementById('ssigOk').disabled = !this._ready();
+  },
+
+  clear: function(){
+    if(!this._ctx) return;
+    var r = this._canvas.getBoundingClientRect();
+    this._ctx.clearRect(0,0,this._canvas.width,this._canvas.height);
+    this._points = []; this._strokes = 0; this._t0 = 0; this._drawing = false;
+    var h=document.getElementById('ssigHint'); if(h)h.style.display='';
+    document.getElementById('ssigMeter').style.width='0';
+    document.getElementById('ssigOk').disabled = true;
+  },
+
+  _confirm: function(){
+    if(!this._ready()) return;
+    var result = {
+      image: this._canvas.toDataURL('image/png'),
+      points: this._points.slice(),
+      strokes: this._strokes,
+      durationMs: this._points.length ? this._points[this._points.length-1].t : 0,
+      coverage: Math.round(this._coverage()*100)/100,
+      capturedAt: new Date().toISOString(),
+    };
+    this._finish(result);
+  },
+
+  _finish: function(result){
+    document.getElementById('ssigOverlay').classList.remove('show');
+    this._open = false;
+    var cb = this._cb; this._cb = null;
+    if(cb) cb(result);
+  },
+};
+
+if (typeof window !== 'undefined') { window.SynelSignature = SynelSignature; }
+
+})();
+}
+
+
 /* ════════════════════════════════════════════════════════
    synel-nav.js — מעטפת ניווט משותפת לכל התבניות
    ────────────────────────────────────────────────────────
