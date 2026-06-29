@@ -1,3 +1,4 @@
+/* synel-nav v12 — fix: signature unlocks after reading doc (חוזה/סעיף 14) */
 /* ===== רכיב חתימה דיגיטלית מוטמע (מוגן) — מבטיח שהמודאל זמין בכל הטפסים ===== */
 if (typeof window.SynelSignature === 'undefined') {
 (function(){
@@ -641,7 +642,10 @@ var SynelNav = {
             if (!done) return;
             btn.classList.add('opened');
             try { btn.textContent = '✓ המסמך נפתח'; } catch (e) {}
+            try { window.docOpened = true; } catch (e) {}
             var rc = document.querySelector('.pv-confirm'); if (rc) rc.classList.add('enabled');
+            var sg = document.querySelector('.pv-sig'); if (sg) sg.classList.add('enabled');
+            var hint = document.querySelector('.pv-scroll-hint'); if (hint) hint.style.display = 'none';
             var sd = document.querySelector('.pv-scroll-done'); if (sd) sd.classList.add('show');
           });
         }, true);
